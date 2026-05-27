@@ -1,8 +1,8 @@
 # dependencies
 node_modules/
 
-# sibling widget repo is versioned separately
-myra-widget/
+# preserved local metadata from the former standalone widget repo
+myra-widget/.git-backup/
 
 # production builds
 dist/
