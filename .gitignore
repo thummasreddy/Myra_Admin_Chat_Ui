@@ -1,0 +1,38 @@
+# dependencies
+node_modules/
+
+# sibling widget repo is versioned separately
+myra-widget/
+
+# production builds
+dist/
+build/
+
+# local env
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# caches
+.vite/
+.turbo/
+.cache/
+.eslintcache
+
+# system/editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# TypeScript
+*.tsbuildinfo

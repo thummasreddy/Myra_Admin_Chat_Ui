@@ -1,0 +1,11 @@
+{
+  "name": "myra-workspace",
+  "private": true,
+  "scripts": {
+    "dev": "npm --prefix myra-admin-ui run dev",
+    "build": "npm --prefix myra-admin-ui run build",
+    "lint": "npm --prefix myra-admin-ui run lint",
+    "preview": "npm --prefix myra-admin-ui run preview",
+    "dev:admin": "npm --prefix myra-admin-ui run dev"
+  }
+}
