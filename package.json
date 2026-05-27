@@ -6,8 +6,6 @@
     "build": "npm --prefix myra-admin-ui run build",
     "lint": "npm --prefix myra-admin-ui run lint",
     "preview": "npm --prefix myra-admin-ui run preview",
-    "dev:admin": "npm --prefix myra-admin-ui run dev",
-    "dev:widget": "npm --prefix myra-widget run dev",
-    "build:widget": "npm --prefix myra-widget run build"
+    "dev:admin": "npm --prefix myra-admin-ui run dev"
   }
 }
