@@ -24,13 +24,15 @@ export function LoginPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const token = useAuthStore((state) => state.token);
+  const user = useAuthStore((state) => state.user);
   const setSession = useAuthStore((state) => state.setSession);
   const redirectTo = (location.state as { from?: { pathname?: string } } | null)?.from?.pathname ?? "/dashboard";
+  const isCustomerLogin = redirectTo.startsWith("/customer");
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      email: "admin@myra.ai",
+      email: isCustomerLogin ? "customer@myra.ai" : "admin@myra.ai",
       password: "password123"
     }
   });
@@ -39,7 +41,11 @@ export function LoginPage() {
     mutationFn: login,
     onSuccess: (session) => {
       setSession(session.token, session.user);
-      toast({ title: "Welcome back", description: "You are signed in to Myra Admin.", variant: "success" });
+      toast({
+        title: "Welcome back",
+        description: isCustomerLogin ? "You are signed in to the Myra customer dashboard." : "You are signed in to Myra Admin.",
+        variant: "success"
+      });
       navigate(redirectTo, { replace: true });
     },
     onError: () => {
@@ -51,37 +57,41 @@ export function LoginPage() {
     document.title = "Login | Myra Admin";
   }, []);
 
-  if (token) return <Navigate to="/dashboard" replace />;
+  if (token) return <Navigate to={user?.role === "TENANT_OWNER" ? "/customer/dashboard" : "/dashboard"} replace />;
 
   return (
     <main className="grid min-h-screen bg-slate-50 lg:grid-cols-[1.05fr_0.95fr]">
-      <section className="hidden bg-blue-700 px-10 py-12 text-white lg:flex lg:flex-col lg:justify-between">
+      <section className="hidden bg-primary px-10 py-12 text-white lg:flex lg:flex-col lg:justify-between">
         <div className="flex items-center gap-3">
           <div className="flex h-11 w-11 items-center justify-center rounded-md bg-white/15">
             <Bot className="h-6 w-6" />
           </div>
           <div>
             <p className="font-semibold">Myra AI</p>
-            <p className="text-sm text-blue-100">Tenant control for conversational SaaS</p>
+            <p className="text-sm text-white/80">Tenant control for conversational SaaS</p>
           </div>
         </div>
         <div className="max-w-xl">
           <p className="text-4xl font-semibold tracking-normal">Launch and manage tenant chatbots without touching backend code.</p>
-          <p className="mt-4 text-blue-100">
+          <p className="mt-4 text-white/80">
             Configure tenant branding, AI behavior, knowledge, leads, analytics, and widget embeds from one clean operations console.
           </p>
         </div>
-        <p className="text-sm text-blue-100">VITE_API_BASE_URL powered gateway integration</p>
+        <p className="text-sm text-white/80">VITE_API_BASE_URL powered gateway integration</p>
       </section>
 
       <section className="flex items-center justify-center p-4">
         <Card className="w-full max-w-md">
           <CardHeader>
-            <div className="mb-2 flex h-11 w-11 items-center justify-center rounded-md bg-blue-600 text-white lg:hidden">
+            <div className="mb-2 flex h-11 w-11 items-center justify-center rounded-md bg-primary text-white lg:hidden">
               <Bot className="h-6 w-6" />
             </div>
             <CardTitle>Sign in</CardTitle>
-            <CardDescription>Use your admin account. If the backend is offline, demo fallback login is used.</CardDescription>
+            <CardDescription>
+              {isCustomerLogin
+                ? "Use your business owner account. If the backend is offline, demo fallback login is used."
+                : "Use your admin account. If the backend is offline, demo fallback login is used."}
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <form className="space-y-4" onSubmit={form.handleSubmit((values) => loginMutation.mutate(values))}>

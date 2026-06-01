@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Copy, KeyRound, Power } from "lucide-react";
+import { Copy, CreditCard, KeyRound, Power } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm, type FieldErrors } from "react-hook-form";
 import { Link, useParams } from "react-router-dom";
@@ -25,6 +25,8 @@ import {
   type TenantWizardFormValues
 } from "@/features/tenants/tenant.schema";
 import type { TenantStatus } from "@/features/tenants/tenant.types";
+import { documentReviewMessage } from "@/features/onboarding/onboarding.api";
+import { formatPlanPrice, getSubscriptionPlan } from "@/features/onboarding/onboarding.data";
 import { formatDate } from "@/lib/utils";
 
 function FieldError({ name, errors }: { name: keyof TenantWizardFormValues; errors: FieldErrors<TenantWizardFormValues> }) {
@@ -91,7 +93,8 @@ export function TenantDetailPage() {
   if (!tenantQuery.data) return <PageHeader title="Tenant not found" description="The requested tenant does not exist." />;
 
   const tenant = tenantQuery.data;
-  const nextStatus: TenantStatus = tenant.status === "ACTIVE" ? "INACTIVE" : "ACTIVE";
+  const nextStatus: TenantStatus = tenant.status === "ACTIVE" || tenant.status === "APPROVED" ? "INACTIVE" : "ACTIVE";
+  const plan = getSubscriptionPlan(tenant.selectedSubscriptionPlan);
 
   return (
     <>
@@ -111,7 +114,7 @@ export function TenantDetailPage() {
         }
       />
 
-      <div className="mb-6 grid gap-4 lg:grid-cols-3">
+      <div className="mb-6 grid gap-4 lg:grid-cols-4">
         <Card>
           <CardHeader>
             <CardTitle>Status</CardTitle>
@@ -120,6 +123,32 @@ export function TenantDetailPage() {
             <StatusBadge status={tenant.status} />
             <p className="text-sm text-muted-foreground">Created {formatDate(tenant.createdAt)}</p>
             <p className="text-sm text-muted-foreground">Updated {formatDate(tenant.updatedAt)}</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <CreditCard className="h-5 w-5 text-primary" />
+              Onboarding
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2 text-sm">
+            <div className="flex justify-between gap-3">
+              <span className="text-muted-foreground">Plan</span>
+              <span className="font-medium">{plan.name}</span>
+            </div>
+            <div className="flex justify-between gap-3">
+              <span className="text-muted-foreground">Price</span>
+              <span className="font-medium">{formatPlanPrice(plan)}</span>
+            </div>
+            <div className="flex justify-between gap-3">
+              <span className="text-muted-foreground">Payment</span>
+              <StatusBadge status={tenant.paymentStatus ?? "PAID"} />
+            </div>
+            <div className="flex justify-between gap-3">
+              <span className="text-muted-foreground">Documents</span>
+              <StatusBadge status={tenant.documentProcessingStatus ?? "NOT_UPLOADED"} />
+            </div>
           </CardContent>
         </Card>
         <Card className="lg:col-span-2">
@@ -139,6 +168,29 @@ export function TenantDetailPage() {
           </CardContent>
         </Card>
       </div>
+
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle>Registration Review</CardTitle>
+        </CardHeader>
+        <CardContent className="grid gap-4 text-sm md:grid-cols-2">
+          <div>
+            <p className="text-muted-foreground">Business email</p>
+            <p className="font-medium text-slate-950">{tenant.businessEmail ?? tenant.supportEmail}</p>
+          </div>
+          <div>
+            <p className="text-muted-foreground">Phone number</p>
+            <p className="font-medium text-slate-950">{tenant.phoneNumber ?? "N/A"}</p>
+          </div>
+          <div className="md:col-span-2">
+            <p className="text-muted-foreground">Business description</p>
+            <p className="font-medium text-slate-950">{tenant.businessDescription ?? "No public registration description was provided."}</p>
+          </div>
+          <div className="rounded-md border border-amber-200 bg-amber-50 px-4 py-3 text-amber-800 md:col-span-2">
+            {documentReviewMessage}
+          </div>
+        </CardContent>
+      </Card>
 
       <form onSubmit={form.handleSubmit((values) => saveMutation.mutate(values))} className="space-y-6">
         <Card>

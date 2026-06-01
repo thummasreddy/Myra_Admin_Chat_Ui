@@ -2,28 +2,23 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Trash2 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Select } from "@/components/ui/select";
 import { toast } from "@/components/ui/toast";
 import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
 import { DataTable, type DataTableColumn } from "@/components/shared/DataTable";
+import { LoadingSpinner } from "@/components/shared/LoadingSpinner";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { DocumentUpload } from "@/features/knowledge/components/DocumentUpload";
-import { FaqEditor } from "@/features/knowledge/components/FaqEditor";
-import { addFaq, deleteKnowledgeSource, listKnowledgeSources, uploadKnowledgeDocument } from "@/features/knowledge/knowledge.api";
+import { deleteKnowledgeSource, listKnowledgeSources, uploadKnowledgeDocument } from "@/features/knowledge/knowledge.api";
 import type { KnowledgeSource } from "@/features/knowledge/knowledge.types";
-import { documentReviewMessage } from "@/features/onboarding/onboarding.api";
-import { listTenants } from "@/features/tenants/tenant.api";
-import { useAuthStore } from "@/features/auth/auth.store";
+import { documentReviewMessage, updateTenantDocumentStatus } from "@/features/onboarding/onboarding.api";
+import { useCustomerTenant } from "@/features/customer/customer.hooks";
 import { formatDate } from "@/lib/utils";
 
-export function KnowledgeBasePage() {
-  const selectedTenantId = useAuthStore((state) => state.selectedTenantId);
-  const setSelectedTenantId = useAuthStore((state) => state.setSelectedTenantId);
+export function CustomerKnowledgePage() {
+  const { tenantId, tenantQuery } = useCustomerTenant();
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const queryClient = useQueryClient();
-  const tenantsQuery = useQuery({ queryKey: ["tenants", "knowledge"], queryFn: () => listTenants() });
-  const tenantId = selectedTenantId || tenantsQuery.data?.[0]?.tenantId || "";
 
   const knowledgeQuery = useQuery({
     queryKey: ["knowledge", tenantId],
@@ -33,20 +28,13 @@ export function KnowledgeBasePage() {
 
   const uploadMutation = useMutation({
     mutationFn: (file: File) => uploadKnowledgeDocument(tenantId, file),
-    onSuccess: () => {
+    onSuccess: async () => {
+      await updateTenantDocumentStatus(tenantId, { status: "UPLOADED" });
       queryClient.invalidateQueries({ queryKey: ["knowledge", tenantId] });
-      toast({ title: "Upload queued", description: "The source is pending processing.", variant: "success" });
+      queryClient.invalidateQueries({ queryKey: ["tenant", tenantId] });
+      toast({ title: "Upload queued", description: documentReviewMessage, variant: "success" });
     },
     onError: () => toast({ title: "Upload failed", variant: "error" })
-  });
-
-  const faqMutation = useMutation({
-    mutationFn: (values: { question: string; answer: string }) => addFaq({ tenantId, ...values }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["knowledge", tenantId] });
-      toast({ title: "FAQ added", variant: "success" });
-    },
-    onError: () => toast({ title: "FAQ was not added", variant: "error" })
   });
 
   const deleteMutation = useMutation({
@@ -65,7 +53,9 @@ export function KnowledgeBasePage() {
         accessor: (source) => (
           <div>
             <p className="font-medium text-slate-950">{source.name}</p>
-            <p className="text-sm text-muted-foreground">{source.type} {source.size ? `- ${source.size}` : ""}</p>
+            <p className="text-sm text-muted-foreground">
+              {source.type} {source.size ? `- ${source.size}` : ""}
+            </p>
           </div>
         )
       },
@@ -84,45 +74,35 @@ export function KnowledgeBasePage() {
     []
   );
 
+  if (tenantQuery.isLoading) return <LoadingSpinner label="Loading knowledge" />;
+
   return (
     <>
       <PageHeader
-        title="Knowledge Base"
-        description="Upload business knowledge and add manual FAQs for tenant-specific retrieval."
-        actions={
-          <Select value={tenantId} onChange={(event) => setSelectedTenantId(event.target.value)} className="w-64">
-            {tenantsQuery.data?.map((tenant) => (
-              <option key={tenant.tenantId} value={tenant.tenantId}>
-                {tenant.tenantName}
-              </option>
-            ))}
-          </Select>
-        }
+        title="Knowledge Documents"
+        description="Upload or replace business knowledge files after registration. Admin reviews the documents before activation."
       />
 
-      <div className="mb-4 rounded-md border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-800">
+      <div className="mb-6 rounded-md border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-800">
         {documentReviewMessage}
       </div>
 
       <div className="grid gap-4 lg:grid-cols-[360px_1fr]">
-        <div className="space-y-4">
-          <DocumentUpload disabled={!tenantId || uploadMutation.isPending} onUpload={(file) => uploadMutation.mutate(file)} />
-          <FaqEditor disabled={!tenantId || faqMutation.isPending} onSubmit={(values) => faqMutation.mutate(values)} />
-        </div>
+        <DocumentUpload disabled={!tenantId || uploadMutation.isPending} onUpload={(file) => uploadMutation.mutate(file)} />
         <DataTable
           columns={columns}
           data={knowledgeQuery.data ?? []}
           getRowKey={(source) => source.id}
           isLoading={knowledgeQuery.isLoading}
           emptyTitle="No knowledge sources"
-          emptyDescription="Upload documents or create FAQs to teach Myra about this tenant."
+          emptyDescription="Upload PDF, DOCX, TXT, or CSV files for admin review and processing."
         />
       </div>
 
       <ConfirmDialog
         open={Boolean(deleteId)}
         title="Delete knowledge source?"
-        description="This removes the source from the tenant knowledge base."
+        description="This removes the source from your business knowledge queue."
         confirmLabel="Delete"
         destructive
         onCancel={() => setDeleteId(null)}

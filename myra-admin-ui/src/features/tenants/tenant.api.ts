@@ -17,11 +17,14 @@ const demoTenants: Tenant[] = [
     websiteUrl: "https://www.vthumma.com",
     industry: "Technology Portfolio",
     supportEmail: "support@vthumma.com",
+    businessEmail: "support@vthumma.com",
+    phoneNumber: "+1 602 555 0100",
+    businessDescription: "Portfolio and project information for technology visitors.",
     country: "United States",
     timezone: "America/Phoenix",
     assistantName: "Myra",
     assistantIntro: "Hi, I am Myra, Vijay's AI assistant.",
-    brandColor: "#2563EB",
+    brandColor: "#1591DC",
     logoUrl: "",
     avatarUrl: "",
     chatPosition: "bottom-right",
@@ -41,6 +44,15 @@ const demoTenants: Tenant[] = [
     enableAnalytics: true,
     enableHumanEscalation: false,
     status: "ACTIVE",
+    onboardingStatus: "APPROVED",
+    approvalStatus: "APPROVED",
+    selectedSubscriptionPlan: "TWELVE_MONTHS",
+    paymentStatus: "SUCCESS",
+    subscriptionStatus: "ACTIVE",
+    documentProcessingStatus: "READY",
+    embedCode: `<script src="https://cdn.myra.ai/widget.js" data-tenant-id="tenant_vthumma"></script>`,
+    approvedAt: "2026-05-02T17:00:00.000Z",
+    embedCodeEmailSentAt: "2026-05-02T17:05:00.000Z",
     createdAt: "2026-05-01T15:00:00.000Z",
     updatedAt: "2026-05-22T18:30:00.000Z"
   },
@@ -51,11 +63,14 @@ const demoTenants: Tenant[] = [
     websiteUrl: "https://example.com",
     industry: "Healthcare",
     supportEmail: "hello@example.com",
+    businessEmail: "hello@example.com",
+    phoneNumber: "+1 212 555 0198",
+    businessDescription: "Neighborhood dental office offering appointments, services, and insurance guidance.",
     country: "United States",
     timezone: "America/New_York",
     assistantName: "Myra",
     assistantIntro: "Hi, I can help with appointments, services, and common questions.",
-    brandColor: "#1D4ED8",
+    brandColor: "#1591DC",
     chatPosition: "bottom-left",
     systemPrompt: "You are Myra, a helpful AI assistant for a dental office.",
     responseStyle: "friendly",
@@ -69,12 +84,18 @@ const demoTenants: Tenant[] = [
     enableAnalytics: true,
     enableHumanEscalation: true,
     status: "INACTIVE",
+    onboardingStatus: "APPROVED",
+    approvalStatus: "APPROVED",
+    selectedSubscriptionPlan: "MONTHLY",
+    paymentStatus: "SUCCESS",
+    subscriptionStatus: "ACTIVE",
+    documentProcessingStatus: "READY",
     createdAt: "2026-04-18T12:30:00.000Z",
     updatedAt: "2026-05-14T09:00:00.000Z"
   }
 ];
 
-function readFallbackTenants() {
+export function readFallbackTenants() {
   const raw = localStorage.getItem(STORAGE_KEY);
   if (!raw) return demoTenants;
   try {
@@ -84,7 +105,7 @@ function readFallbackTenants() {
   }
 }
 
-function writeFallbackTenants(tenants: Tenant[]) {
+export function writeFallbackTenants(tenants: Tenant[]) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(tenants));
 }
 
@@ -134,6 +155,11 @@ export async function createTenant(payload: TenantCreateRequest): Promise<Tenant
       tenantId,
       apiKey: `mk_live_${crypto.randomUUID().replaceAll("-", "").slice(0, 24)}`,
       status: "ACTIVE",
+      onboardingStatus: "APPROVED",
+      approvalStatus: "APPROVED",
+      paymentStatus: "SUCCESS",
+      subscriptionStatus: "ACTIVE",
+      documentProcessingStatus: "READY",
       createdAt,
       updatedAt: createdAt
     };
@@ -143,7 +169,7 @@ export async function createTenant(payload: TenantCreateRequest): Promise<Tenant
   }
 }
 
-export async function updateTenant(tenantId: string, payload: Partial<TenantCreateRequest> & { status?: TenantStatus }): Promise<Tenant> {
+export async function updateTenant(tenantId: string, payload: Partial<Tenant>): Promise<Tenant> {
   try {
     const { data } = await apiClient.patch<Tenant>(`/tenants/${tenantId}`, payload);
     return data;
@@ -169,6 +195,6 @@ export async function regenerateTenantApiKey(tenantId: string): Promise<Tenant> 
   } catch (error) {
     if (!isBackendUnavailable(error)) throw error;
     const apiKey = `mk_live_${crypto.randomUUID().replaceAll("-", "").slice(0, 24)}`;
-    return updateTenant(tenantId, { apiKey } as Partial<TenantCreateRequest> & { apiKey: string });
+    return updateTenant(tenantId, { apiKey });
   }
 }

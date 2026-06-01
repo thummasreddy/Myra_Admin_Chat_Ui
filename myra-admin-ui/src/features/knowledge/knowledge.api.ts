@@ -1,5 +1,5 @@
 import { apiClient, isBackendUnavailable } from "@/lib/apiClient";
-import type { FaqInput, KnowledgeSource } from "@/features/knowledge/knowledge.types";
+import type { FaqInput, KnowledgeSource, KnowledgeStatus } from "@/features/knowledge/knowledge.types";
 
 const STORAGE_KEY = "myra-admin-fallback-knowledge";
 
@@ -11,6 +11,8 @@ const fallbackSources: KnowledgeSource[] = [
     type: "PDF",
     status: "READY",
     size: "1.4 MB",
+    reviewNotes: "Reviewed and approved for assistant grounding.",
+    uploadedBy: "Tenant Owner",
     createdAt: "2026-05-10T14:00:00.000Z"
   },
   {
@@ -19,6 +21,8 @@ const fallbackSources: KnowledgeSource[] = [
     name: "Project FAQ",
     type: "FAQ",
     status: "READY",
+    reviewNotes: "Seed FAQ approved.",
+    uploadedBy: "Admin",
     createdAt: "2026-05-12T16:20:00.000Z"
   }
 ];
@@ -69,8 +73,10 @@ export async function uploadKnowledgeDocument(tenantId: string, file: File): Pro
       tenantId,
       name: file.name,
       type: fileType(file.name),
-      status: "PENDING",
+      status: "UPLOADED",
       size: `${Math.max(file.size / 1024 / 1024, 0.01).toFixed(2)} MB`,
+      reviewNotes: "",
+      uploadedBy: "Tenant Owner",
       createdAt: new Date().toISOString()
     };
     writeSources([source, ...readSources()]);
@@ -103,5 +109,23 @@ export async function deleteKnowledgeSource(sourceId: string): Promise<void> {
   } catch (error) {
     if (!isBackendUnavailable(error)) throw error;
     writeSources(readSources().filter((source) => source.id !== sourceId));
+  }
+}
+
+export async function updateKnowledgeSourceStatus(
+  sourceId: string,
+  payload: { status: KnowledgeStatus; reviewNotes?: string }
+): Promise<KnowledgeSource> {
+  try {
+    const { data } = await apiClient.patch<KnowledgeSource>(`/admin/knowledge-documents/${sourceId}`, payload);
+    return data;
+  } catch (error) {
+    if (!isBackendUnavailable(error)) throw error;
+    const sources = readSources();
+    const source = sources.find((item) => item.id === sourceId);
+    if (!source) throw new Error("Knowledge source not found");
+    const updatedSource = { ...source, ...payload };
+    writeSources(sources.map((item) => (item.id === sourceId ? updatedSource : item)));
+    return updatedSource;
   }
 }

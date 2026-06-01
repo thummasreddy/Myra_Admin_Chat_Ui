@@ -3,10 +3,15 @@ import {
   BarChart3,
   Bot,
   Building2,
+  CreditCard,
   FileText,
+  Inbox,
   LayoutDashboard,
+  Mail,
   MessageSquare,
   Settings,
+  ShieldCheck,
+  UserCheck,
   Users,
   X
 } from "lucide-react";
@@ -15,6 +20,12 @@ import { cn } from "@/lib/utils";
 
 const navItems = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+  { label: "Pending Approvals", href: "/approvals", icon: ShieldCheck },
+  { label: "Tenant Review", href: "/tenant-review", icon: UserCheck },
+  { label: "Payments", href: "/payments", icon: CreditCard },
+  { label: "Knowledge Documents", href: "/knowledge-documents", icon: Inbox },
+  { label: "Subscriptions", href: "/subscriptions", icon: FileText },
+  { label: "Email Notifications", href: "/email-notifications", icon: Mail },
   { label: "Tenants", href: "/tenants", icon: Building2 },
   { label: "Knowledge", href: "/knowledge", icon: FileText },
   { label: "Conversations", href: "/conversations", icon: MessageSquare },
@@ -39,7 +50,7 @@ export function Sidebar({ open, onClose }: { open: boolean; onClose: () => void 
       >
         <div className="flex h-16 items-center justify-between border-b px-5">
           <NavLink to="/dashboard" className="flex items-center gap-2" onClick={onClose}>
-            <div className="flex h-9 w-9 items-center justify-center rounded-md bg-blue-600 text-white">
+            <div className="flex h-9 w-9 items-center justify-center rounded-md bg-primary text-white">
               <Bot className="h-5 w-5" />
             </div>
             <div>
@@ -61,7 +72,7 @@ export function Sidebar({ open, onClose }: { open: boolean; onClose: () => void 
               className={({ isActive }) =>
                 cn(
                   "flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-colors",
-                  isActive ? "bg-blue-50 text-blue-700" : "text-slate-600 hover:bg-slate-100 hover:text-slate-950"
+                  isActive ? "bg-primary/10 text-primary" : "text-slate-600 hover:bg-slate-100 hover:text-slate-950"
                 )
               }
             >

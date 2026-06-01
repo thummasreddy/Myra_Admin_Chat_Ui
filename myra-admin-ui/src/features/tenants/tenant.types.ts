@@ -4,6 +4,13 @@ export type TenantStatus = (typeof TENANT_STATUSES)[number];
 export type ChatPosition = (typeof CHAT_POSITIONS)[number];
 export type ResponseStyle = (typeof RESPONSE_STYLES)[number];
 
+export type SubscriptionPlanId = "MONTHLY" | "THREE_MONTHS" | "SIX_MONTHS" | "TWELVE_MONTHS";
+export type PaymentStatus = "PENDING" | "PAID" | "SUCCESS" | "FAILED";
+export type SubscriptionStatus = "PENDING_PAYMENT" | "PENDING_ADMIN_APPROVAL" | "ACTIVE" | "PAST_DUE" | "CANCELED";
+export type DocumentProcessingStatus = "NOT_UPLOADED" | "UPLOADED" | "UNDER_REVIEW" | "PROCESSING" | "READY" | "COMPLETED" | "REJECTED" | "FAILED";
+export type OnboardingStatus = "PAYMENT_PENDING" | "PENDING_ADMIN_APPROVAL" | "APPROVED" | "REJECTED";
+export type ApprovalStatus = "NOT_SUBMITTED" | "PENDING_REVIEW" | "APPROVED" | "REJECTED";
+
 export type TenantFeatureToggles = {
   enableWebSearch: boolean;
   enableLeadCapture: boolean;
@@ -17,6 +24,9 @@ export type TenantCreateRequest = TenantFeatureToggles & {
   websiteUrl: string;
   industry: string;
   supportEmail: string;
+  businessEmail?: string;
+  phoneNumber?: string;
+  businessDescription?: string;
   country: string;
   timezone: string;
   assistantName: string;
@@ -37,6 +47,17 @@ export type Tenant = TenantCreateRequest & {
   tenantId: string;
   apiKey: string;
   status: TenantStatus;
+  onboardingStatus?: OnboardingStatus;
+  approvalStatus?: ApprovalStatus;
+  selectedSubscriptionPlan?: SubscriptionPlanId;
+  paymentStatus?: PaymentStatus;
+  subscriptionStatus?: SubscriptionStatus;
+  documentProcessingStatus?: DocumentProcessingStatus;
+  embedCode?: string;
+  embedCodeEmailSentAt?: string;
+  approvedAt?: string;
+  rejectedAt?: string;
+  rejectedReason?: string;
   createdAt: string;
   updatedAt: string;
 };

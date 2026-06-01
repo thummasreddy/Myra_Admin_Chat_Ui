@@ -55,7 +55,7 @@ export function Toaster() {
             "rounded-lg border bg-white p-4 shadow-lg",
             item.variant === "success" && "border-emerald-200",
             item.variant === "error" && "border-red-200",
-            item.variant === "info" && "border-blue-200"
+            item.variant === "info" && "border-primary/20"
           )}
         >
           <div className="flex items-start gap-3">

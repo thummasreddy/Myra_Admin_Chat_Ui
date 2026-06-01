@@ -69,8 +69,12 @@ export function TenantListPage() {
         <Input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search tenant by name" />
         <Select value={status} onChange={(event) => setStatus(event.target.value as TenantStatus | "ALL")}>
           <option value="ALL">All statuses</option>
+          <option value="PAYMENT_PENDING">Payment pending</option>
+          <option value="PENDING_ADMIN_APPROVAL">Pending admin approval</option>
+          <option value="APPROVED">Approved</option>
           <option value="ACTIVE">Active</option>
           <option value="INACTIVE">Inactive</option>
+          <option value="REJECTED">Rejected</option>
         </Select>
       </div>
 

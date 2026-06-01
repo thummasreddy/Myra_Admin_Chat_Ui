@@ -7,7 +7,7 @@ export type AdminUser = {
   id: string;
   name: string;
   email: string;
-  role: "OWNER" | "ADMIN";
+  role: "ADMIN" | "SUPPORT_ENGINEER" | "BILLING_ADMIN" | "TENANT_OWNER";
 };
 
 export type LoginResponse = {

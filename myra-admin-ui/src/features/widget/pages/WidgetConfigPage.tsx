@@ -14,10 +14,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/toast";
 import { LoadingSpinner } from "@/components/shared/LoadingSpinner";
 import { PageHeader } from "@/components/shared/PageHeader";
+import { StatusBadge } from "@/components/shared/StatusBadge";
+import { getTenant } from "@/features/tenants/tenant.api";
 import { EmbedCodeBox } from "@/features/widget/components/EmbedCodeBox";
 import { WidgetPreview } from "@/features/widget/components/WidgetPreview";
 import { getWidgetConfig, updateWidgetConfig } from "@/features/widget/widget.api";
 import type { WidgetConfig } from "@/features/widget/widget.types";
+import { isEmbedReady } from "@/features/customer/customer.hooks";
 
 const widgetSchema = z.object({
   tenantId: z.string(),
@@ -39,6 +42,11 @@ export function WidgetConfigPage() {
     queryFn: () => getWidgetConfig(tenantId),
     enabled: Boolean(tenantId)
   });
+  const tenantQuery = useQuery({
+    queryKey: ["tenant", tenantId],
+    queryFn: () => getTenant(tenantId),
+    enabled: Boolean(tenantId)
+  });
 
   const form = useForm<WidgetConfig>({
     resolver: zodResolver(widgetSchema),
@@ -46,7 +54,7 @@ export function WidgetConfigPage() {
       tenantId,
       assistantName: "Myra",
       assistantIntro: "Hi, I am Myra, your AI assistant.",
-      brandColor: "#2563EB",
+      brandColor: "#1591DC",
       chatPosition: "bottom-right",
       launcherLabel: "Chat with Myra",
       welcomeMessage: "Hi, I am Myra. How can I help?",
@@ -69,6 +77,8 @@ export function WidgetConfigPage() {
   });
 
   const previewConfig = form.watch();
+  const tenant = tenantQuery.data;
+  const embedReady = isEmbedReady(tenant?.status);
 
   if (widgetQuery.isLoading) return <LoadingSpinner label="Loading widget config" />;
   if (!tenantId) return <PageHeader title="Widget Config" description="Select a tenant from the tenant list to configure its widget." />;
@@ -135,11 +145,20 @@ export function WidgetConfigPage() {
               <CardTitle>Embed Script</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <EmbedCodeBox tenantId={tenantId} />
-              <div className="space-y-2 text-sm text-muted-foreground">
-                <p>Install by placing this script before the closing body tag on the tenant website.</p>
-                <p>Publish knowledge and activate the tenant before sending production traffic to the widget.</p>
-              </div>
+              {embedReady ? (
+                <>
+                  <EmbedCodeBox tenantId={tenantId} />
+                  <div className="space-y-2 text-sm text-muted-foreground">
+                    <p>Install by placing this script before the closing body tag on the tenant website.</p>
+                    <p>Embed code is available because the tenant has admin approval.</p>
+                  </div>
+                </>
+              ) : (
+                <div className="rounded-md border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
+                  Embed code is generated only after admin approval. Current status:{" "}
+                  <StatusBadge status={tenant?.status ?? "PENDING_ADMIN_APPROVAL"} />
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>

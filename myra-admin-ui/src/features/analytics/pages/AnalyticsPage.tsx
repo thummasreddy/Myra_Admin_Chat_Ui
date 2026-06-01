@@ -20,7 +20,7 @@ export function AnalyticsPage() {
             <CardTitle>Conversations Over Time</CardTitle>
           </CardHeader>
           <CardContent>
-            <BarSeries data={data?.timeline.map((point) => ({ label: point.label, value: point.conversations })) ?? []} color="#2563EB" />
+            <BarSeries data={data?.timeline.map((point) => ({ label: point.label, value: point.conversations })) ?? []} color="#1591DC" />
           </CardContent>
         </Card>
         <Card>
@@ -97,7 +97,7 @@ function ProgressRow({ label, value, max }: { label: string; value: number; max:
         <span className="text-muted-foreground">{value}</span>
       </div>
       <div className="h-2 rounded-full bg-slate-100">
-        <div className="h-2 rounded-full bg-blue-600" style={{ width: `${Math.max((value / max) * 100, 8)}%` }} />
+        <div className="h-2 rounded-full bg-primary" style={{ width: `${Math.max((value / max) * 100, 8)}%` }} />
       </div>
     </div>
   );

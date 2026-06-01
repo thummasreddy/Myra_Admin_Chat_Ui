@@ -17,7 +17,7 @@ export function SettingsPage() {
         <Card>
           <CardHeader>
             <div className="flex items-center gap-2">
-              <User className="h-5 w-5 text-blue-600" />
+              <User className="h-5 w-5 text-primary" />
               <CardTitle>Admin Profile</CardTitle>
             </div>
             <CardDescription>Profile values are ready for auth-service integration.</CardDescription>
@@ -38,7 +38,7 @@ export function SettingsPage() {
         <Card>
           <CardHeader>
             <div className="flex items-center gap-2">
-              <Lock className="h-5 w-5 text-blue-600" />
+              <Lock className="h-5 w-5 text-primary" />
               <CardTitle>Change Password</CardTitle>
             </div>
             <CardDescription>Placeholder for secure password rotation through auth-service.</CardDescription>
@@ -53,7 +53,7 @@ export function SettingsPage() {
         <Card className="lg:col-span-2">
           <CardHeader>
             <div className="flex items-center gap-2">
-              <Bell className="h-5 w-5 text-blue-600" />
+              <Bell className="h-5 w-5 text-primary" />
               <CardTitle>Notification Preferences</CardTitle>
             </div>
             <CardDescription>Placeholder settings for operational alerts and lead notifications.</CardDescription>

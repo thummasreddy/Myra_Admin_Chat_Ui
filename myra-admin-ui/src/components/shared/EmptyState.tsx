@@ -6,7 +6,7 @@ export function EmptyState({ title, description, action }: { title: string; desc
   return (
     <Card className="border-dashed">
       <CardContent className="flex flex-col items-center justify-center gap-3 p-10 text-center">
-        <div className="rounded-full bg-blue-50 p-3 text-blue-600">
+        <div className="rounded-full bg-primary/10 p-3 text-primary">
           <Inbox className="h-6 w-6" />
         </div>
         <div>

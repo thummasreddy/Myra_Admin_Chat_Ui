@@ -20,7 +20,7 @@ export function DocumentUpload({
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="rounded-lg border border-dashed bg-slate-50 p-6 text-center">
-          <Upload className="mx-auto h-8 w-8 text-blue-600" />
+          <Upload className="mx-auto h-8 w-8 text-primary" />
           <p className="mt-3 text-sm font-medium text-slate-950">{fileName || "PDF, DOCX, TXT, or CSV"}</p>
           <p className="mt-1 text-xs text-muted-foreground">Files are sent to knowledge-service for indexing.</p>
           <input

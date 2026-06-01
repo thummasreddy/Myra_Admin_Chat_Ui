@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 
 export function WidgetPreview({ config }: { config: WidgetConfig }) {
   return (
-    <div className="relative min-h-[520px] overflow-hidden rounded-lg border bg-gradient-to-br from-slate-50 to-blue-50 p-6">
+    <div className="relative min-h-[520px] overflow-hidden rounded-lg border bg-gradient-to-br from-slate-50 to-primary/10 p-6">
       <div className="rounded-md bg-white p-5 shadow-sm">
         <p className="text-sm font-medium text-slate-950">Website preview</p>
         <div className="mt-4 space-y-2">

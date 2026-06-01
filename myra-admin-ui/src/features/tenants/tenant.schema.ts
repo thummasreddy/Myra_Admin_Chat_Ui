@@ -11,7 +11,7 @@ export const tenantWizardSchema = z.object({
   timezone: z.string().min(2, "Timezone is required"),
   assistantName: z.string().min(2, "Assistant name is required"),
   assistantIntro: z.string().min(10, "Assistant intro should be more descriptive"),
-  brandColor: z.string().regex(/^#[0-9A-Fa-f]{6}$/, "Use a hex color like #2563EB"),
+  brandColor: z.string().regex(/^#[0-9A-Fa-f]{6}$/, "Use a hex color like #1591DC"),
   logoUrl: z.string().url("Enter a valid logo URL").or(z.literal("")).optional(),
   avatarUrl: z.string().url("Enter a valid avatar URL").or(z.literal("")).optional(),
   chatPosition: z.enum(CHAT_POSITIONS),
@@ -39,7 +39,7 @@ export const defaultTenantWizardValues: TenantWizardFormValues = {
   timezone: "America/Phoenix",
   assistantName: "Myra",
   assistantIntro: "Hi, I am Myra, Vijay's AI assistant.",
-  brandColor: "#2563EB",
+  brandColor: "#1591DC",
   logoUrl: "",
   avatarUrl: "",
   chatPosition: "bottom-right",
@@ -57,7 +57,7 @@ export const defaultTenantWizardValues: TenantWizardFormValues = {
 };
 
 export const tenantDetailSchema = tenantWizardSchema.extend({
-  status: z.enum(["ACTIVE", "INACTIVE"])
+  status: z.enum(["PAYMENT_PENDING", "PENDING_ADMIN_APPROVAL", "APPROVED", "ACTIVE", "INACTIVE", "REJECTED"])
 });
 
 function splitList(value?: string) {

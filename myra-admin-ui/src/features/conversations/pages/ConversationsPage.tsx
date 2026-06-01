@@ -91,11 +91,11 @@ export function ConversationsPage() {
                   <div
                     className={cn(
                       "max-w-[82%] rounded-lg px-4 py-3 text-sm shadow-sm",
-                      message.role === "user" ? "bg-blue-600 text-white" : "border bg-white text-slate-800"
+                      message.role === "user" ? "bg-primary text-white" : "border bg-white text-slate-800"
                     )}
                   >
                     <p>{message.content}</p>
-                    <div className={cn("mt-2 flex items-center gap-2 text-xs", message.role === "user" ? "text-blue-100" : "text-muted-foreground")}>
+                    <div className={cn("mt-2 flex items-center gap-2 text-xs", message.role === "user" ? "text-white/80" : "text-muted-foreground")}>
                       {message.confidence !== undefined ? <span>{Math.round(message.confidence * 100)}% confidence</span> : null}
                       {message.fallback ? (
                         <span className="inline-flex items-center gap-1 text-amber-600">
@@ -120,14 +120,14 @@ function SessionButton({ session, selected, onClick }: { session: ChatSession; s
     <button
       type="button"
       onClick={onClick}
-      className={cn("w-full rounded-md border p-3 text-left transition-colors", selected ? "border-blue-300 bg-blue-50" : "bg-white hover:bg-slate-50")}
+      className={cn("w-full rounded-md border p-3 text-left transition-colors", selected ? "border-primary/30 bg-primary/10" : "bg-white hover:bg-slate-50")}
     >
       <div className="flex items-start justify-between gap-2">
         <div>
           <p className="font-medium text-slate-950">{session.visitorName}</p>
           <p className="text-sm text-muted-foreground">{session.tenantName}</p>
         </div>
-        <MessageSquare className="h-4 w-4 text-blue-600" />
+        <MessageSquare className="h-4 w-4 text-primary" />
       </div>
       <div className="mt-3 flex items-center justify-between text-xs text-muted-foreground">
         <span>{formatDate(session.createdAt)}</span>

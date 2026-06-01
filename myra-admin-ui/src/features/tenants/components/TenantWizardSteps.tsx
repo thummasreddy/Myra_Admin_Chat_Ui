@@ -16,13 +16,13 @@ export function TenantWizardSteps({ currentStep }: { currentStep: number }) {
         const complete = step.id < currentStep;
         const active = step.id === currentStep;
         return (
-          <div key={step.id} className={cn("rounded-md border bg-white p-3", active && "border-blue-300 bg-blue-50")}>
+          <div key={step.id} className={cn("rounded-md border bg-white p-3", active && "border-primary/30 bg-primary/10")}>
             <div className="flex items-center gap-2">
               <div
                 className={cn(
                   "flex h-7 w-7 items-center justify-center rounded-full text-xs font-semibold",
-                  complete && "bg-blue-600 text-white",
-                  active && "bg-blue-100 text-blue-700",
+                  complete && "bg-primary text-white",
+                  active && "bg-primary/10 text-primary",
                   !complete && !active && "bg-slate-100 text-slate-500"
                 )}
               >

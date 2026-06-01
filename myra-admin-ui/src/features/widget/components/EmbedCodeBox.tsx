@@ -13,7 +13,7 @@ export function EmbedCodeBox({ tenantId }: { tenantId: string }) {
   return (
     <div className="rounded-lg border bg-slate-950 p-4 text-white">
       <div className="flex items-start justify-between gap-3">
-        <pre className="min-w-0 whitespace-pre-wrap break-all text-sm text-blue-100">{embedCode}</pre>
+        <pre className="min-w-0 whitespace-pre-wrap break-all text-sm text-white/80">{embedCode}</pre>
         <Button type="button" variant="secondary" size="sm" onClick={copyEmbedCode}>
           <Copy className="h-4 w-4" />
           Copy

@@ -1,4 +1,4 @@
-export type KnowledgeStatus = "PENDING" | "PROCESSING" | "READY" | "FAILED";
+export type KnowledgeStatus = "PENDING" | "UPLOADED" | "UNDER_REVIEW" | "PROCESSING" | "READY" | "REJECTED" | "FAILED";
 
 export type KnowledgeSource = {
   id: string;
@@ -7,6 +7,8 @@ export type KnowledgeSource = {
   type: "PDF" | "DOCX" | "TXT" | "CSV" | "FAQ";
   status: KnowledgeStatus;
   size?: string;
+  reviewNotes?: string;
+  uploadedBy?: string;
   createdAt: string;
 };
 

@@ -35,7 +35,7 @@ export function DashboardPage() {
             <Card key={metric.key}>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium text-muted-foreground">{metric.label}</CardTitle>
-                <Icon className="h-4 w-4 text-blue-600" />
+                <Icon className="h-4 w-4 text-primary" />
               </CardHeader>
               <CardContent>
                 {summaryQuery.isLoading ? (
@@ -64,7 +64,20 @@ export function DashboardPage() {
             <CardTitle>Service Map</CardTitle>
           </CardHeader>
           <CardContent className="grid gap-2 text-sm text-slate-700 sm:grid-cols-2">
-            {["tenant-service", "auth-service", "knowledge-service", "chat-service", "lead-service", "analytics-service", "widget-config-service", "gateway-service"].map(
+            {[
+              "tenant-service",
+              "onboarding-service",
+              "subscription-service",
+              "payment-service",
+              "notification-service",
+              "auth-service",
+              "knowledge-service",
+              "chat-service",
+              "lead-service",
+              "analytics-service",
+              "widget-config-service",
+              "gateway-service"
+            ].map(
               (service) => (
                 <div key={service} className="rounded-md border bg-slate-50 px-3 py-2">
                   {service}
