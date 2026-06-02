@@ -12,6 +12,8 @@ Production-ready React + TypeScript + Vite admin portal for the Myra AI SaaS pla
 - Zustand persisted auth store
 - React Hook Form + Zod validation
 - Lucide React icons
+- Vitest + React Testing Library
+- ESLint + Prettier + Husky pre-commit checks
 
 ## Setup
 
@@ -57,11 +59,30 @@ password123
 
 ## API Behavior
 
-All backend calls go through `src/lib/apiClient.ts`, which:
+Production should use a backend gateway pattern. The admin portal calls the gateway through:
+
+```bash
+VITE_API_BASE_URL=https://YOUR-GATEWAY/api/v1
+```
+
+The gateway must also expose the public widget endpoints outside the admin prefix:
+
+```text
+/api/chat
+/api/leads
+```
+
+Direct service access is supported only for local development with optional `VITE_TENANT_API_URL`, `VITE_CHAT_API_URL`, and related overrides.
+
+All admin backend calls go through `src/lib/apiClient.ts`, which:
 
 - Reads `VITE_API_BASE_URL`
-- Attaches the persisted JWT token
-- Clears auth and redirects to `/login` on `401`
+- Uses configurable request timeout and retry values
+- Retries transient network, rate-limit, and server failures with exponential backoff
+- Attaches JWT, optional widget API key, and CSRF headers
+- Attempts token refresh on `401` before logging out
+- Normalizes network, timeout, validation, auth, rate-limit, and server errors
+- Adds structured API request/response logging
 - Lets feature APIs fall back to local demo data when the backend is unavailable
 
 Expected services behind the gateway:
@@ -74,6 +95,57 @@ Expected services behind the gateway:
 - analytics-service
 - widget-config-service
 - gateway-service
+
+See:
+
+- [Architecture](docs/architecture.md)
+- [API Reference](docs/api.md)
+- [Authentication](docs/authentication.md)
+- [Deployment](docs/deployment.md)
+- [Components](docs/components.md)
+- [Translation Process](docs/i18n.md)
+
+## Environment Configuration
+
+Copy the right example for the target environment:
+
+```bash
+cp .env.development.example .env
+cp .env.staging.example .env
+cp .env.production.example .env
+```
+
+`src/lib/config.ts` validates environment variables at startup. Production and any environment with `VITE_REQUIRE_ENV_VALIDATION=true` fail fast when required values are invalid.
+
+Key variables:
+
+- `VITE_API_BASE_URL`: gateway `/api/v1` base URL
+- `VITE_API_TIMEOUT_MS`: request timeout, default `12000`
+- `VITE_API_RETRY_ATTEMPTS`: transient retry attempts, default `2`
+- `VITE_API_RETRY_BASE_DELAY_MS`: exponential backoff base delay, default `300`
+- `VITE_API_RATE_LIMIT_PER_MINUTE`: defensive frontend throttle, default `120`
+- `VITE_PUBLIC_WIDGET_KEY`: optional widget API key sent as `X-Api-Key`
+- `VITE_SENTRY_DSN`: optional production error tracking DSN
+
+## Testing And Quality
+
+```bash
+npm run lint
+npm run typecheck
+npm run test
+npm run test:coverage
+npm run format:check
+```
+
+Current coverage includes API client behavior, shared status badges, and the login flow. Add focused component tests next to components and broader flow tests under `src/test/integration`.
+
+## Security Notes
+
+The frontend implements client-side request throttling, CSRF header forwarding, payload sanitization, token refresh handling, and route-level error recovery. The backend gateway must still enforce server-side rate limiting, issue secure httpOnly refresh cookies, validate CSRF tokens, restrict widget API keys to public widget endpoints, and store audit logs.
+
+## Accessibility
+
+Forms should use visible labels and field-level error text. Interactive elements use visible focus styles from the shared UI primitives. When adding new flows, verify keyboard navigation, dialog focus behavior, and screen-reader labels with React Testing Library and manual browser checks.
 
 ## Build
 

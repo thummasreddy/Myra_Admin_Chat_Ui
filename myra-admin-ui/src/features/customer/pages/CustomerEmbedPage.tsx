@@ -5,6 +5,7 @@ import { PageHeader } from "@/components/shared/PageHeader";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { EmbedCodeBox } from "@/features/widget/components/EmbedCodeBox";
 import { useCustomerTenant, isEmbedReady } from "@/features/customer/customer.hooks";
+import { customerDashboardMessages } from "@/features/onboarding/onboarding.copy";
 import { formatDate } from "@/lib/utils";
 
 export function CustomerEmbedPage() {
@@ -20,7 +21,7 @@ export function CustomerEmbedPage() {
     <>
       <PageHeader
         title="Embed Code"
-        description="Install the Myra widget on your website after admin approval. The code is also emailed to the business email."
+        description={ready ? customerDashboardMessages.embedReady : customerDashboardMessages.embedHidden}
       />
 
       <div className="grid gap-4 lg:grid-cols-[1fr_360px]">
@@ -34,15 +35,16 @@ export function CustomerEmbedPage() {
           <CardContent className="space-y-4">
             {ready ? (
               <>
-                <EmbedCodeBox tenantId={tenantId} />
+                <EmbedCodeBox tenantId={tenantId} publicWidgetKey={tenant.apiKey} />
                 <div className="rounded-md border bg-slate-50 p-4 text-sm text-muted-foreground">
                   Place this script before the closing body tag on your website. The assistant will use approved settings and
-                  processed knowledge sources.
+                  processed knowledge sources to help customers ask questions, get answers, and move toward contact, booking,
+                  quote request, or purchase.
                 </div>
               </>
             ) : (
               <div className="rounded-md border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
-                Embed code is generated only after admin approval. Current status: <StatusBadge status={tenant.status} />
+                {customerDashboardMessages.embedHidden} Current status: <StatusBadge status={tenant.status} />
               </div>
             )}
           </CardContent>

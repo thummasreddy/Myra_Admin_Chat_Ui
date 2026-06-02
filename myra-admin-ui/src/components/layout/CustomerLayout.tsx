@@ -1,4 +1,4 @@
-import { BarChart3, Bot, Code2, FileText, HelpCircle, LogOut, Palette, Settings } from "lucide-react";
+import { BarChart3, Bot, Code2, CreditCard, FileText, HelpCircle, LogOut, Palette, Settings, Users } from "lucide-react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -8,11 +8,14 @@ import { useAuthStore } from "@/features/auth/auth.store";
 import { cn, initials } from "@/lib/utils";
 
 const navItems = [
-  { label: "Overview", href: "/customer/dashboard", icon: BarChart3 },
-  { label: "Knowledge", href: "/customer/knowledge", icon: FileText },
+  { label: "Dashboard", href: "/customer/dashboard", icon: BarChart3 },
+  { label: "Assistant Setup", href: "/customer/settings", icon: Palette },
+  { label: "Knowledge Base", href: "/customer/knowledge", icon: FileText },
+  { label: "Leads", href: "/customer/leads", icon: Users },
+  { label: "Analytics", href: "/customer/analytics", icon: BarChart3 },
+  { label: "Subscription", href: "/customer/subscription", icon: CreditCard },
   { label: "Embed Code", href: "/customer/embed", icon: Code2 },
-  { label: "Assistant", href: "/customer/settings", icon: Palette },
-  { label: "Support", href: "/customer/support", icon: HelpCircle }
+  { label: "Settings", href: "/customer/support", icon: HelpCircle }
 ];
 
 export function CustomerLayout() {
@@ -38,16 +41,16 @@ export function CustomerLayout() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <header className="sticky top-0 z-30 border-b bg-white/95 backdrop-blur">
+    <div className="customer-shell">
+      <header className="sticky top-0 z-30 border-b border-white/10 bg-[#0F172A]/90 text-white backdrop-blur-xl">
         <div className="mx-auto flex h-16 max-w-7xl items-center gap-3 px-4 sm:px-6 lg:px-8">
           <NavLink to="/customer/dashboard" className="flex items-center gap-2">
-            <div className="flex h-9 w-9 items-center justify-center rounded-md bg-primary text-white">
+            <div className="flex h-9 w-9 items-center justify-center rounded-md bg-[linear-gradient(135deg,#14B8A6,#8B5CF6)] text-white shadow-lg shadow-teal-500/20">
               <Bot className="h-5 w-5" />
             </div>
             <div>
-              <p className="text-sm font-semibold text-slate-950">Myra Customer</p>
-              <p className="text-xs text-muted-foreground">Business dashboard</p>
+              <p className="text-sm font-semibold text-white">Myra Customer</p>
+              <p className="text-xs text-slate-300">Business dashboard</p>
             </div>
           </NavLink>
 
@@ -65,12 +68,12 @@ export function CustomerLayout() {
               ))}
             </Select>
             <div className="hidden items-center gap-2 rounded-md border px-3 py-2 md:flex">
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-teal-400/15 text-xs font-semibold text-teal-200">
                 {initials(user?.name ?? "Owner")}
               </div>
               <div className="leading-tight">
-                <p className="text-sm font-medium text-slate-950">{user?.name ?? "Tenant Owner"}</p>
-                <p className="text-xs text-muted-foreground">{user?.role ?? "TENANT_OWNER"}</p>
+                <p className="text-sm font-medium text-white">{user?.name ?? "Tenant Owner"}</p>
+                <p className="text-xs text-slate-300">{user?.role ?? "TENANT_OWNER"}</p>
               </div>
             </div>
             <Button variant="ghost" size="icon" onClick={handleLogout} aria-label="Log out">
@@ -81,16 +84,18 @@ export function CustomerLayout() {
       </header>
 
       <div className="mx-auto grid max-w-7xl gap-6 px-4 py-6 sm:px-6 lg:grid-cols-[220px_1fr] lg:px-8">
-        <aside className="rounded-lg border bg-white p-2 lg:sticky lg:top-24 lg:h-fit">
-          <nav className="grid gap-1 sm:grid-cols-5 lg:grid-cols-1">
+        <aside className="rounded-lg border border-white/10 bg-[#0F172A] p-2 shadow-2xl shadow-slate-950/20 backdrop-blur lg:sticky lg:top-24 lg:h-fit">
+          <nav className="grid gap-1 sm:grid-cols-4 lg:grid-cols-1">
             {navItems.map((item) => (
               <NavLink
                 key={item.href}
                 to={item.href}
                 className={({ isActive }) =>
                   cn(
-                    "flex items-center gap-2 rounded-md px-3 py-2.5 text-sm font-medium transition-colors",
-                    isActive ? "bg-primary/10 text-primary" : "text-slate-600 hover:bg-slate-100 hover:text-slate-950"
+                    "flex items-center gap-2 rounded-md border px-3 py-2.5 text-sm font-medium transition-colors",
+                    isActive
+                      ? "border-teal-300/30 bg-white/15 text-white shadow-lg shadow-teal-500/10"
+                      : "border-transparent text-slate-300 hover:border-white/10 hover:bg-white/10 hover:text-white"
                   )
                 }
               >
@@ -99,8 +104,8 @@ export function CustomerLayout() {
               </NavLink>
             ))}
           </nav>
-          <div className="mt-2 rounded-md bg-slate-50 p-3 text-sm text-muted-foreground">
-            <div className="mb-1 flex items-center gap-2 font-medium text-slate-800">
+          <div className="mt-2 rounded-md border border-white/10 bg-slate-950/40 p-3 text-sm text-slate-300">
+            <div className="mb-1 flex items-center gap-2 font-medium text-white">
               <Settings className="h-4 w-4" />
               Manual activation
             </div>

@@ -24,7 +24,7 @@ const demoTenants: Tenant[] = [
     timezone: "America/Phoenix",
     assistantName: "Myra",
     assistantIntro: "Hi, I am Myra, Vijay's AI assistant.",
-    brandColor: "#1591DC",
+    brandColor: "#14B8A6",
     logoUrl: "",
     avatarUrl: "",
     chatPosition: "bottom-right",
@@ -50,7 +50,11 @@ const demoTenants: Tenant[] = [
     paymentStatus: "SUCCESS",
     subscriptionStatus: "ACTIVE",
     documentProcessingStatus: "READY",
-    embedCode: `<script src="https://cdn.myra.ai/widget.js" data-tenant-id="tenant_vthumma"></script>`,
+    embedCode: `<script
+  src="https://cdn.myra.ai/widget.js"
+  data-tenant-id="tenant_vthumma"
+  data-api-key="mk_live_demo_vthumma">
+</script>`,
     approvedAt: "2026-05-02T17:00:00.000Z",
     embedCodeEmailSentAt: "2026-05-02T17:05:00.000Z",
     createdAt: "2026-05-01T15:00:00.000Z",
@@ -70,7 +74,7 @@ const demoTenants: Tenant[] = [
     timezone: "America/New_York",
     assistantName: "Myra",
     assistantIntro: "Hi, I can help with appointments, services, and common questions.",
-    brandColor: "#1591DC",
+    brandColor: "#14B8A6",
     chatPosition: "bottom-left",
     systemPrompt: "You are Myra, a helpful AI assistant for a dental office.",
     responseStyle: "friendly",

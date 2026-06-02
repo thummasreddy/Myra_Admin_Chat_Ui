@@ -1,6 +1,7 @@
 import { Component, type ErrorInfo, type ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { captureError } from "@/lib/logger";
 
 type ErrorBoundaryState = {
   hasError: boolean;
@@ -15,7 +16,7 @@ export class ErrorBoundary extends Component<{ children: ReactNode }, ErrorBound
   }
 
   componentDidCatch(error: Error, info: ErrorInfo) {
-    console.error("Myra admin error boundary", error, info);
+    captureError(error, { source: "react_error_boundary", componentStack: info.componentStack });
   }
 
   render() {

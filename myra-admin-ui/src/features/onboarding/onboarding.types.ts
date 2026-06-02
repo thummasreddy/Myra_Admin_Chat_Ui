@@ -88,6 +88,7 @@ export type NotificationEvent = {
   type: NotificationType;
   recipient: string;
   subject: string;
+  body?: string;
   status: "QUEUED" | "SENT" | "SCHEDULED";
   createdAt: string;
   sendAt?: string;

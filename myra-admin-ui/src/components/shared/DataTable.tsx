@@ -26,7 +26,7 @@ export function DataTable<T>({
 }) {
   if (isLoading) {
     return (
-      <div className="space-y-2 rounded-lg border bg-white p-4">
+      <div data-slot="data-table-loading" className="space-y-2 rounded-lg border bg-white p-4">
         {Array.from({ length: 5 }).map((_, index) => (
           <Skeleton key={index} className="h-12 w-full" />
         ))}
@@ -39,7 +39,7 @@ export function DataTable<T>({
   }
 
   return (
-    <div className="rounded-lg border bg-white">
+    <div data-slot="data-table" className="rounded-lg border bg-white">
       <Table>
         <TableHeader>
           <TableRow>

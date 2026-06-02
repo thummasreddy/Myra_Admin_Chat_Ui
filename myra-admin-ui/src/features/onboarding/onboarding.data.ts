@@ -4,10 +4,10 @@ import type { SubscriptionPlanId } from "@/features/tenants/tenant.types";
 export const DOCUMENT_REVIEW_MESSAGE = "Documents are usually reviewed and processed within 3 business days.";
 
 export const SUBSCRIPTION_PLANS: SubscriptionPlan[] = [
-  { id: "MONTHLY", name: "Monthly", durationMonths: 1, priceUsd: 49, renewalCadence: "Renews monthly" },
-  { id: "THREE_MONTHS", name: "3 Months", durationMonths: 3, priceUsd: 129, renewalCadence: "Renews every 3 months" },
-  { id: "SIX_MONTHS", name: "6 Months", durationMonths: 6, priceUsd: 239, renewalCadence: "Renews every 6 months" },
-  { id: "TWELVE_MONTHS", name: "12 Months", durationMonths: 12, priceUsd: 449, renewalCadence: "Renews yearly" }
+  { id: "MONTHLY", name: "Starter", durationMonths: 1, priceUsd: 49, renewalCadence: "Renews monthly" },
+  { id: "THREE_MONTHS", name: "Growth", durationMonths: 3, priceUsd: 129, renewalCadence: "Renews every 3 months" },
+  { id: "SIX_MONTHS", name: "Pro", durationMonths: 6, priceUsd: 239, renewalCadence: "Renews every 6 months" },
+  { id: "TWELVE_MONTHS", name: "Enterprise", durationMonths: 12, priceUsd: 449, renewalCadence: "Renews yearly" }
 ];
 
 export function getSubscriptionPlan(planId?: SubscriptionPlanId) {

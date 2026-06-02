@@ -28,8 +28,8 @@ export function CustomerSupportPage() {
   return (
     <>
       <PageHeader
-        title="Contact Support"
-        description="Reach the Myra support team about onboarding, document processing, billing, or embed installation."
+        title="Settings & Support"
+        description="Manage account follow-up with the Myra team for onboarding, document processing, billing, or embed installation."
       />
 
       <div className="grid gap-4 lg:grid-cols-[1fr_360px]">

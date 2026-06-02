@@ -4,7 +4,7 @@ export type KnowledgeSource = {
   id: string;
   tenantId: string;
   name: string;
-  type: "PDF" | "DOCX" | "TXT" | "CSV" | "FAQ";
+  type: "PDF" | "DOCX" | "TXT" | "CSV" | "FAQ" | "WEBSITE";
   status: KnowledgeStatus;
   size?: string;
   reviewNotes?: string;

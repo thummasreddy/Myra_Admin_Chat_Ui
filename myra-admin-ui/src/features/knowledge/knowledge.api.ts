@@ -103,6 +103,27 @@ export async function addFaq(input: FaqInput): Promise<KnowledgeSource> {
   }
 }
 
+export async function addWebsiteKnowledgeSource(tenantId: string, websiteUrl: string): Promise<KnowledgeSource> {
+  try {
+    const { data } = await apiClient.post<KnowledgeSource>("/knowledge/sources/website", { tenantId, websiteUrl });
+    return data;
+  } catch (error) {
+    if (!isBackendUnavailable(error)) throw error;
+    const source: KnowledgeSource = {
+      id: `web_${Date.now()}`,
+      tenantId,
+      name: websiteUrl,
+      type: "WEBSITE",
+      status: "UPLOADED",
+      reviewNotes: "Website URL queued for content review.",
+      uploadedBy: "Tenant Owner",
+      createdAt: new Date().toISOString()
+    };
+    writeSources([source, ...readSources()]);
+    return source;
+  }
+}
+
 export async function deleteKnowledgeSource(sourceId: string): Promise<void> {
   try {
     await apiClient.delete(`/knowledge/sources/${sourceId}`);

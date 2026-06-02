@@ -1,5 +1,6 @@
 import { apiClient, isBackendUnavailable } from "@/lib/apiClient";
 import { DOCUMENT_REVIEW_MESSAGE, getSubscriptionPlan, SUBSCRIPTION_PLANS } from "@/features/onboarding/onboarding.data";
+import { emailTemplates } from "@/features/onboarding/onboarding.copy";
 import type {
   ApprovalDecision,
   BusinessRegistration,
@@ -58,16 +59,7 @@ function addDays(value: Date, days: number) {
 }
 
 function notificationSubject(type: NotificationEvent["type"]) {
-  const subjects: Record<NotificationEvent["type"], string> = {
-    REGISTRATION_RECEIVED: "Myra registration received",
-    PAYMENT_SUCCESSFUL: "Myra payment successful",
-    ADMIN_APPROVAL_PENDING: "Myra admin approval pending",
-    ASSISTANT_APPROVED: "Myra assistant approved",
-    EMBED_CODE_READY: "Myra embed code ready",
-    DOCUMENT_PROCESSING_COMPLETED: "Myra document processing completed",
-    SUBSCRIPTION_RENEWAL_REMINDER: "Myra subscription renewal reminder"
-  };
-  return subjects[type];
+  return emailTemplates[type].subject;
 }
 
 function readRegistrations() {
@@ -107,6 +99,7 @@ function recordNotification(input: Omit<NotificationEvent, "id" | "subject" | "c
     ...input,
     id: id("email"),
     subject: notificationSubject(input.type),
+    body: emailTemplates[input.type].body,
     createdAt: new Date().toISOString()
   };
   writeNotifications([notification, ...readNotifications()]);
@@ -114,7 +107,11 @@ function recordNotification(input: Omit<NotificationEvent, "id" | "subject" | "c
 }
 
 function createEmbedCode(tenantId: string) {
-  return `<script src="https://cdn.myra.ai/widget.js" data-tenant-id="${tenantId}"></script>`;
+  return `<script
+  src="https://cdn.myra.ai/widget.js"
+  data-tenant-id="${tenantId}"
+  data-api-key="PUBLIC_WIDGET_KEY">
+</script>`;
 }
 
 function buildTenantFromRegistration(registration: BusinessRegistration, tenantId: string, now: string): Tenant {

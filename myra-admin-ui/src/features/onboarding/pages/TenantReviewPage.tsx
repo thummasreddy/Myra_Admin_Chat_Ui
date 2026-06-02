@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { CheckCircle2, MailCheck, RefreshCw, ShieldCheck, XCircle } from "lucide-react";
+import { CheckCircle2, MailCheck, MessageSquare, RefreshCw, ShieldCheck, XCircle } from "lucide-react";
 import type { ReactNode } from "react";
 import { useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
@@ -151,6 +151,14 @@ export function TenantReviewPage() {
   const approver = canApproveTenant(user);
   const canApprove = approver && paid;
 
+  function requestMoreInformation() {
+    toast({
+      title: "Information request queued",
+      description: "notification-service can send this request once the backend endpoint is connected.",
+      variant: "success"
+    });
+  }
+
   return (
     <>
       <PageHeader
@@ -165,6 +173,10 @@ export function TenantReviewPage() {
             <Button variant="destructive" onClick={() => setRejectOpen(true)} disabled={!approver || rejectMutation.isPending}>
               <XCircle className="h-4 w-4" />
               Reject Tenant
+            </Button>
+            <Button variant="outline" onClick={requestMoreInformation}>
+              <MessageSquare className="h-4 w-4" />
+              Request Info
             </Button>
           </div>
         }
@@ -213,6 +225,15 @@ export function TenantReviewPage() {
           ) : (
             <p className="text-sm text-muted-foreground">Billing details are visible to ADMIN and BILLING_ADMIN roles.</p>
           )}
+        </ReviewCard>
+
+        <ReviewCard title="Risk and Review Notes">
+          <InfoRow label="Review owner" value={user?.name ?? "Admin"} />
+          <InfoRow label="Risk signal" value={tenant.documentProcessingStatus === "REJECTED" ? "Document issue detected" : "No blocking issue"} />
+          <InfoRow label="Requested action" value={tenant.approvalStatus === "PENDING_REVIEW" ? "Approve, reject, or request more information" : "No pending action"} />
+          <p className="rounded-md border bg-slate-50 p-3 text-sm text-muted-foreground">
+            Review website legitimacy, uploaded knowledge quality, payment status, assistant configuration, and any business-specific compliance concerns before activation.
+          </p>
         </ReviewCard>
       </div>
 
@@ -285,6 +306,7 @@ export function TenantReviewPage() {
                 <div>
                   <p className="text-sm font-medium text-slate-950">{event.subject}</p>
                   <p className="text-xs text-muted-foreground">{event.recipient}</p>
+                  {event.body ? <p className="mt-1 text-xs text-muted-foreground">{event.body}</p> : null}
                 </div>
                 <StatusBadge status={event.status} />
               </div>

@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label";
 import { toast } from "@/components/ui/toast";
 import { login } from "@/features/auth/auth.api";
 import { useAuthStore } from "@/features/auth/auth.store";
+import { trackUserAction } from "@/lib/logger";
 
 const loginSchema = z.object({
   email: z.string().email("Enter a valid email"),
@@ -41,6 +42,7 @@ export function LoginPage() {
     mutationFn: login,
     onSuccess: (session) => {
       setSession(session.token, session.user);
+      trackUserAction("login_success", { role: session.user.role });
       toast({
         title: "Welcome back",
         description: isCustomerLogin ? "You are signed in to the Myra customer dashboard." : "You are signed in to Myra Admin.",
@@ -99,18 +101,42 @@ export function LoginPage() {
                 <Label htmlFor="email">Email</Label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                  <Input id="email" className="pl-9" type="email" autoComplete="email" {...form.register("email")} />
+                  <Input
+                    id="email"
+                    className="pl-9"
+                    type="email"
+                    autoComplete="email"
+                    aria-invalid={Boolean(form.formState.errors.email)}
+                    aria-describedby={form.formState.errors.email ? "email-error" : undefined}
+                    {...form.register("email")}
+                  />
                 </div>
-                {form.formState.errors.email ? <p className="text-sm text-red-600">{form.formState.errors.email.message}</p> : null}
+                {form.formState.errors.email ? (
+                  <p id="email-error" className="text-sm text-red-600">
+                    {form.formState.errors.email.message}
+                  </p>
+                ) : null}
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="password">Password</Label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                  <Input id="password" className="pl-9" type="password" autoComplete="current-password" {...form.register("password")} />
+                  <Input
+                    id="password"
+                    className="pl-9"
+                    type="password"
+                    autoComplete="current-password"
+                    aria-invalid={Boolean(form.formState.errors.password)}
+                    aria-describedby={form.formState.errors.password ? "password-error" : undefined}
+                    {...form.register("password")}
+                  />
                 </div>
-                {form.formState.errors.password ? <p className="text-sm text-red-600">{form.formState.errors.password.message}</p> : null}
+                {form.formState.errors.password ? (
+                  <p id="password-error" className="text-sm text-red-600">
+                    {form.formState.errors.password.message}
+                  </p>
+                ) : null}
               </div>
 
               <Button className="w-full" type="submit" disabled={loginMutation.isPending}>

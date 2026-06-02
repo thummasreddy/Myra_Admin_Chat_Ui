@@ -2,8 +2,12 @@ import { Copy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/toast";
 
-export function EmbedCodeBox({ tenantId }: { tenantId: string }) {
-  const embedCode = `<script src="https://cdn.myra.ai/widget.js" data-tenant-id="${tenantId}"></script>`;
+export function EmbedCodeBox({ tenantId, publicWidgetKey = "PUBLIC_WIDGET_KEY" }: { tenantId: string; publicWidgetKey?: string }) {
+  const embedCode = `<script
+  src="https://cdn.myra.ai/widget.js"
+  data-tenant-id="${tenantId}"
+  data-api-key="${publicWidgetKey}">
+</script>`;
 
   async function copyEmbedCode() {
     await navigator.clipboard.writeText(embedCode);

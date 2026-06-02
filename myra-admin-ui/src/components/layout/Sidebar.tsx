@@ -16,6 +16,7 @@ import {
   X
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
 const navItems = [
@@ -38,32 +39,32 @@ export function Sidebar({ open, onClose }: { open: boolean; onClose: () => void 
   return (
     <>
       <div
-        className={cn("fixed inset-0 z-30 bg-slate-950/40 lg:hidden", open ? "block" : "hidden")}
+        className={cn("fixed inset-0 z-30 bg-slate-950/55 backdrop-blur-sm lg:hidden", open ? "block" : "hidden")}
         onClick={onClose}
         aria-hidden="true"
       />
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-40 flex w-72 flex-col border-r bg-white transition-transform lg:static lg:z-auto lg:translate-x-0",
+          "admin-sidebar fixed inset-y-0 left-0 z-40 flex w-72 flex-col border-r transition-transform lg:static lg:z-auto lg:translate-x-0",
           open ? "translate-x-0" : "-translate-x-full"
         )}
       >
-        <div className="flex h-16 items-center justify-between border-b px-5">
+        <div className="flex h-16 items-center justify-between border-b border-white/10 px-5">
           <NavLink to="/dashboard" className="flex items-center gap-2" onClick={onClose}>
-            <div className="flex h-9 w-9 items-center justify-center rounded-md bg-primary text-white">
+            <div className="flex h-10 w-10 items-center justify-center rounded-md bg-[linear-gradient(135deg,#14B8A6,#8B5CF6)] text-white shadow-lg shadow-teal-500/20">
               <Bot className="h-5 w-5" />
             </div>
             <div>
-              <p className="text-sm font-semibold text-slate-950">Myra Admin</p>
-              <p className="text-xs text-muted-foreground">AI SaaS Control</p>
+              <p className="text-sm font-semibold text-white">Myra Admin</p>
+              <p className="text-xs text-slate-400">AI SaaS Control</p>
             </div>
           </NavLink>
-          <Button variant="ghost" size="icon" className="lg:hidden" onClick={onClose} aria-label="Close navigation">
+          <Button variant="ghost" size="icon" className="text-slate-300 hover:bg-white/10 hover:text-white lg:hidden" onClick={onClose} aria-label="Close navigation">
             <X className="h-5 w-5" />
           </Button>
         </div>
 
-        <nav className="flex-1 space-y-1 px-3 py-4">
+        <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4">
           {navItems.map((item) => (
             <NavLink
               key={item.href}
@@ -71,21 +72,28 @@ export function Sidebar({ open, onClose }: { open: boolean; onClose: () => void 
               onClick={onClose}
               className={({ isActive }) =>
                 cn(
-                  "flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-colors",
-                  isActive ? "bg-primary/10 text-primary" : "text-slate-600 hover:bg-slate-100 hover:text-slate-950"
+                  "group flex items-center gap-3 rounded-md border px-3 py-2.5 text-sm font-medium transition-all",
+                  isActive
+                    ? "border-teal-300/35 bg-white/10 text-white shadow-lg shadow-teal-500/10"
+                    : "border-transparent text-slate-400 hover:border-white/10 hover:bg-white/[0.06] hover:text-white"
                 )
               }
             >
-              <item.icon className="h-4 w-4" />
-              {item.label}
+              <span className="flex h-8 w-8 items-center justify-center rounded-md bg-white/[0.06] text-teal-300 transition-colors group-hover:bg-white/10">
+                <item.icon className="h-4 w-4" />
+              </span>
+              <span className="min-w-0 truncate">{item.label}</span>
             </NavLink>
           ))}
         </nav>
 
-        <div className="border-t p-4">
-          <div className="rounded-md bg-slate-50 p-3">
-            <p className="text-sm font-medium text-slate-950">Widget install</p>
-            <p className="mt-1 text-xs text-muted-foreground">Create a tenant, publish config, then copy the embed script.</p>
+        <div className="border-t border-white/10 p-4">
+          <div className="rounded-md border border-white/10 bg-white/[0.06] p-3 shadow-inner">
+            <div className="mb-2 flex items-center justify-between gap-2">
+              <p className="text-sm font-medium text-white">Activation Queue</p>
+              <Badge variant="secondary">Manual</Badge>
+            </div>
+            <p className="text-xs leading-5 text-slate-400">Review payment, knowledge, approval, and embed delivery from one operations lane.</p>
           </div>
         </div>
       </aside>

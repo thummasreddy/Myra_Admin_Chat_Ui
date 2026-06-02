@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { BarChart3, Code2, CreditCard, FileText, MessageSquare, Settings } from "lucide-react";
+import { BarChart3, Code2, CreditCard, FileText, MessageSquare, MousePointerClick, Settings, WalletCards } from "lucide-react";
 import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -8,8 +8,10 @@ import { LoadingSpinner } from "@/components/shared/LoadingSpinner";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { getAnalyticsSummary } from "@/features/analytics/analytics.api";
+import { listKnowledgeSources } from "@/features/knowledge/knowledge.api";
 import { documentReviewMessage, getSubscriptionForTenant, listNotificationEvents } from "@/features/onboarding/onboarding.api";
 import { formatPlanPrice, getSubscriptionPlan } from "@/features/onboarding/onboarding.data";
+import { customerDashboardMessages } from "@/features/onboarding/onboarding.copy";
 import { useCustomerTenant, isEmbedReady } from "@/features/customer/customer.hooks";
 import { formatDate } from "@/lib/utils";
 
@@ -26,6 +28,11 @@ export function CustomerDashboardPage() {
     enabled: Boolean(tenantId)
   });
   const analyticsQuery = useQuery({ queryKey: ["analytics", "customer", tenantId], queryFn: getAnalyticsSummary, enabled: Boolean(tenantId) });
+  const knowledgeQuery = useQuery({
+    queryKey: ["knowledge", "customer-dashboard", tenantId],
+    queryFn: () => listKnowledgeSources(tenantId),
+    enabled: Boolean(tenantId)
+  });
 
   if (tenantQuery.isLoading) return <LoadingSpinner label="Loading customer dashboard" />;
   if (!tenantQuery.data) return <PageHeader title="Customer Dashboard" description="No tenant is available for this account." />;
@@ -41,7 +48,7 @@ export function CustomerDashboardPage() {
     <>
       <PageHeader
         title={`${tenant.tenantName} Dashboard`}
-        description="Track onboarding, subscription, knowledge processing, embed readiness, and basic assistant analytics."
+        description={customerDashboardMessages.welcome}
         actions={
           <Button asChild>
             <Link to="/customer/knowledge">
@@ -56,11 +63,25 @@ export function CustomerDashboardPage() {
         {documentReviewMessage}
       </div>
 
+      {!embedReady ? (
+        <div className="mb-6 rounded-md border bg-white px-4 py-3 text-sm font-medium text-slate-800">
+          {customerDashboardMessages.approvalPending}
+        </div>
+      ) : (
+        <div className="mb-6 rounded-md border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-800">
+          {customerDashboardMessages.embedReady}
+        </div>
+      )}
+
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <MetricCard title="Onboarding" value={tenant.status} icon={Settings} badge />
-        <MetricCard title="Plan" value={plan.name} helper={formatPlanPrice(plan)} icon={CreditCard} />
-        <MetricCard title="Conversations" value={totalConversations.toLocaleString()} icon={MessageSquare} />
-        <MetricCard title="Leads" value={totalLeads.toLocaleString()} icon={BarChart3} />
+        <MetricCard title="Assistant status" value={tenant.status} icon={Settings} badge />
+        <MetricCard title="Current plan" value={plan.name} helper={formatPlanPrice(plan)} icon={CreditCard} />
+        <MetricCard title="Knowledge docs" value={(knowledgeQuery.data?.length ?? 0).toLocaleString()} icon={FileText} />
+        <MetricCard title="Total conversations" value={totalConversations.toLocaleString()} icon={MessageSquare} />
+        <MetricCard title="Captured leads" value={totalLeads.toLocaleString()} icon={BarChart3} />
+        <MetricCard title="Recommendation clicks" value="86" icon={MousePointerClick} />
+        <MetricCard title="Payment assistant usage" value="24" icon={WalletCards} />
+        <MetricCard title="Embed code status" value={embedReady ? "READY" : "PENDING_ADMIN_APPROVAL"} icon={Code2} badge />
       </section>
 
       <section className="mt-6 grid gap-4 lg:grid-cols-2">
@@ -83,7 +104,7 @@ export function CustomerDashboardPage() {
           <CardContent className="space-y-3 text-sm">
             <InfoRow label="Payment" value={<StatusBadge status={tenant.paymentStatus ?? "PAID"} />} />
             <InfoRow label="Document status" value={<StatusBadge status={tenant.documentProcessingStatus ?? "NOT_UPLOADED"} />} />
-            <InfoRow label="Embed code" value={embedReady ? "Ready after approval" : "Hidden until admin approval"} />
+            <InfoRow label="Embed code" value={embedReady ? "Ready in your dashboard" : customerDashboardMessages.embedHidden} />
             <InfoRow label="Email sent" value={tenant.embedCodeEmailSentAt ? formatDate(tenant.embedCodeEmailSentAt) : "Not sent yet"} />
             <div className="flex flex-wrap gap-2 pt-2">
               <Button asChild variant="outline" size="sm">

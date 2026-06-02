@@ -5,7 +5,11 @@
     "dev": "npm --prefix myra-admin-ui run dev",
     "build": "npm --prefix myra-admin-ui run build",
     "lint": "npm --prefix myra-admin-ui run lint",
+    "test": "npm --prefix myra-admin-ui run test",
+    "test:coverage": "npm --prefix myra-admin-ui run test:coverage",
+    "typecheck": "npm --prefix myra-admin-ui run typecheck",
     "preview": "npm --prefix myra-admin-ui run preview",
-    "dev:admin": "npm --prefix myra-admin-ui run dev"
+    "dev:admin": "npm --prefix myra-admin-ui run dev",
+    "prepare": "node myra-admin-ui/node_modules/husky/bin.js"
   }
 }

@@ -6,9 +6,12 @@ import { LoginPage } from "@/features/auth/pages/LoginPage";
 import { AnalyticsPage } from "@/features/analytics/pages/AnalyticsPage";
 import { ConversationsPage } from "@/features/conversations/pages/ConversationsPage";
 import { CustomerAssistantSettingsPage } from "@/features/customer/pages/CustomerAssistantSettingsPage";
+import { CustomerAnalyticsPage } from "@/features/customer/pages/CustomerAnalyticsPage";
 import { CustomerDashboardPage } from "@/features/customer/pages/CustomerDashboardPage";
 import { CustomerEmbedPage } from "@/features/customer/pages/CustomerEmbedPage";
 import { CustomerKnowledgePage } from "@/features/customer/pages/CustomerKnowledgePage";
+import { CustomerLeadsPage } from "@/features/customer/pages/CustomerLeadsPage";
+import { CustomerSubscriptionPage } from "@/features/customer/pages/CustomerSubscriptionPage";
 import { CustomerSupportPage } from "@/features/customer/pages/CustomerSupportPage";
 import { DashboardPage } from "@/features/dashboard/pages/DashboardPage";
 import { KnowledgeBasePage } from "@/features/knowledge/pages/KnowledgeBasePage";
@@ -69,6 +72,7 @@ export const router = createBrowserRouter([
   { path: "/register", element: <RegisterBusinessPage /> },
   { path: "/mock-payment/:registrationId", element: <MockPaymentPage /> },
   { path: "/onboarding-success/:registrationId", element: <OnboardingSuccessPage /> },
+  { path: "/pending-approval/:registrationId", element: <OnboardingSuccessPage /> },
   { path: "/login", element: <LoginPage /> },
   {
     element: <ProtectedAdminRoutes />,
@@ -99,6 +103,9 @@ export const router = createBrowserRouter([
       { index: true, element: <Navigate to="/customer/dashboard" replace /> },
       { path: "dashboard", element: <CustomerDashboardPage /> },
       { path: "knowledge", element: <CustomerKnowledgePage /> },
+      { path: "leads", element: <CustomerLeadsPage /> },
+      { path: "analytics", element: <CustomerAnalyticsPage /> },
+      { path: "subscription", element: <CustomerSubscriptionPage /> },
       { path: "embed", element: <CustomerEmbedPage /> },
       { path: "settings", element: <CustomerAssistantSettingsPage /> },
       { path: "support", element: <CustomerSupportPage /> }

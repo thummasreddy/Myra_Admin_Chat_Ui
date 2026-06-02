@@ -7,6 +7,21 @@ const config = {
   theme: {
     extend: {
       colors: {
+        brand: {
+          primary: "#0F172A",
+          secondary: "#14B8A6",
+          accent: "#8B5CF6",
+          background: "#F8FAFC",
+          surface: "#FFFFFF",
+          text: {
+            primary: "#111827",
+            secondary: "#64748B"
+          },
+          border: "#E2E8F0",
+          success: "#22C55E",
+          warning: "#F59E0B",
+          error: "#EF4444"
+        },
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
