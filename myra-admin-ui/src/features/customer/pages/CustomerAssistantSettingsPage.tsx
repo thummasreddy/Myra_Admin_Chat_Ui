@@ -3,7 +3,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Bot, BrainCircuit, Palette, Save, Sparkles, Workflow, Zap } from "lucide-react";
 import { useEffect } from "react";
 import type { ReactNode } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, type FieldErrors, type Resolver } from "react-hook-form";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -16,8 +16,97 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/toast";
 import { LoadingSpinner } from "@/components/shared/LoadingSpinner";
 import { PageHeader } from "@/components/shared/PageHeader";
+import { TestExtractionPanel } from "@/features/customer/components/TestExtractionPanel";
 import { updateTenant } from "@/features/tenants/tenant.api";
+import { defaultAiBehaviorCaptureValues } from "@/features/tenants/tenant.schema";
 import { useCustomerTenant } from "@/features/customer/customer.hooks";
+
+type RequiredFieldName = "leadRequiredFields" | "orderRequiredFields" | "appointmentRequiredFields";
+
+type RequiredFieldOption = {
+  value: string;
+  label: string;
+  description: string;
+};
+
+const contactFieldValues = new Set(["phone_or_email", "phone", "email"]);
+
+const leadFieldOptions: RequiredFieldOption[] = [
+  {
+    value: "name",
+    label: "Customer name",
+    description: "Useful for follow-up and CRM matching."
+  },
+  {
+    value: "phone_or_email",
+    label: "Phone or email",
+    description: "Requires at least one contact channel."
+  },
+  {
+    value: "service_or_product_interest",
+    label: "Service or product interest",
+    description: "Captures what the visitor wants help with."
+  },
+  {
+    value: "message",
+    label: "Customer message",
+    description: "Stores the original request for context."
+  }
+];
+
+const orderFieldOptions: RequiredFieldOption[] = [
+  {
+    value: "product_or_service",
+    label: "Product or service",
+    description: "Identifies what the customer wants to order."
+  },
+  {
+    value: "quantity_or_people_count",
+    label: "Quantity or people count",
+    description: "Captures units, seats, guests, or project size."
+  },
+  {
+    value: "phone_or_email",
+    label: "Phone or email",
+    description: "Keeps the team able to confirm the request."
+  },
+  {
+    value: "delivery_or_pickup_preference",
+    label: "Delivery or pickup preference",
+    description: "Optional fulfillment preference for the order."
+  }
+];
+
+const appointmentFieldOptions: RequiredFieldOption[] = [
+  {
+    value: "service_required",
+    label: "Service required",
+    description: "Clarifies the appointment type."
+  },
+  {
+    value: "preferred_date",
+    label: "Preferred date",
+    description: "Collects the customer's first date choice."
+  },
+  {
+    value: "preferred_time",
+    label: "Preferred time",
+    description: "Collects the requested time window."
+  },
+  {
+    value: "phone_or_email",
+    label: "Phone or email",
+    description: "Allows confirmation before booking."
+  }
+];
+
+const sessionExpirationOptions = [
+  { value: 30, label: "30 minutes" },
+  { value: 60, label: "1 hour" },
+  { value: 360, label: "6 hours" },
+  { value: 1440, label: "24 hours" },
+  { value: 10080, label: "7 days" }
+];
 
 const settingsSchema = z.object({
   assistantName: z.string().min(2, "Assistant name is required"),
@@ -33,12 +122,32 @@ const settingsSchema = z.object({
   enableSuggestedPrompts: z.boolean(),
   enableAnalytics: z.boolean(),
   enableHumanEscalation: z.boolean(),
-  enableWebSearch: z.boolean()
+  enableWebSearch: z.boolean(),
+  enableMultiTurnMemory: z.boolean().default(defaultAiBehaviorCaptureValues.enableMultiTurnMemory),
+  enableStructuredExtraction: z.boolean().default(defaultAiBehaviorCaptureValues.enableStructuredExtraction),
+  enableOrderCapture: z.boolean().default(defaultAiBehaviorCaptureValues.enableOrderCapture),
+  enableAppointmentCapture: z.boolean().default(defaultAiBehaviorCaptureValues.enableAppointmentCapture),
+  enableConversationSummary: z.boolean().default(defaultAiBehaviorCaptureValues.enableConversationSummary),
+  sessionExpirationMinutes: z.coerce
+    .number()
+    .min(1, "Session expiration must be at least 1 minute")
+    .max(10080, "Session expiration cannot exceed 7 days")
+    .default(defaultAiBehaviorCaptureValues.sessionExpirationMinutes),
+  leadRequiredFields: z.array(z.string()).default(() => [...defaultAiBehaviorCaptureValues.leadRequiredFields]),
+  orderRequiredFields: z.array(z.string()).default(() => [...defaultAiBehaviorCaptureValues.orderRequiredFields]),
+  appointmentRequiredFields: z.array(z.string()).default(() => [...defaultAiBehaviorCaptureValues.appointmentRequiredFields])
 });
 
 type SettingsFormValues = z.infer<typeof settingsSchema>;
 
-const featureToggles: { name: keyof Pick<SettingsFormValues, "enableLeadCapture" | "enableSuggestedPrompts" | "enableAnalytics" | "enableHumanEscalation" | "enableWebSearch">; title: string; description: string }[] = [
+const featureToggles: {
+  name: keyof Pick<
+    SettingsFormValues,
+    "enableLeadCapture" | "enableSuggestedPrompts" | "enableAnalytics" | "enableHumanEscalation" | "enableWebSearch"
+  >;
+  title: string;
+  description: string;
+}[] = [
   {
     name: "enableLeadCapture",
     title: "Lead capture",
@@ -77,7 +186,7 @@ export function CustomerAssistantSettingsPage() {
   const { tenantId, tenantQuery } = useCustomerTenant();
   const queryClient = useQueryClient();
   const form = useForm<SettingsFormValues>({
-    resolver: zodResolver(settingsSchema),
+    resolver: zodResolver(settingsSchema) as Resolver<SettingsFormValues>,
     defaultValues: {
       assistantName: "Myra",
       assistantIntro: "Hi, I am Myra. I can help with questions, services, pricing, and next steps.",
@@ -92,7 +201,8 @@ export function CustomerAssistantSettingsPage() {
       enableSuggestedPrompts: true,
       enableAnalytics: true,
       enableHumanEscalation: true,
-      enableWebSearch: false
+      enableWebSearch: false,
+      ...defaultAiBehaviorCaptureValues
     }
   });
 
@@ -112,7 +222,19 @@ export function CustomerAssistantSettingsPage() {
         enableSuggestedPrompts: tenantQuery.data.enableSuggestedPrompts,
         enableAnalytics: tenantQuery.data.enableAnalytics,
         enableHumanEscalation: tenantQuery.data.enableHumanEscalation,
-        enableWebSearch: tenantQuery.data.enableWebSearch
+        enableWebSearch: tenantQuery.data.enableWebSearch,
+        enableMultiTurnMemory: tenantQuery.data.enableMultiTurnMemory ?? defaultAiBehaviorCaptureValues.enableMultiTurnMemory,
+        enableStructuredExtraction:
+          tenantQuery.data.enableStructuredExtraction ?? defaultAiBehaviorCaptureValues.enableStructuredExtraction,
+        enableOrderCapture: tenantQuery.data.enableOrderCapture ?? defaultAiBehaviorCaptureValues.enableOrderCapture,
+        enableAppointmentCapture: tenantQuery.data.enableAppointmentCapture ?? defaultAiBehaviorCaptureValues.enableAppointmentCapture,
+        enableConversationSummary: tenantQuery.data.enableConversationSummary ?? defaultAiBehaviorCaptureValues.enableConversationSummary,
+        sessionExpirationMinutes: tenantQuery.data.sessionExpirationMinutes ?? defaultAiBehaviorCaptureValues.sessionExpirationMinutes,
+        leadRequiredFields: tenantQuery.data.leadRequiredFields ?? [...defaultAiBehaviorCaptureValues.leadRequiredFields],
+        orderRequiredFields: tenantQuery.data.orderRequiredFields ?? [...defaultAiBehaviorCaptureValues.orderRequiredFields],
+        appointmentRequiredFields: tenantQuery.data.appointmentRequiredFields ?? [
+          ...defaultAiBehaviorCaptureValues.appointmentRequiredFields
+        ]
       });
     }
   }, [form, tenantQuery.data]);
@@ -132,10 +254,86 @@ export function CustomerAssistantSettingsPage() {
     onError: () => toast({ title: "Settings were not saved", variant: "error" })
   });
 
+  const structuredExtractionEnabled = form.watch("enableStructuredExtraction");
+
+  useEffect(() => {
+    if (!structuredExtractionEnabled) {
+      if (form.getValues("enableOrderCapture")) {
+        form.setValue("enableOrderCapture", false, { shouldDirty: true, shouldValidate: true });
+      }
+      if (form.getValues("enableAppointmentCapture")) {
+        form.setValue("enableAppointmentCapture", false, { shouldDirty: true, shouldValidate: true });
+      }
+    }
+  }, [form, structuredExtractionEnabled]);
+
+  function toggleRequiredField(fieldName: RequiredFieldName, fieldValue: string, checked: boolean) {
+    const currentValues = form.getValues(fieldName) ?? [];
+    const nextValues = checked
+      ? Array.from(new Set([...currentValues, fieldValue]))
+      : currentValues.filter((value) => value !== fieldValue);
+
+    form.setValue(fieldName, nextValues, {
+      shouldDirty: true,
+      shouldTouch: true,
+      shouldValidate: true
+    });
+  }
+
+  function handleSave(values: SettingsFormValues) {
+    if (values.sessionExpirationMinutes < 1 || values.sessionExpirationMinutes > 10080) {
+      form.setError("sessionExpirationMinutes", {
+        type: "validate",
+        message: "Session expiration must be between 1 minute and 7 days"
+      });
+      toast({
+        title: "Review session expiration",
+        description: "Choose a value between 1 minute and 7 days.",
+        variant: "error"
+      });
+      return;
+    }
+
+    if (values.enableLeadCapture && !values.leadRequiredFields.some((field) => contactFieldValues.has(field))) {
+      form.setError("leadRequiredFields", {
+        type: "validate",
+        message: "Lead capture requires phone or email."
+      });
+      toast({
+        title: "Lead capture needs a contact field",
+        description: "Select phone or email before saving.",
+        variant: "error"
+      });
+      return;
+    }
+
+    saveMutation.mutate({
+      ...values,
+      enableOrderCapture: values.enableStructuredExtraction && values.enableOrderCapture,
+      enableAppointmentCapture: values.enableStructuredExtraction && values.enableAppointmentCapture
+    });
+  }
+
+  function handleInvalidSubmit(errors: FieldErrors<SettingsFormValues>) {
+    const firstError = Object.values(errors).find((error) => error && "message" in error);
+    const description =
+      firstError && "message" in firstError && typeof firstError.message === "string"
+        ? firstError.message
+        : "Fix the highlighted settings and try again.";
+
+    toast({
+      title: "Review assistant settings",
+      description,
+      variant: "error"
+    });
+  }
+
   if (tenantQuery.isLoading) return <LoadingSpinner label="Loading assistant settings" />;
 
   const values = form.watch();
   const prompts = splitList(values.suggestedPrompts).slice(0, 3);
+  const leadRequiredFieldsError = form.formState.errors.leadRequiredFields?.message;
+  const sessionExpirationError = form.formState.errors.sessionExpirationMinutes?.message;
 
   return (
     <>
@@ -150,7 +348,11 @@ export function CustomerAssistantSettingsPage() {
         }
       />
 
-      <form id="assistant-settings-form" className="grid gap-6 xl:grid-cols-[1fr_380px]" onSubmit={form.handleSubmit((values) => saveMutation.mutate(values))}>
+      <form
+        id="assistant-settings-form"
+        className="grid gap-6 xl:grid-cols-[1fr_380px]"
+        onSubmit={form.handleSubmit(handleSave, handleInvalidSubmit)}
+      >
         <Card>
           <CardContent className="p-5">
             <Tabs defaultValue="branding">
@@ -170,6 +372,10 @@ export function CustomerAssistantSettingsPage() {
                 <TabsTrigger value="features">
                   <Zap className="mr-2 h-4 w-4" />
                   Features
+                </TabsTrigger>
+                <TabsTrigger value="ai-capture">
+                  <Sparkles className="mr-2 h-4 w-4" />
+                  AI Behavior & Capture
                 </TabsTrigger>
               </TabsList>
 
@@ -199,10 +405,18 @@ export function CustomerAssistantSettingsPage() {
               </TabsContent>
 
               <TabsContent value="behavior" className="space-y-4">
-                <Field label="Fallback message" error={form.formState.errors.fallbackMessage?.message} helper="This message is shown when the assistant does not know the answer.">
+                <Field
+                  label="Fallback message"
+                  error={form.formState.errors.fallbackMessage?.message}
+                  helper="This message is shown when the assistant does not know the answer."
+                >
                   <Textarea className="min-h-24" {...form.register("fallbackMessage")} />
                 </Field>
-                <Field label="Suggested prompts" error={form.formState.errors.suggestedPrompts?.message} helper="Put each prompt on a new line. These appear as quick starts inside the assistant.">
+                <Field
+                  label="Suggested prompts"
+                  error={form.formState.errors.suggestedPrompts?.message}
+                  helper="Put each prompt on a new line. These appear as quick starts inside the assistant."
+                >
                   <Textarea className="min-h-28" {...form.register("suggestedPrompts")} />
                 </Field>
               </TabsContent>
@@ -211,7 +425,11 @@ export function CustomerAssistantSettingsPage() {
                 <Field label="Business description" error={form.formState.errors.businessDescription?.message}>
                   <Textarea className="min-h-28" {...form.register("businessDescription")} />
                 </Field>
-                <Field label="Allowed topics" error={form.formState.errors.allowedTopics?.message} helper="Choose what your assistant is allowed to answer, such as products, pricing, appointments, delivery, support, or business FAQs.">
+                <Field
+                  label="Allowed topics"
+                  error={form.formState.errors.allowedTopics?.message}
+                  helper="Choose what your assistant is allowed to answer, such as products, pricing, appointments, delivery, support, or business FAQs."
+                >
                   <Textarea className="min-h-24" {...form.register("allowedTopics")} />
                 </Field>
                 <Field label="Business-specific system prompt" error={form.formState.errors.systemPrompt?.message}>
@@ -221,7 +439,10 @@ export function CustomerAssistantSettingsPage() {
 
               <TabsContent value="features" className="grid gap-3 md:grid-cols-2">
                 {featureToggles.map((feature) => (
-                  <label key={feature.name} className="flex cursor-pointer gap-3 rounded-md border bg-slate-50 p-4 transition-colors hover:bg-white">
+                  <label
+                    key={feature.name}
+                    className="flex cursor-pointer gap-3 rounded-md border bg-slate-50 p-4 transition-colors hover:bg-white"
+                  >
                     <Checkbox {...form.register(feature.name)} />
                     <span>
                       <span className="block text-sm font-semibold text-slate-950">{feature.title}</span>
@@ -229,6 +450,149 @@ export function CustomerAssistantSettingsPage() {
                     </span>
                   </label>
                 ))}
+              </TabsContent>
+
+              <TabsContent value="ai-capture" className="space-y-5">
+                <SectionBlock
+                  title="Feature toggles"
+                  description="Control how much conversational context Myra keeps and whether it extracts structured customer requests."
+                >
+                  <div className="grid gap-3 md:grid-cols-2">
+                    <label className="flex cursor-pointer gap-3 rounded-md border bg-slate-50 p-4 transition-colors hover:bg-white">
+                      <Checkbox {...form.register("enableMultiTurnMemory")} />
+                      <span>
+                        <span className="block text-sm font-semibold text-slate-950">Multi-turn memory</span>
+                        <span className="mt-1 block text-sm text-muted-foreground">
+                          Remember context within a session so follow-up questions feel continuous.
+                        </span>
+                      </span>
+                    </label>
+                    <label className="flex cursor-pointer gap-3 rounded-md border bg-slate-50 p-4 transition-colors hover:bg-white">
+                      <Checkbox {...form.register("enableStructuredExtraction")} />
+                      <span>
+                        <span className="block text-sm font-semibold text-slate-950">Structured extraction</span>
+                        <span className="mt-1 block text-sm text-muted-foreground">
+                          Detect intent and extract lead, order, and appointment fields from conversations.
+                        </span>
+                      </span>
+                    </label>
+                    <label className="flex cursor-pointer gap-3 rounded-md border bg-slate-50 p-4 transition-colors hover:bg-white">
+                      <Checkbox {...form.register("enableConversationSummary")} />
+                      <span>
+                        <span className="block text-sm font-semibold text-slate-950">Conversation summary</span>
+                        <span className="mt-1 block text-sm text-muted-foreground">
+                          Summarize important details for admin review and human follow-up.
+                        </span>
+                      </span>
+                    </label>
+                  </div>
+                </SectionBlock>
+
+                <SectionBlock
+                  title="Lead Capture Configuration"
+                  description="Choose which fields Myra must collect before creating a lead."
+                >
+                  <InfoBox>
+                    Lead quality rules keep captured leads actionable. When lead capture is enabled, at least one contact option must stay
+                    selected.
+                  </InfoBox>
+                  {!values.enableLeadCapture ? (
+                    <InfoBox variant="warning">
+                      Lead capture is disabled in the Features tab. Required fields are preserved but cannot be changed while the feature is
+                      off.
+                    </InfoBox>
+                  ) : null}
+                  <RequiredFieldChecklist
+                    options={leadFieldOptions}
+                    selected={values.leadRequiredFields ?? []}
+                    disabled={!values.enableLeadCapture}
+                    onToggle={(fieldValue, checked) => toggleRequiredField("leadRequiredFields", fieldValue, checked)}
+                  />
+                  {typeof leadRequiredFieldsError === "string" ? <p className="text-sm text-red-600">{leadRequiredFieldsError}</p> : null}
+                </SectionBlock>
+
+                <SectionBlock
+                  title="Order Capture Configuration"
+                  description="Let Myra collect order intent and hand the request to your team for confirmation."
+                >
+                  <label
+                    className={`flex gap-3 rounded-md border bg-slate-50 p-4 transition-colors ${
+                      values.enableStructuredExtraction ? "cursor-pointer hover:bg-white" : "cursor-not-allowed opacity-60"
+                    }`}
+                  >
+                    <Checkbox {...form.register("enableOrderCapture")} disabled={!values.enableStructuredExtraction} />
+                    <span>
+                      <span className="block text-sm font-semibold text-slate-950">Enable order capture</span>
+                      <span className="mt-1 block text-sm text-muted-foreground">
+                        Collect order details after the assistant detects a purchase or quote request.
+                      </span>
+                    </span>
+                  </label>
+                  <InfoBox variant="warning">
+                    Order capture records intent only. Myra does not process payments, reserve inventory, or finalize purchases.
+                  </InfoBox>
+                  {!values.enableStructuredExtraction ? (
+                    <InfoBox variant="warning">Turn on structured extraction before enabling order capture.</InfoBox>
+                  ) : null}
+                  {values.enableOrderCapture && values.enableStructuredExtraction ? (
+                    <RequiredFieldChecklist
+                      options={orderFieldOptions}
+                      selected={values.orderRequiredFields ?? []}
+                      onToggle={(fieldValue, checked) => toggleRequiredField("orderRequiredFields", fieldValue, checked)}
+                    />
+                  ) : null}
+                </SectionBlock>
+
+                <SectionBlock
+                  title="Appointment Capture Configuration"
+                  description="Collect scheduling details so staff can confirm an appointment."
+                >
+                  <label
+                    className={`flex gap-3 rounded-md border bg-slate-50 p-4 transition-colors ${
+                      values.enableStructuredExtraction ? "cursor-pointer hover:bg-white" : "cursor-not-allowed opacity-60"
+                    }`}
+                  >
+                    <Checkbox {...form.register("enableAppointmentCapture")} disabled={!values.enableStructuredExtraction} />
+                    <span>
+                      <span className="block text-sm font-semibold text-slate-950">Enable appointment capture</span>
+                      <span className="mt-1 block text-sm text-muted-foreground">
+                        Ask for service, date, time, and contact details before passing the request to staff.
+                      </span>
+                    </span>
+                  </label>
+                  {!values.enableStructuredExtraction ? (
+                    <InfoBox variant="warning">Appointment capture depends on structured extraction being enabled.</InfoBox>
+                  ) : null}
+                  {values.enableAppointmentCapture && values.enableStructuredExtraction ? (
+                    <RequiredFieldChecklist
+                      options={appointmentFieldOptions}
+                      selected={values.appointmentRequiredFields ?? []}
+                      onToggle={(fieldValue, checked) => toggleRequiredField("appointmentRequiredFields", fieldValue, checked)}
+                    />
+                  ) : null}
+                </SectionBlock>
+
+                <SectionBlock
+                  title="Conversation Memory Settings"
+                  description="Set how long session-scoped conversation memory remains active."
+                >
+                  <Field
+                    label="Session expiration"
+                    error={typeof sessionExpirationError === "string" ? sessionExpirationError : undefined}
+                    helper="Memory expires after this window. The maximum is 7 days."
+                  >
+                    <Select {...form.register("sessionExpirationMinutes", { valueAsNumber: true })}>
+                      {sessionExpirationOptions.map((option) => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </Select>
+                  </Field>
+                  <InfoBox>
+                    Conversation memory is session-based and should be treated as short-lived context, not permanent customer history.
+                  </InfoBox>
+                </SectionBlock>
               </TabsContent>
             </Tabs>
           </CardContent>
@@ -265,35 +629,84 @@ export function CustomerAssistantSettingsPage() {
                     </div>
                   ) : null}
                   <div className="rounded-md border border-white/10 bg-white/5 p-3 text-xs text-slate-300">
-                    Style: {values.responseStyle}. Lead capture {values.enableLeadCapture ? "enabled" : "disabled"}.
+                    Style: {values.responseStyle}. Lead capture {values.enableLeadCapture ? "enabled" : "disabled"}. Multi-turn memory{" "}
+                    {values.enableMultiTurnMemory ? "enabled" : "disabled"}. Structured extraction{" "}
+                    {values.enableStructuredExtraction ? "enabled" : "disabled"}.
                   </div>
                 </div>
               </div>
             </CardContent>
           </Card>
+          <TestExtractionPanel tenantId={tenantId} />
         </aside>
       </form>
     </>
   );
 }
 
-function Field({
-  label,
-  error,
-  helper,
-  children
-}: {
-  label: string;
-  error?: string;
-  helper?: string;
-  children: ReactNode;
-}) {
+function Field({ label, error, helper, children }: { label: string; error?: string; helper?: string; children: ReactNode }) {
   return (
     <div className="space-y-2">
       <Label>{label}</Label>
       {children}
       {helper ? <p className="text-xs text-muted-foreground">{helper}</p> : null}
       {error ? <p className="text-sm text-red-600">{error}</p> : null}
+    </div>
+  );
+}
+
+function SectionBlock({ title, description, children }: { title: string; description?: string; children: ReactNode }) {
+  return (
+    <section className="space-y-4 rounded-md border bg-white p-4">
+      <div>
+        <h3 className="text-base font-semibold text-slate-950">{title}</h3>
+        {description ? <p className="mt-1 text-sm text-muted-foreground">{description}</p> : null}
+      </div>
+      {children}
+    </section>
+  );
+}
+
+function InfoBox({ children, variant = "info" }: { children: ReactNode; variant?: "info" | "warning" }) {
+  const className =
+    variant === "warning"
+      ? "rounded-md border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900"
+      : "rounded-md border border-sky-200 bg-sky-50 p-3 text-sm text-sky-900";
+
+  return <div className={className}>{children}</div>;
+}
+
+function RequiredFieldChecklist({
+  options,
+  selected,
+  disabled = false,
+  onToggle
+}: {
+  options: RequiredFieldOption[];
+  selected: string[];
+  disabled?: boolean;
+  onToggle: (fieldValue: string, checked: boolean) => void;
+}) {
+  return (
+    <div className="grid gap-3 md:grid-cols-2">
+      {options.map((option) => (
+        <label
+          key={option.value}
+          className={`flex gap-3 rounded-md border bg-slate-50 p-3 transition-colors ${
+            disabled ? "cursor-not-allowed opacity-60" : "cursor-pointer hover:bg-white"
+          }`}
+        >
+          <Checkbox
+            checked={selected.includes(option.value)}
+            disabled={disabled}
+            onChange={(event) => onToggle(option.value, event.currentTarget.checked)}
+          />
+          <span>
+            <span className="block text-sm font-semibold text-slate-950">{option.label}</span>
+            <span className="mt-1 block text-xs text-muted-foreground">{option.description}</span>
+          </span>
+        </label>
+      ))}
     </div>
   );
 }

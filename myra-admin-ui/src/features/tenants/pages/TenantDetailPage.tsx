@@ -2,7 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Copy, CreditCard, KeyRound, Power } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useForm, type FieldErrors } from "react-hook-form";
+import { useForm, type FieldErrors, type Resolver } from "react-hook-form";
 import { Link, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -45,7 +45,7 @@ export function TenantDetailPage() {
   });
 
   const form = useForm<TenantWizardFormValues>({
-    resolver: zodResolver(tenantWizardSchema),
+    resolver: zodResolver(tenantWizardSchema) as Resolver<TenantWizardFormValues>,
     defaultValues: defaultTenantWizardValues
   });
 

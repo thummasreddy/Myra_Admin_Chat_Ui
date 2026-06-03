@@ -2,7 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Copy, ExternalLink } from "lucide-react";
 import { useState } from "react";
-import { FormProvider, useForm } from "react-hook-form";
+import { FormProvider, useForm, type Resolver } from "react-hook-form";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -36,7 +36,7 @@ export function TenantCreateWizardPage() {
   const [created, setCreated] = useState<TenantCreateResponse | null>(null);
   const queryClient = useQueryClient();
   const form = useForm<TenantWizardFormValues>({
-    resolver: zodResolver(tenantWizardSchema),
+    resolver: zodResolver(tenantWizardSchema) as Resolver<TenantWizardFormValues>,
     defaultValues: defaultTenantWizardValues,
     mode: "onBlur"
   });
@@ -127,7 +127,9 @@ export function TenantCreateWizardPage() {
           <Card>
             <CardHeader>
               <CardTitle>{wizardSteps[currentStep].title}</CardTitle>
-              <CardDescription>Step {currentStep + 1} of {wizardSteps.length}</CardDescription>
+              <CardDescription>
+                Step {currentStep + 1} of {wizardSteps.length}
+              </CardDescription>
             </CardHeader>
             <CardContent>{stepContent}</CardContent>
           </Card>

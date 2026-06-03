@@ -4,8 +4,11 @@ import type {
   TenantCreateRequest,
   TenantCreateResponse,
   TenantListFilters,
-  TenantStatus
+  TenantStatus,
+  TestExtractionRequest,
+  TestExtractionResponse
 } from "@/features/tenants/tenant.types";
+import { defaultAiBehaviorCaptureValues } from "@/features/tenants/tenant.schema";
 
 const STORAGE_KEY = "myra-admin-fallback-tenants";
 
@@ -33,16 +36,13 @@ const demoTenants: Tenant[] = [
     allowedTopics: ["career", "projects", "technology"],
     blockedTopics: ["medical", "legal"],
     fallbackMessage: "I am not sure about that yet. Please contact support.",
-    suggestedPrompts: [
-      "Tell me about Vijay's experience",
-      "What projects has Vijay built?",
-      "How can I contact Vijay?"
-    ],
+    suggestedPrompts: ["Tell me about Vijay's experience", "What projects has Vijay built?", "How can I contact Vijay?"],
     enableWebSearch: false,
     enableLeadCapture: true,
     enableSuggestedPrompts: true,
     enableAnalytics: true,
     enableHumanEscalation: false,
+    ...defaultAiBehaviorCaptureValues,
     status: "ACTIVE",
     onboardingStatus: "APPROVED",
     approvalStatus: "APPROVED",
@@ -87,6 +87,7 @@ const demoTenants: Tenant[] = [
     enableSuggestedPrompts: true,
     enableAnalytics: true,
     enableHumanEscalation: true,
+    ...defaultAiBehaviorCaptureValues,
     status: "INACTIVE",
     onboardingStatus: "APPROVED",
     approvalStatus: "APPROVED",
@@ -99,13 +100,20 @@ const demoTenants: Tenant[] = [
   }
 ];
 
+function withAiBehaviorCaptureDefaults(tenant: Tenant): Tenant {
+  return {
+    ...defaultAiBehaviorCaptureValues,
+    ...tenant
+  };
+}
+
 export function readFallbackTenants() {
   const raw = localStorage.getItem(STORAGE_KEY);
-  if (!raw) return demoTenants;
+  if (!raw) return demoTenants.map(withAiBehaviorCaptureDefaults);
   try {
-    return JSON.parse(raw) as Tenant[];
+    return (JSON.parse(raw) as Tenant[]).map(withAiBehaviorCaptureDefaults);
   } catch {
-    return demoTenants;
+    return demoTenants.map(withAiBehaviorCaptureDefaults);
   }
 }
 
@@ -151,10 +159,12 @@ export async function createTenant(payload: TenantCreateRequest): Promise<Tenant
   } catch (error) {
     if (!isBackendUnavailable(error)) throw error;
     const createdAt = new Date().toISOString();
-    const tenantId = `tenant_${payload.tenantName.toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, "")}_${Date.now()
-      .toString()
-      .slice(-5)}`;
+    const tenantId = `tenant_${payload.tenantName
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "_")
+      .replace(/^_|_$/g, "")}_${Date.now().toString().slice(-5)}`;
     const tenant: Tenant = {
+      ...defaultAiBehaviorCaptureValues,
       ...payload,
       tenantId,
       apiKey: `mk_live_${crypto.randomUUID().replaceAll("-", "").slice(0, 24)}`,
@@ -201,4 +211,75 @@ export async function regenerateTenantApiKey(tenantId: string): Promise<Tenant> 
     const apiKey = `mk_live_${crypto.randomUUID().replaceAll("-", "").slice(0, 24)}`;
     return updateTenant(tenantId, { apiKey });
   }
+}
+
+export async function testExtraction(tenantId: string, payload: TestExtractionRequest): Promise<TestExtractionResponse> {
+  try {
+    const { data } = await apiClient.post<TestExtractionResponse>(`/admin/tenants/${tenantId}/ai-settings/test-extraction`, payload);
+    return data;
+  } catch (error) {
+    if (!isBackendUnavailable(error)) throw error;
+    return buildMockExtractionResponse(payload.message);
+  }
+}
+
+function buildMockExtractionResponse(message: string): TestExtractionResponse {
+  const lowerMessage = message.toLowerCase();
+  const email = message.match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i)?.[0];
+  const phone = message.match(/(?:\+?1[\s.-]?)?(?:\(?\d{3}\)?[\s.-]?)\d{3}[\s.-]?\d{4}/)?.[0];
+  const isAppointment = /\b(appointment|book|schedule|reserve|meeting|consultation)\b/.test(lowerMessage);
+  const isOrder = /\b(order|buy|purchase|quantity|quote|invoice|deliver)\b/.test(lowerMessage);
+  const intent = isAppointment ? "appointment_capture" : isOrder ? "order_capture" : "lead_capture";
+
+  const leadData: Record<string, unknown> = {
+    phone_or_email: email ?? phone ?? null,
+    service_or_product_interest: extractInterest(message, intent)
+  };
+
+  const orderData: Record<string, unknown> = isOrder
+    ? {
+        product_or_service: extractInterest(message, intent),
+        quantity_or_people_count: message.match(/\b\d+\b/)?.[0] ?? null,
+        phone_or_email: email ?? phone ?? null
+      }
+    : {};
+
+  const appointmentData: Record<string, unknown> = isAppointment
+    ? {
+        service_required: extractInterest(message, intent),
+        preferred_date: extractDateHint(message),
+        preferred_time: extractTimeHint(message),
+        phone_or_email: email ?? phone ?? null
+      }
+    : {};
+
+  const missingFields = [
+    ...(!email && !phone ? ["phone_or_email"] : []),
+    ...(isOrder && !orderData.quantity_or_people_count ? ["quantity_or_people_count"] : []),
+    ...(isAppointment && !appointmentData.preferred_date ? ["preferred_date"] : []),
+    ...(isAppointment && !appointmentData.preferred_time ? ["preferred_time"] : [])
+  ];
+
+  return {
+    intent,
+    leadData,
+    orderData,
+    appointmentData,
+    missingFields,
+    isMock: true
+  };
+}
+
+function extractInterest(message: string, intent: string) {
+  if (intent === "appointment_capture") return "appointment request";
+  if (intent === "order_capture") return "order request";
+  return message.length > 80 ? `${message.slice(0, 77)}...` : message;
+}
+
+function extractDateHint(message: string) {
+  return message.match(/\b(today|tomorrow|monday|tuesday|wednesday|thursday|friday|saturday|sunday)\b/i)?.[0] ?? null;
+}
+
+function extractTimeHint(message: string) {
+  return message.match(/\b(?:[1-9]|1[0-2])(?::[0-5]\d)?\s?(?:am|pm)\b/i)?.[0] ?? null;
 }

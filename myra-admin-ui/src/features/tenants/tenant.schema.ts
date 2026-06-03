@@ -2,6 +2,18 @@ import { z } from "zod";
 import { CHAT_POSITIONS, RESPONSE_STYLES, TENANT_STATUSES } from "@/lib/constants";
 import type { TenantCreateRequest } from "@/features/tenants/tenant.types";
 
+export const defaultAiBehaviorCaptureValues = {
+  enableMultiTurnMemory: true,
+  enableStructuredExtraction: true,
+  enableOrderCapture: false,
+  enableAppointmentCapture: false,
+  enableConversationSummary: true,
+  sessionExpirationMinutes: 1440,
+  leadRequiredFields: ["phone_or_email", "service_or_product_interest"],
+  orderRequiredFields: ["product_or_service", "quantity_or_people_count", "phone_or_email"],
+  appointmentRequiredFields: ["service_required", "preferred_date", "preferred_time", "phone_or_email"]
+};
+
 export const tenantWizardSchema = z.object({
   tenantName: z.string().min(2, "Tenant name must be at least 2 characters"),
   websiteUrl: z.string().url("Enter a valid website URL"),
@@ -25,7 +37,16 @@ export const tenantWizardSchema = z.object({
   enableLeadCapture: z.boolean(),
   enableSuggestedPrompts: z.boolean(),
   enableAnalytics: z.boolean(),
-  enableHumanEscalation: z.boolean()
+  enableHumanEscalation: z.boolean(),
+  enableMultiTurnMemory: z.boolean().default(defaultAiBehaviorCaptureValues.enableMultiTurnMemory),
+  enableStructuredExtraction: z.boolean().default(defaultAiBehaviorCaptureValues.enableStructuredExtraction),
+  enableOrderCapture: z.boolean().default(defaultAiBehaviorCaptureValues.enableOrderCapture),
+  enableAppointmentCapture: z.boolean().default(defaultAiBehaviorCaptureValues.enableAppointmentCapture),
+  enableConversationSummary: z.boolean().default(defaultAiBehaviorCaptureValues.enableConversationSummary),
+  sessionExpirationMinutes: z.coerce.number().min(1).max(10080).default(defaultAiBehaviorCaptureValues.sessionExpirationMinutes),
+  leadRequiredFields: z.array(z.string()).default(() => [...defaultAiBehaviorCaptureValues.leadRequiredFields]),
+  orderRequiredFields: z.array(z.string()).default(() => [...defaultAiBehaviorCaptureValues.orderRequiredFields]),
+  appointmentRequiredFields: z.array(z.string()).default(() => [...defaultAiBehaviorCaptureValues.appointmentRequiredFields])
 });
 
 export type TenantWizardFormValues = z.infer<typeof tenantWizardSchema>;
@@ -53,7 +74,8 @@ export const defaultTenantWizardValues: TenantWizardFormValues = {
   enableLeadCapture: true,
   enableSuggestedPrompts: true,
   enableAnalytics: true,
-  enableHumanEscalation: false
+  enableHumanEscalation: false,
+  ...defaultAiBehaviorCaptureValues
 };
 
 export const tenantDetailSchema = tenantWizardSchema.extend({
@@ -80,6 +102,7 @@ export function toTenantCreateRequest(values: TenantWizardFormValues): TenantCre
 
 export function toTenantWizardValues(tenant: TenantCreateRequest): TenantWizardFormValues {
   return {
+    ...defaultAiBehaviorCaptureValues,
     ...tenant,
     logoUrl: tenant.logoUrl ?? "",
     avatarUrl: tenant.avatarUrl ?? "",
