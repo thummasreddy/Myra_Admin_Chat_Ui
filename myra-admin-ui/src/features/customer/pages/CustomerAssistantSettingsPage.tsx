@@ -18,6 +18,7 @@ import { LoadingSpinner } from "@/components/shared/LoadingSpinner";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { TestExtractionPanel } from "@/features/customer/components/TestExtractionPanel";
 import { updateTenant } from "@/features/tenants/tenant.api";
+import { RESPONSE_STYLES } from "@/lib/constants";
 import { defaultAiBehaviorCaptureValues } from "@/features/tenants/tenant.schema";
 import { useCustomerTenant } from "@/features/customer/customer.hooks";
 
@@ -112,7 +113,7 @@ const settingsSchema = z.object({
   assistantName: z.string().min(2, "Assistant name is required"),
   assistantIntro: z.string().min(10, "Intro message should be more descriptive"),
   brandColor: z.string().regex(/^#[0-9A-Fa-f]{6}$/, "Use a hex color like #14B8A6"),
-  responseStyle: z.enum(["friendly", "professional", "concise", "sales"]),
+  responseStyle: z.enum(RESPONSE_STYLES),
   businessDescription: z.string().min(30, "Business description should be at least 30 characters"),
   allowedTopics: z.string().min(2, "Choose at least one allowed topic"),
   fallbackMessage: z.string().min(10, "Fallback message is required"),
@@ -191,7 +192,7 @@ export function CustomerAssistantSettingsPage() {
       assistantName: "Myra",
       assistantIntro: "Hi, I am Myra. I can help with questions, services, pricing, and next steps.",
       brandColor: "#14B8A6",
-      responseStyle: "professional",
+      responseStyle: "PROFESSIONAL",
       businessDescription: "",
       allowedTopics: "products, pricing, services, appointments, policies, support",
       fallbackMessage: "I do not have that answer yet. Please contact our team.",
@@ -386,10 +387,10 @@ export function CustomerAssistantSettingsPage() {
                   </Field>
                   <Field label="Response style" error={form.formState.errors.responseStyle?.message}>
                     <Select {...form.register("responseStyle")}>
-                      <option value="friendly">Friendly</option>
-                      <option value="professional">Professional</option>
-                      <option value="concise">Concise</option>
-                      <option value="sales">Sales assisted</option>
+                      <option value="PROFESSIONAL">Professional</option>
+                      <option value="FRIENDLY">Friendly</option>
+                      <option value="CASUAL">Casual</option>
+                      <option value="FORMAL">Formal</option>
                     </Select>
                   </Field>
                 </div>

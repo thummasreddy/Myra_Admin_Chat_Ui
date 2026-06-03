@@ -61,6 +61,23 @@ describe("apiClient", () => {
     vi.useRealTimers();
   });
 
+  it("unwraps standardized backend response envelopes", async () => {
+    const adapter = vi.fn(async (config: InternalAxiosRequestConfig) => ({
+      data: { success: true, data: { tenant_id: "tenant_1" }, message: "ok" },
+      status: 200,
+      statusText: "OK",
+      headers: {},
+      config
+    }));
+
+    const client = createApiClient("https://gateway.myra.test/api/v1");
+    client.defaults.adapter = adapter;
+
+    const response = await client.get("/tenants/tenant_1");
+
+    expect(response.data).toEqual({ tenant_id: "tenant_1" });
+  });
+
   it("classifies validation and server errors", () => {
     const config = { headers: {} } as InternalAxiosRequestConfig;
     expect(normalizeApiError(axiosError(422, config)).kind).toBe("validation");

@@ -1,11 +1,22 @@
+import type { AxiosInstance } from "axios";
 import { serviceBaseUrls } from "@/lib/config";
+import { appConfig } from "@/lib/config";
 import { normalizeApiError, isBackendUnavailable } from "@/lib/apiErrors";
 import { createApiClient } from "@/lib/apiClient";
 
 type ServiceName = keyof typeof serviceBaseUrls;
 
 function createServiceClient(service: ServiceName) {
-  return createApiClient(serviceBaseUrls[service]);
+  const client = createApiClient(serviceBaseUrls[service]);
+  if (service === "admin") addAdminSecret(client);
+  return client;
+}
+
+function addAdminSecret(client: AxiosInstance) {
+  client.interceptors.request.use((config) => {
+    config.headers["X-Admin-Secret"] = appConfig.VITE_ADMIN_SECRET;
+    return config;
+  });
 }
 
 export const tenantHttp = createServiceClient("tenant");

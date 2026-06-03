@@ -30,14 +30,36 @@ export function normalizeApiError(error: unknown): MyraApiError {
 
   const status = error.response.status;
   const details = error.response.data;
-  if (status === 401 || status === 403) return new MyraApiError("auth", "Authentication failed or session expired.", status, details);
-  if (status === 422 || status === 400) return new MyraApiError("validation", "Validation failed. Review the submitted fields.", status, details);
-  if (status === 429) return new MyraApiError("rate_limited", "Too many requests. Please wait and try again.", status, details);
-  if (status >= 500) return new MyraApiError("server", "Server error. The backend service did not complete the request.", status, details);
-  return new MyraApiError("unknown", error.message, status, details);
+  const message = extractApiErrorMessage(details);
+  if (status === 401 || status === 403) {
+    return new MyraApiError("auth", message ?? "Authentication failed or session expired.", status, details);
+  }
+  if (status === 422 || status === 400) {
+    return new MyraApiError("validation", message ?? "Validation failed. Review the submitted fields.", status, details);
+  }
+  if (status === 429) {
+    return new MyraApiError("rate_limited", message ?? "Too many requests. Please wait and try again.", status, details);
+  }
+  if (status >= 500) {
+    return new MyraApiError("server", message ?? "Server error. The backend service did not complete the request.", status, details);
+  }
+  return new MyraApiError("unknown", message ?? error.message, status, details);
 }
 
 export function isBackendUnavailable(error: unknown) {
   const normalized = normalizeApiError(error);
   return normalized.kind === "network" || normalized.kind === "timeout";
+}
+
+function extractApiErrorMessage(value: unknown): string | undefined {
+  if (!value || typeof value !== "object") return undefined;
+  const record = value as Record<string, unknown>;
+  const nestedError = record.error;
+  if (nestedError && typeof nestedError === "object") {
+    const nestedMessage = (nestedError as Record<string, unknown>).message;
+    if (typeof nestedMessage === "string" && nestedMessage.trim()) return nestedMessage;
+  }
+  if (typeof record.message === "string" && record.message.trim()) return record.message;
+  if (typeof record.detail === "string" && record.detail.trim()) return record.detail;
+  return undefined;
 }

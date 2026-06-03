@@ -1,6 +1,6 @@
 import axios, { type AxiosError, type AxiosInstance, type InternalAxiosRequestConfig } from "axios";
 import { appConfig } from "@/lib/config";
-import { normalizeApiError, isBackendUnavailable, type MyraApiError } from "@/lib/apiErrors";
+import { MyraApiError, normalizeApiError, isBackendUnavailable } from "@/lib/apiErrors";
 import { API_BASE_URL } from "@/lib/constants";
 import { logger } from "@/lib/logger";
 import { sanitizePayload } from "@/lib/sanitize";
@@ -100,6 +100,7 @@ export function createApiClient(baseURL = API_BASE_URL): AxiosInstance {
         status: response.status,
         durationMs: startedAt ? Math.round(performance.now() - startedAt) : undefined
       });
+      response.data = unwrapResponseEnvelope(response.data);
       return response;
     },
     async (error: AxiosError) => {
@@ -114,9 +115,7 @@ export function createApiClient(baseURL = API_BASE_URL): AxiosInstance {
       if (config && shouldRetry(error, retryCount)) {
         config.metadata = { ...config.metadata, retryCount: retryCount + 1 };
         const retryAfter = Number(error.response?.headers["retry-after"]);
-        const delay = Number.isFinite(retryAfter)
-          ? retryAfter * 1000
-          : appConfig.VITE_API_RETRY_BASE_DELAY_MS * 2 ** retryCount;
+        const delay = Number.isFinite(retryAfter) ? retryAfter * 1000 : appConfig.VITE_API_RETRY_BASE_DELAY_MS * 2 ** retryCount;
         logger.warn("api_retry", { url: config.url, retryCount: retryCount + 1, delay });
         await sleep(delay);
         return client(config);
@@ -146,3 +145,18 @@ export const apiClient = createApiClient();
 
 export { isBackendUnavailable };
 export type { MyraApiError };
+
+function unwrapResponseEnvelope(payload: unknown) {
+  if (!payload || typeof payload !== "object") return payload;
+  const record = payload as Record<string, unknown>;
+  if (typeof record.success !== "boolean") return payload;
+
+  if (record.success) return record.data;
+
+  const error = record.error && typeof record.error === "object" ? (record.error as Record<string, unknown>) : undefined;
+  const message =
+    (typeof error?.message === "string" && error.message) ||
+    (typeof record.message === "string" && record.message) ||
+    "Backend request failed";
+  throw new MyraApiError("server", message, undefined, payload);
+}

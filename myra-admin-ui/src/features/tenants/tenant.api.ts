@@ -9,6 +9,12 @@ import type {
   TestExtractionResponse
 } from "@/features/tenants/tenant.types";
 import { defaultAiBehaviorCaptureValues } from "@/features/tenants/tenant.schema";
+import {
+  fromTenantListResponse,
+  fromTenantResponse,
+  toTenantCreateRequest,
+  toTenantUpdateRequest
+} from "@/features/tenants/tenant.transformers";
 
 const STORAGE_KEY = "myra-admin-fallback-tenants";
 
@@ -32,7 +38,7 @@ const demoTenants: Tenant[] = [
     avatarUrl: "",
     chatPosition: "bottom-right",
     systemPrompt: "You are Myra, a helpful AI assistant for this business.",
-    responseStyle: "professional",
+    responseStyle: "PROFESSIONAL",
     allowedTopics: ["career", "projects", "technology"],
     blockedTopics: ["medical", "legal"],
     fallbackMessage: "I am not sure about that yet. Please contact support.",
@@ -77,7 +83,7 @@ const demoTenants: Tenant[] = [
     brandColor: "#14B8A6",
     chatPosition: "bottom-left",
     systemPrompt: "You are Myra, a helpful AI assistant for a dental office.",
-    responseStyle: "friendly",
+    responseStyle: "FRIENDLY",
     allowedTopics: ["appointments", "services", "insurance"],
     blockedTopics: ["diagnosis", "emergency medical advice"],
     fallbackMessage: "I do not have that answer yet. Please contact the office.",
@@ -101,10 +107,10 @@ const demoTenants: Tenant[] = [
 ];
 
 function withAiBehaviorCaptureDefaults(tenant: Tenant): Tenant {
-  return {
+  return fromTenantResponse({
     ...defaultAiBehaviorCaptureValues,
     ...tenant
-  };
+  });
 }
 
 export function readFallbackTenants() {
@@ -132,8 +138,8 @@ function filterTenants(tenants: Tenant[], filters?: TenantListFilters) {
 
 export async function listTenants(filters?: TenantListFilters): Promise<Tenant[]> {
   try {
-    const { data } = await apiClient.get<Tenant[]>("/tenants", { params: filters });
-    return data;
+    const { data } = await apiClient.get<unknown>("/tenants", { params: filters });
+    return fromTenantListResponse(data);
   } catch (error) {
     if (!isBackendUnavailable(error)) throw error;
     return filterTenants(readFallbackTenants(), filters);
@@ -142,8 +148,8 @@ export async function listTenants(filters?: TenantListFilters): Promise<Tenant[]
 
 export async function getTenant(tenantId: string): Promise<Tenant> {
   try {
-    const { data } = await apiClient.get<Tenant>(`/tenants/${tenantId}`);
-    return data;
+    const { data } = await apiClient.get<unknown>(`/tenants/${tenantId}`);
+    return fromTenantResponse(data);
   } catch (error) {
     if (!isBackendUnavailable(error)) throw error;
     const tenant = readFallbackTenants().find((item) => item.tenantId === tenantId);
@@ -154,8 +160,9 @@ export async function getTenant(tenantId: string): Promise<Tenant> {
 
 export async function createTenant(payload: TenantCreateRequest): Promise<TenantCreateResponse> {
   try {
-    const { data } = await apiClient.post<TenantCreateResponse>("/tenants", payload);
-    return data;
+    const { data } = await apiClient.post<unknown>("/tenants", toTenantCreateRequest(payload));
+    const tenant = fromTenantResponse(data);
+    return { tenant, tenantId: tenant.tenantId, apiKey: tenant.apiKey };
   } catch (error) {
     if (!isBackendUnavailable(error)) throw error;
     const createdAt = new Date().toISOString();
@@ -185,8 +192,8 @@ export async function createTenant(payload: TenantCreateRequest): Promise<Tenant
 
 export async function updateTenant(tenantId: string, payload: Partial<Tenant>): Promise<Tenant> {
   try {
-    const { data } = await apiClient.patch<Tenant>(`/tenants/${tenantId}`, payload);
-    return data;
+    const { data } = await apiClient.patch<unknown>(`/tenants/${tenantId}`, toTenantUpdateRequest(payload));
+    return fromTenantResponse(data);
   } catch (error) {
     if (!isBackendUnavailable(error)) throw error;
     const tenants = readFallbackTenants();
@@ -204,8 +211,8 @@ export async function setTenantStatus(tenantId: string, status: TenantStatus): P
 
 export async function regenerateTenantApiKey(tenantId: string): Promise<Tenant> {
   try {
-    const { data } = await apiClient.post<Tenant>(`/tenants/${tenantId}/regenerate-api-key`);
-    return data;
+    const { data } = await apiClient.post<unknown>(`/tenants/${tenantId}/regenerate-api-key`);
+    return fromTenantResponse(data);
   } catch (error) {
     if (!isBackendUnavailable(error)) throw error;
     const apiKey = `mk_live_${crypto.randomUUID().replaceAll("-", "").slice(0, 24)}`;

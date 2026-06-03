@@ -65,7 +65,7 @@ export const defaultTenantWizardValues: TenantWizardFormValues = {
   avatarUrl: "",
   chatPosition: "bottom-right",
   systemPrompt: "You are Myra, a helpful AI assistant for this business.",
-  responseStyle: "professional",
+  responseStyle: "PROFESSIONAL",
   allowedTopics: "career, projects, technology",
   blockedTopics: "medical, legal",
   fallbackMessage: "I am not sure about that yet. Please contact support.",

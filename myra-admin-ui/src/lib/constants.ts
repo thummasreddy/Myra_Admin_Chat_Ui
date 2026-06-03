@@ -16,4 +16,4 @@ export const TENANT_STATUSES = [
 
 export const CHAT_POSITIONS = ["bottom-right", "bottom-left"] as const;
 
-export const RESPONSE_STYLES = ["friendly", "professional", "concise", "sales"] as const;
+export const RESPONSE_STYLES = ["PROFESSIONAL", "FRIENDLY", "CASUAL", "FORMAL"] as const;

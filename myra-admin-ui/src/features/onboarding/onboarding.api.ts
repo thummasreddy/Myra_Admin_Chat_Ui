@@ -42,7 +42,10 @@ function id(prefix: string) {
 }
 
 function tenantIdFromName(name: string) {
-  const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, "");
+  const slug = name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_|_$/g, "");
   return `tenant_${slug}_${Date.now().toString().slice(-5)}`;
 }
 
@@ -132,7 +135,7 @@ function buildTenantFromRegistration(registration: BusinessRegistration, tenantI
     brandColor: registration.brandColor,
     chatPosition: "bottom-right",
     systemPrompt: `You are ${registration.assistantName}, a helpful AI assistant for ${registration.businessName}. Business context: ${registration.businessDescription}`,
-    responseStyle: "professional",
+    responseStyle: "PROFESSIONAL",
     allowedTopics: [registration.industry, "services", "pricing", "support"],
     blockedTopics: ["medical diagnosis", "legal advice", "financial advice"],
     fallbackMessage: registration.fallbackMessage,
@@ -311,7 +314,13 @@ export async function completeMockPayment(registrationId: string): Promise<MockP
     writeSubscriptions([subscription, ...readSubscriptions().filter((item) => item.tenantId !== tenantId)]);
     writeRegistrations(registrations.map((item) => (item.id === registration.id ? updatedRegistration : item)));
     recordNotification({ tenantId, registrationId, type: "PAYMENT_SUCCESSFUL", recipient: registration.businessEmail, status: "QUEUED" });
-    recordNotification({ tenantId, registrationId, type: "ADMIN_APPROVAL_PENDING", recipient: registration.businessEmail, status: "QUEUED" });
+    recordNotification({
+      tenantId,
+      registrationId,
+      type: "ADMIN_APPROVAL_PENDING",
+      recipient: registration.businessEmail,
+      status: "QUEUED"
+    });
     recordNotification({
       tenantId,
       registrationId,
@@ -458,9 +467,7 @@ export async function approveTenant(tenantId: string): Promise<Tenant> {
     writeFallbackTenants(tenants.map((item) => (item.tenantId === tenantId ? updatedTenant : item)));
     const subscriptions = readSubscriptions();
     writeSubscriptions(
-      subscriptions.map((subscription) =>
-        subscription.tenantId === tenantId ? { ...subscription, status: "ACTIVE" } : subscription
-      )
+      subscriptions.map((subscription) => (subscription.tenantId === tenantId ? { ...subscription, status: "ACTIVE" } : subscription))
     );
     recordNotification({
       tenantId,

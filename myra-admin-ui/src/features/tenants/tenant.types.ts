@@ -94,6 +94,26 @@ export type TenantCreateResponse = {
   apiKey: string;
 };
 
+export type TenantUpdateRequest = Partial<TenantCreateRequest>;
+
+export type TenantResponse = Tenant;
+
+export type TenantPublicConfig = Pick<
+  Tenant,
+  | "tenantId"
+  | "tenantName"
+  | "assistantName"
+  | "assistantIntro"
+  | "brandColor"
+  | "fallbackMessage"
+  | "responseStyle"
+  | "suggestedPrompts"
+  | "enableWebSearch"
+  | "enableLeadCapture"
+  | "enableSuggestedPrompts"
+  | "status"
+>;
+
 export type TestExtractionRequest = {
   message: string;
 };
