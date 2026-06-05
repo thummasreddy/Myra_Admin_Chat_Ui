@@ -3,22 +3,12 @@ import type { ResponseStyle, Tenant, TenantCreateRequest } from "@/features/tena
 
 type TenantApiRecord = Record<string, unknown>;
 
-const legacyResponseStyleMap: Record<string, ResponseStyle> = {
-  professional: "PROFESSIONAL",
-  friendly: "FRIENDLY",
-  casual: "CASUAL",
-  concise: "FORMAL",
-  formal: "FORMAL",
-  sales: "PROFESSIONAL",
-  PROFESSIONAL: "PROFESSIONAL",
-  FRIENDLY: "FRIENDLY",
-  CASUAL: "CASUAL",
-  FORMAL: "FORMAL"
-};
-
-export function normalizeResponseStyle(value: unknown): ResponseStyle {
-  if (typeof value !== "string") return "PROFESSIONAL";
-  return legacyResponseStyleMap[value] ?? legacyResponseStyleMap[value.toLowerCase()] ?? "PROFESSIONAL";
+export function normalizeResponseStyle(style: string): ResponseStyle {
+  const upper = style.toUpperCase();
+  if (upper === "FRIENDLY" || upper === "PROFESSIONAL" || upper === "CONCISE" || upper === "SALES") return upper;
+  if (upper === "CASUAL") return "FRIENDLY";
+  if (upper === "FORMAL") return "PROFESSIONAL";
+  return "PROFESSIONAL";
 }
 
 export function toTenantCreateRequest(formValues: TenantCreateRequest): TenantApiRecord {
@@ -61,12 +51,12 @@ export function fromTenantResponse(apiTenant: unknown): Tenant {
     timezone: stringValue(record, "timezone") || "",
     assistantName: stringValue(record, "assistantName", "assistant_name") || "Myra",
     assistantIntro: stringValue(record, "assistantIntro", "assistant_intro") || "Hi, I am Myra.",
-    brandColor: stringValue(record, "brandColor", "brand_color") || "#14B8A6",
+    brandColor: stringValue(record, "brandColor", "brand_color") || "#EA5455",
     logoUrl: optionalStringValue(record, "logoUrl", "logo_url"),
     avatarUrl: optionalStringValue(record, "avatarUrl", "avatar_url"),
     chatPosition: stringValue(record, "chatPosition", "chat_position") === "bottom-left" ? "bottom-left" : "bottom-right",
     systemPrompt: stringValue(record, "systemPrompt", "system_prompt") || "You are Myra, a helpful AI assistant.",
-    responseStyle: normalizeResponseStyle(value(record, "responseStyle", "response_style")),
+    responseStyle: normalizeResponseStyle(String(value(record, "responseStyle", "response_style") ?? "PROFESSIONAL")),
     allowedTopics: stringArrayValue(record, "allowedTopics", "allowed_topics") ?? [],
     blockedTopics: stringArrayValue(record, "blockedTopics", "blocked_topics") ?? [],
     fallbackMessage: stringValue(record, "fallbackMessage", "fallback_message") || "I do not have that answer yet.",

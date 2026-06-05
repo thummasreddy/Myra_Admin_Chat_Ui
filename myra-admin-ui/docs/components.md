@@ -2,7 +2,7 @@
 
 ## Buttons
 
-Use `Button` from `src/components/ui/button.tsx` for all commands. Primary buttons use the Myra teal-to-purple gradient; secondary and outline buttons use white surfaces with the shared border token.
+Use `Button` from `src/components/ui/button.tsx` for all commands. Primary buttons use the Myra solid primary color; secondary and outline buttons use white surfaces with the shared border token.
 
 ## Status Badges
 

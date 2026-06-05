@@ -54,7 +54,6 @@ export function CustomerSupportPage() {
         session_id: `admin_test_${tenantId}`,
         ...testLead,
         source_url: window.location.href,
-        lead_type: "GENERAL",
         metadata: { source: "admin_ui_test" }
       }),
     onSuccess: () => toast({ title: "Test lead submitted", variant: "success" }),

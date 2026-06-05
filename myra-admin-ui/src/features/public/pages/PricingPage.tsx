@@ -22,7 +22,7 @@ export function PricingPage() {
   const plans = plansQuery.data ?? SUBSCRIPTION_PLANS;
 
   return (
-    <main className="min-h-screen bg-white text-slate-950">
+    <main className="min-h-screen bg-[#222831] text-white">
       <PublicNav />
       <section className="public-pricing-hero border-b px-4 py-16 text-white sm:px-6 lg:px-8">
         <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[1fr_380px] lg:items-end">

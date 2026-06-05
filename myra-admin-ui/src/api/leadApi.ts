@@ -19,7 +19,6 @@ export type LeadRequest = {
   phone: string;
   message: string;
   source_url?: string;
-  lead_type?: "GENERAL" | "SALES" | "SUPPORT";
   metadata?: Record<string, unknown>;
 };
 

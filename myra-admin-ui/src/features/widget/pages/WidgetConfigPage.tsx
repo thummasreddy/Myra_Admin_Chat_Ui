@@ -54,7 +54,7 @@ export function WidgetConfigPage() {
       tenantId,
       assistantName: "Myra",
       assistantIntro: "Hi, I am Myra, your AI assistant.",
-      brandColor: "#14B8A6",
+      brandColor: "#EA5455",
       chatPosition: "bottom-right",
       launcherLabel: "Chat with Myra",
       welcomeMessage: "Hi, I am Myra. How can I help?",

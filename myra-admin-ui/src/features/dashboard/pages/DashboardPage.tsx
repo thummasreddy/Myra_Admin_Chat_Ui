@@ -112,7 +112,7 @@ export function DashboardPage() {
                     <span className="text-muted-foreground">{count}</span>
                   </div>
                   <div className="h-2 rounded-full bg-slate-100">
-                    <div className="h-2 rounded-full bg-[linear-gradient(90deg,#14B8A6,#8B5CF6)]" style={{ width: `${width}%` }} />
+                    <div className="h-2 rounded-full bg-[#EA5455]" style={{ width: `${width}%` }} />
                   </div>
                 </div>
               );
@@ -152,7 +152,7 @@ export function DashboardPage() {
                     <span className="text-muted-foreground">{tenant.conversations.toLocaleString()}</span>
                   </div>
                   <div className="h-2 rounded-full bg-white">
-                    <div className="h-2 rounded-full bg-[linear-gradient(90deg,#8B5CF6,#14B8A6)]" style={{ width: `${Math.min(tenant.conversations / 6, 100)}%` }} />
+                    <div className="h-2 rounded-full bg-[#16A596]" style={{ width: `${Math.min(tenant.conversations / 6, 100)}%` }} />
                   </div>
                 </div>
               ))}

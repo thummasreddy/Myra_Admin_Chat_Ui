@@ -20,7 +20,7 @@ export function OnboardingSuccessPage() {
   if (registrationQuery.isLoading) return <LoadingSpinner label="Loading onboarding status" />;
 
   return (
-    <main className="min-h-screen bg-white text-slate-950">
+    <main className="min-h-screen bg-[#222831] text-white">
       <PublicNav />
       <section className="public-pricing-hero border-b px-4 py-14 text-white sm:px-6 lg:px-8">
         <div className="mx-auto max-w-4xl">

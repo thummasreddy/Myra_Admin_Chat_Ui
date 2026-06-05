@@ -38,14 +38,14 @@ describe("tenant transformers", () => {
 
   it("normalizes legacy lowercase response styles", () => {
     expect(normalizeResponseStyle("friendly")).toBe("FRIENDLY");
-    expect(normalizeResponseStyle("concise")).toBe("FORMAL");
-    expect(normalizeResponseStyle("sales")).toBe("PROFESSIONAL");
+    expect(normalizeResponseStyle("concise")).toBe("CONCISE");
+    expect(normalizeResponseStyle("sales")).toBe("SALES");
   });
 
   it("maps camelCase updates to snake_case backend payloads", () => {
     const payload = toTenantUpdateRequest({
       tenantName: "Acme",
-      brandColor: "#14B8A6",
+      brandColor: "#EA5455",
       responseStyle: "FRIENDLY",
       enableLeadCapture: true,
       enableStructuredExtraction: false
@@ -53,7 +53,7 @@ describe("tenant transformers", () => {
 
     expect(payload).toEqual({
       tenant_name: "Acme",
-      brand_color: "#14B8A6",
+      brand_color: "#EA5455",
       response_style: "FRIENDLY",
       enable_lead_capture: true,
       enable_structured_extraction: false
@@ -66,7 +66,7 @@ describe("tenant transformers", () => {
         {
           tenant_id: "tenant_1",
           tenant_name: "Acme",
-          response_style: "CASUAL",
+          response_style: "SALES",
           created_at: "2026-01-01T00:00:00.000Z",
           updated_at: "2026-01-01T00:00:00.000Z"
         }
@@ -74,6 +74,6 @@ describe("tenant transformers", () => {
     });
 
     expect(tenants).toHaveLength(1);
-    expect(tenants[0].responseStyle).toBe("CASUAL");
+    expect(tenants[0].responseStyle).toBe("SALES");
   });
 });

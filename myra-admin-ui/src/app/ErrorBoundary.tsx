@@ -23,7 +23,7 @@ export class ErrorBoundary extends Component<{ children: ReactNode }, ErrorBound
     if (!this.state.hasError) return this.props.children;
 
     return (
-      <main className="flex min-h-screen items-center justify-center bg-slate-50 p-4">
+      <main className="flex min-h-screen items-center justify-center bg-[#222831] p-4">
         <Card className="max-w-lg">
           <CardHeader>
             <CardTitle>Something went wrong</CardTitle>

@@ -20,7 +20,7 @@ export function AnalyticsPage() {
             <CardTitle>Conversations Over Time</CardTitle>
           </CardHeader>
           <CardContent>
-            <BarSeries data={data?.timeline.map((point) => ({ label: point.label, value: point.conversations })) ?? []} color="#14B8A6" />
+            <BarSeries data={data?.timeline.map((point) => ({ label: point.label, value: point.conversations })) ?? []} color="#EA5455" />
           </CardContent>
         </Card>
         <Card>
@@ -28,7 +28,7 @@ export function AnalyticsPage() {
             <CardTitle>Leads Over Time</CardTitle>
           </CardHeader>
           <CardContent>
-            <BarSeries data={data?.timeline.map((point) => ({ label: point.label, value: point.leads })) ?? []} color="#8B5CF6" />
+            <BarSeries data={data?.timeline.map((point) => ({ label: point.label, value: point.leads })) ?? []} color="#16A596" />
           </CardContent>
         </Card>
         <Card>

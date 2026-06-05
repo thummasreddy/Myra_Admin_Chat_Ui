@@ -27,7 +27,7 @@ const registrationSchema = z.object({
   phoneNumber: z.string().min(7, "Phone number is required"),
   industry: z.string().min(2, "Industry is required"),
   assistantName: z.string().min(2, "Assistant name is required"),
-  brandColor: z.string().regex(/^#[0-9A-Fa-f]{6}$/, "Use a hex color like #14B8A6"),
+  brandColor: z.string().regex(/^#[0-9A-Fa-f]{6}$/, "Use a hex color like #EA5455"),
   businessDescription: z.string().min(30, "Add a short business description"),
   fallbackMessage: z.string().min(10, "Fallback message is required"),
   selectedSubscriptionPlan: z.enum(["MONTHLY", "THREE_MONTHS", "SIX_MONTHS", "TWELVE_MONTHS"])
@@ -63,7 +63,7 @@ export function RegisterBusinessPage() {
       phoneNumber: "",
       industry: "",
       assistantName: "Myra",
-      brandColor: "#14B8A6",
+      brandColor: "#EA5455",
       businessDescription: "",
       fallbackMessage: "I do not have that answer yet. Please contact our team.",
       selectedSubscriptionPlan: selectedPlanFromSearch(searchParams.get("plan"))
@@ -94,7 +94,7 @@ export function RegisterBusinessPage() {
   });
 
   return (
-    <main className="min-h-screen bg-white text-slate-950">
+    <main className="min-h-screen bg-[#222831] text-white">
       <PublicNav />
       <section className="public-pricing-hero border-b px-4 py-12 text-white sm:px-6 lg:px-8">
         <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[1fr_380px] lg:items-center">

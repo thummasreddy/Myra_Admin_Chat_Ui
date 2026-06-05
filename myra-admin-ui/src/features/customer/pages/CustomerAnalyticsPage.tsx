@@ -41,7 +41,7 @@ export function CustomerAnalyticsPage() {
                 <div key={point.label} className="flex min-w-0 flex-1 flex-col items-center gap-2">
                   <div className="flex h-48 w-full items-end rounded-md bg-white/5 p-1">
                     <div
-                      className="w-full rounded-sm bg-[linear-gradient(180deg,#14B8A6,#8B5CF6)]"
+                      className="w-full rounded-sm bg-[#EA5455]"
                       style={{ height: `${Math.max((point.conversations / maxConversations) * 100, 8)}%` }}
                       aria-label={`${point.conversations} conversations on ${point.label}`}
                     />

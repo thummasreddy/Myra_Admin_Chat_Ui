@@ -42,10 +42,10 @@ export function CustomerLayout() {
 
   return (
     <div className="customer-shell">
-      <header className="sticky top-0 z-30 border-b border-white/10 bg-[#0F172A]/90 text-white backdrop-blur-xl">
+      <header className="sticky top-0 z-30 border-b border-white/10 bg-[#222831]/90 text-white backdrop-blur-xl">
         <div className="mx-auto flex h-16 max-w-7xl items-center gap-3 px-4 sm:px-6 lg:px-8">
           <NavLink to="/customer/dashboard" className="flex items-center gap-2">
-            <div className="flex h-9 w-9 items-center justify-center rounded-md bg-[linear-gradient(135deg,#14B8A6,#8B5CF6)] text-white shadow-lg shadow-teal-500/20">
+            <div className="flex h-9 w-9 items-center justify-center rounded-md bg-[#EA5455] text-white shadow-lg shadow-red-500/20">
               <Bot className="h-5 w-5" />
             </div>
             <div>
@@ -68,7 +68,7 @@ export function CustomerLayout() {
               ))}
             </Select>
             <div className="hidden items-center gap-2 rounded-md border px-3 py-2 md:flex">
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-teal-400/15 text-xs font-semibold text-teal-200">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-red-400/15 text-xs font-semibold text-red-200">
                 {initials(user?.name ?? "Owner")}
               </div>
               <div className="leading-tight">
@@ -84,7 +84,7 @@ export function CustomerLayout() {
       </header>
 
       <div className="mx-auto grid max-w-7xl gap-6 px-4 py-6 sm:px-6 lg:grid-cols-[220px_1fr] lg:px-8">
-        <aside className="rounded-lg border border-white/10 bg-[#0F172A] p-2 shadow-2xl shadow-slate-950/20 backdrop-blur lg:sticky lg:top-24 lg:h-fit">
+        <aside className="rounded-lg border border-white/10 bg-[#222831] p-2 shadow-2xl shadow-slate-950/20 backdrop-blur lg:sticky lg:top-24 lg:h-fit">
           <nav className="grid gap-1 sm:grid-cols-4 lg:grid-cols-1">
             {navItems.map((item) => (
               <NavLink
@@ -94,7 +94,7 @@ export function CustomerLayout() {
                   cn(
                     "flex items-center gap-2 rounded-md border px-3 py-2.5 text-sm font-medium transition-colors",
                     isActive
-                      ? "border-teal-300/30 bg-white/15 text-white shadow-lg shadow-teal-500/10"
+                      ? "border-red-300/30 bg-white/15 text-white shadow-lg shadow-red-500/10"
                       : "border-transparent text-slate-300 hover:border-white/10 hover:bg-white/10 hover:text-white"
                   )
                 }

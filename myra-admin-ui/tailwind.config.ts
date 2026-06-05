@@ -8,16 +8,16 @@ const config = {
     extend: {
       colors: {
         brand: {
-          primary: "#0F172A",
-          secondary: "#14B8A6",
-          accent: "#8B5CF6",
-          background: "#F8FAFC",
+          primary: "#EA5455",
+          secondary: "#16A596",
+          accent: "#968C83",
+          background: "#222831",
           surface: "#FFFFFF",
           text: {
-            primary: "#111827",
-            secondary: "#64748B"
+            primary: "#222831",
+            secondary: "#5F6872"
           },
-          border: "#E2E8F0",
+          border: "#E3E0DD",
           success: "#22C55E",
           warning: "#F59E0B",
           error: "#EF4444"

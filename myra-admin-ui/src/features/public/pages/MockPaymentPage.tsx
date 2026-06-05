@@ -39,7 +39,7 @@ export function MockPaymentPage() {
   if (registrationQuery.isLoading) return <LoadingSpinner label="Loading payment details" />;
   if (!registrationQuery.data) {
     return (
-      <main className="min-h-screen bg-white">
+      <main className="min-h-screen bg-[#222831]">
         <PublicNav />
         <section className="mx-auto max-w-3xl px-4 py-12">
           <Card className="public-card">
@@ -56,7 +56,7 @@ export function MockPaymentPage() {
   const plan = getSubscriptionPlan(registration.selectedSubscriptionPlan);
 
   return (
-    <main className="min-h-screen bg-white text-slate-950">
+    <main className="min-h-screen bg-[#222831] text-white">
       <PublicNav />
       <section className="public-pricing-hero border-b px-4 py-12 text-white sm:px-6 lg:px-8">
         <div className="mx-auto max-w-7xl">

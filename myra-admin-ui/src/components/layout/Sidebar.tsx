@@ -51,7 +51,7 @@ export function Sidebar({ open, onClose }: { open: boolean; onClose: () => void 
       >
         <div className="flex h-16 items-center justify-between border-b border-white/10 px-5">
           <NavLink to="/dashboard" className="flex items-center gap-2" onClick={onClose}>
-            <div className="flex h-10 w-10 items-center justify-center rounded-md bg-[linear-gradient(135deg,#14B8A6,#8B5CF6)] text-white shadow-lg shadow-teal-500/20">
+            <div className="flex h-10 w-10 items-center justify-center rounded-md bg-[#EA5455] text-white shadow-lg shadow-red-500/20">
               <Bot className="h-5 w-5" />
             </div>
             <div>
@@ -74,12 +74,12 @@ export function Sidebar({ open, onClose }: { open: boolean; onClose: () => void 
                 cn(
                   "group flex items-center gap-3 rounded-md border px-3 py-2.5 text-sm font-medium transition-all",
                   isActive
-                    ? "border-teal-300/35 bg-white/10 text-white shadow-lg shadow-teal-500/10"
+                    ? "border-red-300/35 bg-white/10 text-white shadow-lg shadow-red-500/10"
                     : "border-transparent text-slate-400 hover:border-white/10 hover:bg-white/[0.06] hover:text-white"
                 )
               }
             >
-              <span className="flex h-8 w-8 items-center justify-center rounded-md bg-white/[0.06] text-teal-300 transition-colors group-hover:bg-white/10">
+              <span className="flex h-8 w-8 items-center justify-center rounded-md bg-white/[0.06] text-red-300 transition-colors group-hover:bg-white/10">
                 <item.icon className="h-4 w-4" />
               </span>
               <span className="min-w-0 truncate">{item.label}</span>

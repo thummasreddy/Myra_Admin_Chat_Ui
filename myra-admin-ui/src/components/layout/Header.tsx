@@ -54,7 +54,7 @@ export function Header({ onMenuClick }: { onMenuClick: () => void }) {
           </Button>
 
           <div className="hidden items-center gap-3 rounded-md border border-white/10 bg-white/10 px-3 py-2 shadow-sm sm:flex">
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[linear-gradient(135deg,#14B8A6,#8B5CF6)] text-xs font-semibold text-white shadow-sm">
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#EA5455] text-xs font-semibold text-white shadow-sm">
               {initials(user?.name ?? "Admin")}
             </div>
             <div className="leading-tight">

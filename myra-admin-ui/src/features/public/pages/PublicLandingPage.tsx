@@ -143,7 +143,7 @@ const SELECTED_PLAN_STORAGE_KEY = "myra-selected-plan";
 
 export function PublicLandingPage() {
   return (
-    <main className="min-h-screen bg-[#F8FAFC] text-slate-950">
+    <main className="min-h-screen bg-[#222831] text-white">
       <PublicNav />
       <HeroSection />
       <MetricStrip />
@@ -164,7 +164,7 @@ export function PublicLandingPage() {
 
 function HeroSection() {
   return (
-    <section className="public-hero relative overflow-hidden bg-[#0F172A] px-6 pb-20 pt-24 text-white sm:pb-24 sm:pt-28 lg:pb-28">
+    <section className="public-hero relative overflow-hidden bg-[#222831] px-6 pb-20 pt-24 text-white sm:pb-24 sm:pt-28 lg:pb-28">
       <div className="public-container grid gap-12 lg:grid-cols-[1.02fr_0.98fr] lg:items-center">
         <div className="max-w-3xl">
           <Badge tone="dark">AI Website Assistant for Businesses</Badge>
@@ -203,7 +203,7 @@ function ProductMockup() {
       <div className="public-product-card">
         <div className="flex items-center justify-between border-b border-white/10 px-5 py-4">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-md bg-[linear-gradient(135deg,#14B8A6,#6366F1)]">
+            <div className="flex h-10 w-10 items-center justify-center rounded-md bg-[#EA5455]">
               <Bot className="h-5 w-5" />
             </div>
             <div>
@@ -215,7 +215,7 @@ function ProductMockup() {
         </div>
 
         <div className="space-y-4 p-5">
-          <div className="ml-auto max-w-[82%] rounded-md bg-[#14B8A6] px-4 py-3 text-sm font-medium text-white shadow-lg shadow-teal-500/20">
+          <div className="ml-auto max-w-[82%] rounded-md bg-[#EA5455] px-4 py-3 text-sm font-medium text-white shadow-lg shadow-red-500/20">
             Do you offer weekend appointments?
           </div>
           <div className="max-w-[88%] rounded-md border border-white/10 bg-white/10 px-4 py-3 text-sm leading-6 text-slate-100">
@@ -226,7 +226,7 @@ function ProductMockup() {
           <div className="grid gap-3 sm:grid-cols-3">
             {["Knowledge connected", "Lead captured", "Admin approved"].map((status) => (
               <div key={status} className="rounded-md border border-white/10 bg-white/[0.08] p-3">
-                <CheckCircle2 className="h-4 w-4 text-[#14B8A6]" />
+                <CheckCircle2 className="h-4 w-4 text-[#EA5455]" />
                 <p className="mt-2 text-xs font-semibold text-white">{status}</p>
               </div>
             ))}
@@ -235,7 +235,7 @@ function ProductMockup() {
           <div className="rounded-md border border-white/10 bg-slate-950/60 p-4">
             <div className="flex items-center justify-between">
               <p className="text-sm font-semibold text-white">Captured lead</p>
-              <span className="rounded-full bg-indigo-400/15 px-2.5 py-1 text-xs font-semibold text-indigo-200">New</span>
+              <span className="rounded-full bg-red-400/15 px-2.5 py-1 text-xs font-semibold text-red-200">New</span>
             </div>
             <div className="mt-3 grid gap-2 text-xs text-slate-300 sm:grid-cols-2">
               <span>Name: Sarah M.</span>
@@ -340,7 +340,7 @@ function ComparisonSection() {
           description="Contact forms and manual replies can be slow. Myra creates instant engagement while keeping answers grounded in approved business information."
           centered
         />
-        <div className="public-comparison mt-10 grid gap-0 overflow-hidden rounded-md border border-slate-200 bg-white shadow-[0_24px_70px_rgba(15,23,42,0.1)] lg:grid-cols-2">
+        <div className="public-comparison mt-10 grid gap-0 overflow-hidden rounded-md border border-slate-200 bg-white shadow-[0_24px_70px_rgba(34,40,49,0.1)] lg:grid-cols-2">
           <ComparisonCard title="Regular Process" items={regularProcessItems} icon={Clock3} />
           <ComparisonCard title="Myra AI Assistant" items={myraProcessItems} icon={Zap} highlighted />
         </div>
@@ -398,7 +398,7 @@ function FeaturesSection() {
 function TrustSection() {
   return (
     <section className="px-6 py-14 sm:py-24">
-      <div className="public-container overflow-hidden rounded-md bg-[#0F172A] text-white shadow-[0_28px_80px_rgba(15,23,42,0.22)]">
+      <div className="public-container overflow-hidden rounded-md bg-[#222831] text-white shadow-[0_28px_80px_rgba(34,40,49,0.22)]">
         <div className="grid gap-0 lg:grid-cols-[0.9fr_1.1fr]">
           <div className="p-8 sm:p-12">
             <Badge tone="dark">Trust and safety</Badge>
@@ -411,7 +411,7 @@ function TrustSection() {
           <div className="grid gap-3 bg-white/5 p-6 sm:grid-cols-2 sm:p-8">
             {trustSafetyPoints.slice(1, 8).map((point) => (
               <div key={point} className="rounded-md border border-white/10 bg-white/[0.08] p-4">
-                <ShieldCheck className="h-5 w-5 text-[#14B8A6]" />
+                <ShieldCheck className="h-5 w-5 text-[#EA5455]" />
                 <p className="mt-3 text-sm font-medium leading-6 text-slate-100">{point}</p>
               </div>
             ))}
@@ -475,7 +475,7 @@ function PricingSection() {
 function FinalCtaSection() {
   return (
     <section className="px-6 pb-16 pt-4 sm:pb-24">
-      <div className="public-container rounded-md bg-[linear-gradient(135deg,#0F172A,#1E293B)] px-6 py-12 text-center text-white shadow-[0_28px_80px_rgba(15,23,42,0.24)] sm:px-10">
+      <div className="public-container rounded-md bg-[#222831] px-6 py-12 text-center text-white shadow-[0_28px_80px_rgba(34,40,49,0.24)] sm:px-10">
         <Badge tone="dark">Launch after approval</Badge>
         <h2 className="mx-auto mt-5 max-w-3xl text-3xl font-bold tracking-normal sm:text-4xl">
           Ready to launch your business AI assistant?
@@ -501,7 +501,7 @@ function FinalCtaSection() {
 
 function PublicFooter() {
   return (
-    <footer className="border-t border-white/10 bg-[#0F172A] px-6 py-10 text-white">
+    <footer className="border-t border-white/10 bg-[#222831] px-6 py-10 text-white">
       <div className="public-container flex flex-col gap-8 md:flex-row md:items-center md:justify-between">
         <div className="max-w-md">
           <Link to="/" className="flex items-center gap-3">
@@ -607,7 +607,7 @@ function ComparisonCard({ title, items, icon: Icon, highlighted }: { title: stri
       <div className="mt-6 space-y-4">
         {items.map((item) => (
           <div key={item} className="flex items-start gap-3 text-sm leading-6">
-            <CheckCircle2 className={`mt-1 h-4 w-4 shrink-0 ${highlighted ? "text-[#14B8A6]" : "text-slate-400"}`} />
+            <CheckCircle2 className={`mt-1 h-4 w-4 shrink-0 ${highlighted ? "text-[#EA5455]" : "text-slate-400"}`} />
             <span className={highlighted ? "font-medium text-slate-800" : "text-slate-500"}>{item}</span>
           </div>
         ))}
@@ -628,7 +628,7 @@ function UseCaseCard({ useCase, icon: Icon }: { useCase: { type: string; example
       <div className="mt-5 space-y-3">
         {useCase.examples.slice(0, 5).map((example) => (
           <div key={example} className="flex items-start gap-3 text-sm leading-6 text-slate-600">
-            <Check className="mt-1 h-4 w-4 shrink-0 text-[#14B8A6]" />
+            <Check className="mt-1 h-4 w-4 shrink-0 text-[#EA5455]" />
             <span>{example}</span>
           </div>
         ))}
@@ -646,7 +646,7 @@ function ProcessStep({ step, index, icon: Icon }: { step: string; index: number;
   return (
     <article className="public-card relative p-5">
       <div className="flex items-center gap-3">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-[linear-gradient(135deg,#14B8A6,#6366F1)] text-sm font-bold text-white shadow-[0_12px_28px_rgba(20,184,166,0.22)]">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-[#EA5455] text-sm font-bold text-white shadow-[0_12px_28px_rgba(234,84,85,0.22)]">
           {index + 1}
         </div>
         <Icon className="h-5 w-5 text-slate-500" />
@@ -675,7 +675,7 @@ function PricingCard({ plan, badge }: { plan: (typeof SUBSCRIPTION_PLANS)[number
       <div className="mt-6 flex-1 space-y-3">
         {included.map((item) => (
           <div key={item} className="flex items-start gap-3 text-sm leading-6 text-slate-600">
-            <Check className="mt-1 h-4 w-4 shrink-0 text-[#14B8A6]" />
+            <Check className="mt-1 h-4 w-4 shrink-0 text-[#EA5455]" />
             <span>{item}</span>
           </div>
         ))}
@@ -704,8 +704,8 @@ function SectionHeader({
   return (
     <div className={centered ? "mx-auto max-w-3xl text-center" : "max-w-2xl"}>
       <Badge>{eyebrow}</Badge>
-      <h2 className="mt-4 text-3xl font-bold leading-tight tracking-normal text-slate-950 sm:text-4xl">{title}</h2>
-      <p className="mt-4 text-base leading-8 text-slate-500 sm:text-lg">{description}</p>
+      <h2 className="mt-4 text-3xl font-bold leading-tight tracking-normal text-white sm:text-4xl">{title}</h2>
+      <p className="mt-4 text-base leading-8 text-slate-300 sm:text-lg">{description}</p>
     </div>
   );
 }
@@ -714,7 +714,7 @@ function Badge({ children, tone = "light" }: { children: string; tone?: "light" 
   return (
     <span
       className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-bold uppercase tracking-normal ${
-        tone === "dark" ? "border-white/15 bg-white/10 text-teal-100" : "border-teal-200 bg-teal-50 text-teal-700"
+        tone === "dark" ? "border-white/15 bg-white/10 text-red-100" : "border-red-200 bg-red-50 text-red-700"
       }`}
     >
       <Sparkles className="h-3.5 w-3.5" />
@@ -748,7 +748,7 @@ function Notice({ children, tone }: { children: string; tone: "warning" | "succe
 
 function LogoMark() {
   return (
-    <div className="flex h-10 w-10 items-center justify-center rounded-md bg-[linear-gradient(135deg,#14B8A6,#6366F1)] text-white shadow-lg shadow-teal-500/20">
+    <div className="flex h-10 w-10 items-center justify-center rounded-md bg-[#EA5455] text-white shadow-lg shadow-red-500/20">
       <Bot className="h-5 w-5" />
     </div>
   );

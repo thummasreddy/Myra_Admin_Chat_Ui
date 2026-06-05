@@ -62,7 +62,7 @@ export function LoginPage() {
   if (token) return <Navigate to={user?.role === "TENANT_OWNER" ? "/customer/dashboard" : "/dashboard"} replace />;
 
   return (
-    <main className="grid min-h-screen bg-slate-50 lg:grid-cols-[1.05fr_0.95fr]">
+    <main className="grid min-h-screen bg-[#222831] lg:grid-cols-[1.05fr_0.95fr]">
       <section className="hidden bg-primary px-10 py-12 text-white lg:flex lg:flex-col lg:justify-between">
         <div className="flex items-center gap-3">
           <div className="flex h-11 w-11 items-center justify-center rounded-md bg-white/15">
