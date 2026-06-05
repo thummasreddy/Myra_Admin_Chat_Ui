@@ -387,10 +387,10 @@ export function CustomerAssistantSettingsPage() {
                   </Field>
                   <Field label="Response style" error={form.formState.errors.responseStyle?.message}>
                     <Select {...form.register("responseStyle")}>
-                      <option value="FRIENDLY">Friendly</option>
                       <option value="PROFESSIONAL">Professional</option>
-                      <option value="CONCISE">Concise</option>
-                      <option value="SALES">Sales</option>
+                      <option value="FRIENDLY">Friendly</option>
+                      <option value="CASUAL">Casual</option>
+                      <option value="FORMAL">Formal</option>
                     </Select>
                   </Field>
                 </div>

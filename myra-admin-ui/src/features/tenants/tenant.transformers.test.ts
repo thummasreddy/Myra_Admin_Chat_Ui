@@ -38,8 +38,10 @@ describe("tenant transformers", () => {
 
   it("normalizes legacy lowercase response styles", () => {
     expect(normalizeResponseStyle("friendly")).toBe("FRIENDLY");
-    expect(normalizeResponseStyle("concise")).toBe("CONCISE");
-    expect(normalizeResponseStyle("sales")).toBe("SALES");
+    expect(normalizeResponseStyle("casual")).toBe("CASUAL");
+    expect(normalizeResponseStyle("formal")).toBe("FORMAL");
+    expect(normalizeResponseStyle("concise")).toBe("PROFESSIONAL");
+    expect(normalizeResponseStyle("sales")).toBe("FRIENDLY");
   });
 
   it("maps camelCase updates to snake_case backend payloads", () => {
@@ -66,7 +68,7 @@ describe("tenant transformers", () => {
         {
           tenant_id: "tenant_1",
           tenant_name: "Acme",
-          response_style: "SALES",
+          response_style: "CASUAL",
           created_at: "2026-01-01T00:00:00.000Z",
           updated_at: "2026-01-01T00:00:00.000Z"
         }
@@ -74,6 +76,6 @@ describe("tenant transformers", () => {
     });
 
     expect(tenants).toHaveLength(1);
-    expect(tenants[0].responseStyle).toBe("SALES");
+    expect(tenants[0].responseStyle).toBe("CASUAL");
   });
 });

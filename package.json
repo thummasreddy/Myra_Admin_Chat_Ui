@@ -6,6 +6,7 @@
     "build": "npm --prefix myra-admin-ui run build",
     "lint": "npm --prefix myra-admin-ui run lint",
     "test": "npm --prefix myra-admin-ui run test",
+    "test:contracts": "npm --prefix myra-admin-ui run test -- src/contracts && npm --prefix myra-widget run test -- src/contracts",
     "test:coverage": "npm --prefix myra-admin-ui run test:coverage",
     "typecheck": "npm --prefix myra-admin-ui run typecheck",
     "preview": "npm --prefix myra-admin-ui run preview",

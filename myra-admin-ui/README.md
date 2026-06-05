@@ -28,6 +28,13 @@ The app defaults to:
 
 ```bash
 VITE_API_BASE_URL=http://localhost:8000/api/v1
+VITE_TENANT_API_URL=http://localhost:8000/api/v1
+VITE_KNOWLEDGE_API_URL=http://localhost:8002/api/knowledge
+VITE_CHAT_API_URL=http://localhost:8003/api/chat
+VITE_LEAD_API_URL=http://localhost:8004/api/leads
+VITE_ANALYTICS_API_URL=http://localhost:8005/api/analytics
+VITE_ADMIN_API_URL=http://localhost:8006/api/admin
+VITE_ADMIN_SECRET=local-dev-admin-secret
 ```
 
 Open the Vite URL shown in the terminal. The configured dev port is `5174`.
@@ -59,20 +66,20 @@ password123
 
 ## API Behavior
 
-Production should use a backend gateway pattern. The admin portal calls the gateway through:
+Production can use either a backend gateway or service-specific URLs. The admin portal validates these variables through `src/config/env.ts`:
 
 ```bash
 VITE_API_BASE_URL=https://YOUR-GATEWAY/api/v1
+VITE_TENANT_API_URL=https://YOUR-GATEWAY/api/v1
+VITE_KNOWLEDGE_API_URL=https://YOUR-KNOWLEDGE-SERVICE/api/knowledge
+VITE_CHAT_API_URL=https://YOUR-CHAT-SERVICE/api/chat
+VITE_LEAD_API_URL=https://YOUR-LEAD-SERVICE/api/leads
+VITE_ANALYTICS_API_URL=https://YOUR-ANALYTICS-SERVICE/api/analytics
+VITE_ADMIN_API_URL=https://YOUR-ADMIN-SERVICE/api/admin
+VITE_ADMIN_SECRET=your-admin-secret
 ```
 
-The gateway must also expose the public widget endpoints outside the admin prefix:
-
-```text
-/api/chat
-/api/leads
-```
-
-Direct service access is supported only for local development with optional `VITE_TENANT_API_URL`, `VITE_CHAT_API_URL`, and related overrides.
+Direct service access is useful for local development and split-service deployments. Leave the service URLs pointed at the gateway when everything is served behind one domain.
 
 All admin backend calls go through `src/lib/apiClient.ts`, which:
 
@@ -120,6 +127,13 @@ cp .env.production.example .env
 Key variables:
 
 - `VITE_API_BASE_URL`: gateway `/api/v1` base URL
+- `VITE_TENANT_API_URL`: tenant API base URL
+- `VITE_KNOWLEDGE_API_URL`: knowledge API base URL
+- `VITE_CHAT_API_URL`: chat API base URL
+- `VITE_LEAD_API_URL`: lead API base URL
+- `VITE_ANALYTICS_API_URL`: analytics API base URL
+- `VITE_ADMIN_API_URL`: admin API base URL
+- `VITE_ADMIN_SECRET`: admin service secret sent to admin endpoints
 - `VITE_API_TIMEOUT_MS`: request timeout, default `12000`
 - `VITE_API_RETRY_ATTEMPTS`: transient retry attempts, default `2`
 - `VITE_API_RETRY_BASE_DELAY_MS`: exponential backoff base delay, default `300`

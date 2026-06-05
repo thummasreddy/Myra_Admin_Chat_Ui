@@ -5,9 +5,9 @@ type TenantApiRecord = Record<string, unknown>;
 
 export function normalizeResponseStyle(style: string): ResponseStyle {
   const upper = style.toUpperCase();
-  if (upper === "FRIENDLY" || upper === "PROFESSIONAL" || upper === "CONCISE" || upper === "SALES") return upper;
-  if (upper === "CASUAL") return "FRIENDLY";
-  if (upper === "FORMAL") return "PROFESSIONAL";
+  if (upper === "PROFESSIONAL" || upper === "FRIENDLY" || upper === "CASUAL" || upper === "FORMAL") return upper;
+  if (upper === "CONCISE") return "PROFESSIONAL";
+  if (upper === "SALES") return "FRIENDLY";
   return "PROFESSIONAL";
 }
 

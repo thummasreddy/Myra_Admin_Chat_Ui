@@ -258,10 +258,10 @@ export function TenantDetailPage() {
               <div className="space-y-2">
                 <Label>Response style</Label>
                 <Select {...form.register("responseStyle")}>
-                  <option value="FRIENDLY">Friendly</option>
                   <option value="PROFESSIONAL">Professional</option>
-                  <option value="CONCISE">Concise</option>
-                  <option value="SALES">Sales</option>
+                  <option value="FRIENDLY">Friendly</option>
+                  <option value="CASUAL">Casual</option>
+                  <option value="FORMAL">Formal</option>
                 </Select>
                 <FieldError name="responseStyle" errors={form.formState.errors} />
               </div>

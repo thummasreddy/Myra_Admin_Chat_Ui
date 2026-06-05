@@ -18,6 +18,7 @@ export type LeadRequest = {
   email: string;
   phone: string;
   message: string;
+  lead_type?: "GENERAL";
   source_url?: string;
   metadata?: Record<string, unknown>;
 };
@@ -29,6 +30,6 @@ export type LeadResponse = {
 };
 
 export async function submitTestLead(payload: LeadRequest): Promise<LeadResponse> {
-  const { data } = await leadHttp.post<LeadResponse>("/", payload);
+  const { data } = await leadHttp.post<LeadResponse>("/", { ...payload, lead_type: payload.lead_type ?? "GENERAL" });
   return data;
 }

@@ -25,10 +25,10 @@ export function AiConfigStep() {
         <div className="space-y-2">
           <Label htmlFor="responseStyle">Response style</Label>
           <Select id="responseStyle" {...register("responseStyle")}>
-            <option value="FRIENDLY">Friendly</option>
             <option value="PROFESSIONAL">Professional</option>
-            <option value="CONCISE">Concise</option>
-            <option value="SALES">Sales</option>
+            <option value="FRIENDLY">Friendly</option>
+            <option value="CASUAL">Casual</option>
+            <option value="FORMAL">Formal</option>
           </Select>
           <FieldError name="responseStyle" />
         </div>

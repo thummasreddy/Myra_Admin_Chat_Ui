@@ -9,14 +9,17 @@ Frontend workspace for the Myra AI SaaS admin portal and embeddable chat widget.
 
 ## Backend Architecture
 
-Myra should use a backend gateway in production. The frontend talks to the gateway instead of calling each service directly:
+Myra should use a backend gateway in production. The frontend talks to the gateway instead of each service owning CORS, security headers, rate limits, and cross-service routing independently:
 
-- Admin portal: `VITE_API_BASE_URL=https://gateway.example.com/api/v1`
-- Widget public endpoints: `https://gateway.example.com/api/chat` and `https://gateway.example.com/api/leads`
+- `/api/v1/tenants/*` -> tenant-service
+- `/api/v1/chat/*` -> chat-service
+- `/api/v1/knowledge/*` -> knowledge-service
+- `/api/v1/leads/*` -> lead-service
+- `/api/v1/analytics/*` -> analytics-service
 
-Direct service URLs are supported only as local development overrides in `myra-admin-ui/.env.example`.
+The canonical platform contract lives in `contracts/myra-platform.contract.json`. The production architecture, migration plan, compatibility notes, and deployment checklist are in [docs/production-architecture.md](docs/production-architecture.md).
 
-See [architecture](myra-admin-ui/docs/architecture.md) for the routing diagram and service responsibilities.
+The Admin UI and Widget still support direct service URLs for local split-service development.
 
 ## Common Commands
 
@@ -26,6 +29,7 @@ npm run dev
 npm run build
 npm run lint
 npm run test
+npm run test:contracts
 ```
 
 The admin app defaults to Vite port `5174`.
