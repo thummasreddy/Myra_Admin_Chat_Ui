@@ -22,37 +22,37 @@ export function PricingPage() {
   const plans = plansQuery.data ?? SUBSCRIPTION_PLANS;
 
   return (
-    <main className="min-h-screen bg-[var(--color-bg-main)] text-white">
+    <main className="min-h-screen bg-[var(--color-bg-main)] text-[var(--color-text-main)]">
       <PublicNav />
-      <section className="public-pricing-hero border-b px-4 py-16 text-white sm:px-6 lg:px-8">
+      <section className="public-pricing-hero border-b px-4 py-16 text-[var(--color-text-main)] sm:px-6 lg:px-8">
         <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[1fr_380px] lg:items-end">
           <div>
             <div className="flex h-12 w-12 items-center justify-center rounded-md bg-white/10">
               <Bot className="h-6 w-6" />
             </div>
-            <div className="mt-6 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-sm text-white/90">
+            <div className="mt-6 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-sm text-[var(--color-text-main)]">
               <Sparkles className="h-4 w-4" />
               Same features in every MVP plan
             </div>
             <h1 className="mt-5 text-4xl font-semibold tracking-normal sm:text-5xl">Choose the plan duration that fits your business</h1>
-            <p className="mt-4 max-w-3xl text-lg leading-8 text-slate-300">
+            <p className="mt-4 max-w-3xl text-lg leading-8 text-[var(--color-text-secondary)]">
               Start with Myra AI Assistant, customer dashboard access, knowledge document upload, admin-reviewed activation,
               lead capture support, and embed code delivery after approval. For MVP, plans differ only by price and duration.
             </p>
           </div>
           <div className="public-value-tile rounded-md p-5">
-            <p className="text-sm font-semibold text-white">Activation path</p>
-            <div className="mt-4 space-y-3 text-sm text-white/75">
+            <p className="text-sm font-semibold text-[var(--color-text-main)]">Activation path</p>
+            <div className="mt-4 space-y-3 text-sm text-[var(--color-text-secondary)]">
               <div className="flex items-start gap-3">
-                <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-white" />
+                <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
                 <span>Register and complete mock payment</span>
               </div>
               <div className="flex items-start gap-3">
-                <Clock3 className="mt-0.5 h-4 w-4 shrink-0 text-white" />
+                <Clock3 className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
                 <span>Upload documents from the dashboard after login</span>
               </div>
               <div className="flex items-start gap-3">
-                <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-white" />
+                <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
                 <span>Embed code appears only after admin approval</span>
               </div>
             </div>

@@ -31,7 +31,7 @@ import {
   WandSparkles,
   Zap
 } from "lucide-react";
-import { useEffect, useState, type ComponentType } from "react";
+import { useEffect, useState, type ComponentType, type Dispatch, type SetStateAction } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { DOCUMENT_REVIEW_MESSAGE, formatPlanPrice, SUBSCRIPTION_PLANS } from "@/features/onboarding/onboarding.data";
@@ -48,6 +48,7 @@ import {
 } from "@/features/onboarding/onboarding.copy";
 
 type IconType = ComponentType<{ className?: string }>;
+type PublicTheme = "light" | "dark";
 
 const metricCards = [
   { title: "Business assistant active", detail: "Live-ready after review", icon: Bot },
@@ -137,10 +138,13 @@ const planBadges: Record<string, string> = {
 const SELECTED_PLAN_STORAGE_KEY = "myra-selected-plan";
 
 export function PublicLandingPage() {
+  const [theme, setTheme] = usePublicTheme("dark");
+  const isDark = theme === "dark";
+
   return (
-    <main className="min-h-screen bg-[#080616] text-white">
-      <PublicNav />
-      <HeroSection />
+    <main className={isDark ? "min-h-screen bg-[#080616] text-white" : "min-h-screen bg-[var(--color-bg-main)] text-[var(--color-text-main)]"}>
+      <PublicNav theme={theme} setTheme={setTheme} />
+      <HeroSection isDark={isDark} />
       <MetricStrip />
       <BusinessValueSection />
       <CapabilitiesSection />
@@ -148,25 +152,29 @@ export function PublicLandingPage() {
       <ComparisonSection />
       <UseCasesSection />
       <FeaturesSection />
-      <TrustSection />
+      <TrustSection isDark={isDark} />
       <ProcessSection />
       <PricingSection />
-      <FinalCtaSection />
-      <PublicFooter />
+      <FinalCtaSection isDark={isDark} />
+      <PublicFooter isDark={isDark} />
     </main>
   );
 }
 
-function HeroSection() {
+function HeroSection({ isDark }: { isDark: boolean }) {
   return (
-    <section className="public-hero relative overflow-hidden bg-[#080616] px-6 pb-20 pt-24 text-white sm:pb-24 sm:pt-28 lg:pb-28">
+    <section
+      className={`public-hero relative overflow-hidden px-6 pb-20 pt-24 sm:pb-24 sm:pt-28 lg:pb-28 ${
+        isDark ? "bg-[#080616] text-white" : "bg-[var(--color-bg-main)] text-[var(--color-text-main)]"
+      }`}
+    >
       <div className="public-container grid gap-12 lg:grid-cols-[1.02fr_0.98fr] lg:items-center">
         <div className="max-w-3xl">
-          <Badge tone="dark">AI Website Assistant for Businesses</Badge>
+          <Badge tone={isDark ? "dark" : "light"}>AI Website Assistant for Businesses</Badge>
           <h1 className="mt-6 max-w-4xl text-[2.25rem] font-bold leading-[1.04] tracking-normal sm:text-[3.5rem]">
             Turn website visitors into customers with Myra AI
           </h1>
-          <p className="mt-6 max-w-2xl text-base leading-8 text-slate-300 sm:text-lg">
+          <p className={`mt-6 max-w-2xl text-base leading-8 sm:text-lg ${isDark ? "text-slate-300" : "text-[var(--color-text-secondary)]"}`}>
             Launch a reviewed AI assistant that answers questions, captures leads, recommends products or services, and guides visitors
             using your approved business knowledge.
           </p>
@@ -176,63 +184,84 @@ function HeroSection() {
               asChild
               size="lg"
               variant="outline"
-              className="border-white/25 bg-white/10 text-white shadow-none hover:bg-white/15 hover:text-white"
+              className={
+                isDark
+                  ? "border-white/25 bg-white/10 text-white shadow-none hover:bg-white/15 hover:text-white"
+                  : "border-primary/25 bg-primary/10 text-primary shadow-none hover:bg-primary/15 hover:text-primary"
+              }
             >
               <Link to="/pricing">View Pricing</Link>
             </Button>
           </div>
-          <p className="mt-5 text-sm font-medium text-slate-300">
+          <p className={`mt-5 text-sm font-medium ${isDark ? "text-slate-300" : "text-[var(--color-text-secondary)]"}`}>
             Reviewed before launch | Business-specific knowledge | Lead capture ready
           </p>
         </div>
 
-        <ProductMockup />
+        <ProductMockup isDark={isDark} />
       </div>
     </section>
   );
 }
 
-function ProductMockup() {
+function ProductMockup({ isDark }: { isDark: boolean }) {
   return (
     <div className="public-product-shell">
       <div className="public-product-card">
-        <div className="flex items-center justify-between border-b border-white/10 px-5 py-4">
+        <div className={`flex items-center justify-between border-b px-5 py-4 ${isDark ? "border-white/10" : "border-[var(--color-border)]"}`}>
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-md bg-[#1591DC]">
               <Bot className="h-5 w-5" />
             </div>
             <div>
-              <p className="text-sm font-semibold text-white">Myra Assistant</p>
-              <p className="text-xs text-slate-400">Reviewed business knowledge</p>
+              <p className={`text-sm font-semibold ${isDark ? "text-white" : "text-[var(--color-text-main)]"}`}>Myra Assistant</p>
+              <p className={`text-xs ${isDark ? "text-slate-400" : "text-[var(--color-text-muted)]"}`}>Reviewed business knowledge</p>
             </div>
           </div>
-          <div className="rounded-full bg-emerald-400/15 px-3 py-1 text-xs font-semibold text-emerald-200">Online</div>
+          <div
+            className={`rounded-full px-3 py-1 text-xs font-semibold ${
+              isDark ? "bg-emerald-400/15 text-emerald-200" : "bg-[var(--color-success-bg)] text-[var(--color-success)]"
+            }`}
+          >
+            Online
+          </div>
         </div>
 
         <div className="space-y-4 p-5">
           <div className="ml-auto max-w-[82%] rounded-md bg-[#1591DC] px-4 py-3 text-sm font-medium text-white shadow-lg shadow-blue-500/20">
             Do you offer weekend appointments?
           </div>
-          <div className="max-w-[88%] rounded-md border border-white/10 bg-white/10 px-4 py-3 text-sm leading-6 text-slate-100">
+          <div
+            className={`max-w-[88%] rounded-md border px-4 py-3 text-sm leading-6 ${
+              isDark
+                ? "border-white/10 bg-white/10 text-slate-100"
+                : "border-[var(--color-border)] bg-[var(--color-bg-muted)] text-[var(--color-text-secondary)]"
+            }`}
+          >
             Yes. Weekend appointments are available on Saturday from 10 AM to 4 PM. I can collect your details so the team can confirm a
             time.
           </div>
 
           <div className="grid gap-3 sm:grid-cols-3">
             {["Knowledge connected", "Lead captured", "Admin approved"].map((status) => (
-              <div key={status} className="rounded-md border border-white/10 bg-white/[0.08] p-3">
+              <div
+                key={status}
+                className={`rounded-md border p-3 ${
+                  isDark ? "border-white/10 bg-white/[0.08]" : "border-[var(--color-border)] bg-[var(--color-bg-card)]"
+                }`}
+              >
                 <CheckCircle2 className="h-4 w-4 text-[#1591DC]" />
-                <p className="mt-2 text-xs font-semibold text-white">{status}</p>
+                <p className={`mt-2 text-xs font-semibold ${isDark ? "text-white" : "text-[var(--color-text-main)]"}`}>{status}</p>
               </div>
             ))}
           </div>
 
-          <div className="rounded-md border border-white/10 bg-slate-950/60 p-4">
+          <div className={`rounded-md border p-4 ${isDark ? "border-white/10 bg-slate-950/60" : "border-[var(--color-border)] bg-[var(--color-bg-muted)]"}`}>
             <div className="flex items-center justify-between">
-              <p className="text-sm font-semibold text-white">Captured lead</p>
-              <span className="rounded-full bg-blue-400/15 px-2.5 py-1 text-xs font-semibold text-blue-200">New</span>
+              <p className={`text-sm font-semibold ${isDark ? "text-white" : "text-[var(--color-text-main)]"}`}>Captured lead</p>
+              <span className="rounded-full bg-primary/15 px-2.5 py-1 text-xs font-semibold text-primary">New</span>
             </div>
-            <div className="mt-3 grid gap-2 text-xs text-slate-300 sm:grid-cols-2">
+            <div className={`mt-3 grid gap-2 text-xs sm:grid-cols-2 ${isDark ? "text-slate-300" : "text-[var(--color-text-secondary)]"}`}>
               <span>Name: Sarah M.</span>
               <span>Interest: Weekend booking</span>
               <span>Phone: Collected</span>
@@ -385,24 +414,35 @@ function FeaturesSection() {
   );
 }
 
-function TrustSection() {
+function TrustSection({ isDark }: { isDark: boolean }) {
   return (
     <section className="px-6 py-14 sm:py-24">
-      <div className="public-container overflow-hidden rounded-md bg-[#080616] text-white shadow-[0_28px_80px_rgba(8,6,22,0.22)]">
+      <div
+        className={`public-container overflow-hidden rounded-md ${
+          isDark
+            ? "bg-[#080616] text-white shadow-[0_28px_80px_rgba(8,6,22,0.22)]"
+            : "border border-[var(--color-border)] bg-[var(--color-bg-card)] text-[var(--color-text-main)] shadow-[0_24px_70px_rgba(8,6,22,0.1)]"
+        }`}
+      >
         <div className="grid gap-0 lg:grid-cols-[0.9fr_1.1fr]">
           <div className="p-8 sm:p-12">
-            <Badge tone="dark">Trust and safety</Badge>
-            <h2 className="mt-5 text-3xl font-bold tracking-normal sm:text-4xl">Reviewed before going live</h2>
-            <p className="mt-4 text-base leading-8 text-slate-300">
+            <Badge tone={isDark ? "dark" : "light"}>Trust and safety</Badge>
+            <h2 className={`mt-5 text-3xl font-bold tracking-normal sm:text-4xl ${isDark ? "text-white" : "text-[var(--color-text-main)]"}`}>
+              Reviewed before going live
+            </h2>
+            <p className={`mt-4 text-base leading-8 ${isDark ? "text-slate-300" : "text-[var(--color-text-secondary)]"}`}>
               Myra is reviewed before launch so the assistant can stay aligned with approved business information and use a fallback message
               when information is unavailable.
             </p>
           </div>
-          <div className="grid gap-3 bg-white/5 p-6 sm:grid-cols-2 sm:p-8">
+          <div className={`grid gap-3 p-6 sm:grid-cols-2 sm:p-8 ${isDark ? "bg-white/5" : "bg-[var(--color-bg-muted)]"}`}>
             {trustSafetyPoints.slice(1, 8).map((point) => (
-              <div key={point} className="rounded-md border border-white/10 bg-white/[0.08] p-4">
+              <div
+                key={point}
+                className={`rounded-md border p-4 ${isDark ? "border-white/10 bg-white/[0.08]" : "border-[var(--color-border)] bg-[var(--color-bg-card)]"}`}
+              >
                 <ShieldCheck className="h-5 w-5 text-[#1591DC]" />
-                <p className="mt-3 text-sm font-medium leading-6 text-slate-100">{point}</p>
+                <p className={`mt-3 text-sm font-medium leading-6 ${isDark ? "text-slate-100" : "text-[var(--color-text-main)]"}`}>{point}</p>
               </div>
             ))}
           </div>
@@ -462,15 +502,21 @@ function PricingSection() {
   );
 }
 
-function FinalCtaSection() {
+function FinalCtaSection({ isDark }: { isDark: boolean }) {
   return (
     <section className="px-6 pb-16 pt-4 sm:pb-24">
-      <div className="public-container rounded-md bg-[#080616] px-6 py-12 text-center text-white shadow-[0_28px_80px_rgba(8,6,22,0.24)] sm:px-10">
-        <Badge tone="dark">Launch after approval</Badge>
-        <h2 className="mx-auto mt-5 max-w-3xl text-3xl font-bold tracking-normal sm:text-4xl">
+      <div
+        className={`public-container rounded-md px-6 py-12 text-center sm:px-10 ${
+          isDark
+            ? "bg-[#080616] text-white shadow-[0_28px_80px_rgba(8,6,22,0.24)]"
+            : "border border-[var(--color-border)] bg-[var(--color-bg-card)] text-[var(--color-text-main)] shadow-[0_24px_70px_rgba(8,6,22,0.1)]"
+        }`}
+      >
+        <Badge tone={isDark ? "dark" : "light"}>Launch after approval</Badge>
+        <h2 className={`mx-auto mt-5 max-w-3xl text-3xl font-bold tracking-normal sm:text-4xl ${isDark ? "text-white" : "text-[var(--color-text-main)]"}`}>
           Ready to launch your business AI assistant?
         </h2>
-        <p className="mx-auto mt-4 max-w-2xl text-base leading-8 text-slate-300">
+        <p className={`mx-auto mt-4 max-w-2xl text-base leading-8 ${isDark ? "text-slate-300" : "text-[var(--color-text-secondary)]"}`}>
           Register your business, upload your knowledge, and let Myra help your visitors instantly after approval.
         </p>
         <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
@@ -479,7 +525,11 @@ function FinalCtaSection() {
             asChild
             size="lg"
             variant="outline"
-            className="border-white/25 bg-white/10 text-white shadow-none hover:bg-white/15 hover:text-white"
+            className={
+              isDark
+                ? "border-white/25 bg-white/10 text-white shadow-none hover:bg-white/15 hover:text-white"
+                : "border-primary/25 bg-primary/10 text-primary shadow-none hover:bg-primary/15 hover:text-primary"
+            }
           >
             <Link to="/pricing">View Pricing</Link>
           </Button>
@@ -489,41 +539,47 @@ function FinalCtaSection() {
   );
 }
 
-function PublicFooter() {
+function PublicFooter({ isDark }: { isDark: boolean }) {
   return (
-    <footer className="border-t border-white/10 bg-[#080616] px-6 py-10 text-white">
+    <footer
+      className={`border-t px-6 py-10 ${
+        isDark
+          ? "border-white/10 bg-[#080616] text-white"
+          : "border-[var(--color-border)] bg-[var(--color-bg-card)] text-[var(--color-text-main)]"
+      }`}
+    >
       <div className="public-container flex flex-col gap-8 md:flex-row md:items-center md:justify-between">
         <div className="max-w-md">
           <Link to="/" className="flex items-center gap-3">
             <LogoMark />
             <div>
               <p className="font-semibold">Myra AI</p>
-              <p className="text-sm text-slate-400">Assistant Platform</p>
+              <p className={`text-sm ${isDark ? "text-slate-400" : "text-[var(--color-text-muted)]"}`}>Assistant Platform</p>
             </div>
           </Link>
-          <p className="mt-4 text-sm leading-6 text-slate-400">
+          <p className={`mt-4 text-sm leading-6 ${isDark ? "text-slate-400" : "text-[var(--color-text-secondary)]"}`}>
             Reviewed AI assistants for business websites, lead capture, customer guidance, and dashboard-based onboarding.
           </p>
         </div>
-        <nav className="flex flex-wrap gap-4 text-sm text-slate-300">
-          <Link className="hover:text-white" to="/pricing">
+        <nav className={`flex flex-wrap gap-4 text-sm ${isDark ? "text-slate-300" : "text-[var(--color-text-secondary)]"}`}>
+          <Link className={isDark ? "hover:text-white" : "hover:text-primary"} to="/pricing">
             Pricing
           </Link>
-          <Link className="hover:text-white" to="/login">
+          <Link className={isDark ? "hover:text-white" : "hover:text-primary"} to="/login">
             Login
           </Link>
-          <Link className="hover:text-white" to="/register">
+          <Link className={isDark ? "hover:text-white" : "hover:text-primary"} to="/register">
             Register
           </Link>
-          <a className="hover:text-white" href="#privacy">
+          <a className={isDark ? "hover:text-white" : "hover:text-primary"} href="#privacy">
             Privacy Policy
           </a>
-          <a className="hover:text-white" href="#terms">
+          <a className={isDark ? "hover:text-white" : "hover:text-primary"} href="#terms">
             Terms
           </a>
         </nav>
       </div>
-      <div className="public-container mt-8 border-t border-white/10 pt-6 text-sm text-muted-foreground">
+      <div className={`public-container mt-8 border-t pt-6 text-sm text-muted-foreground ${isDark ? "border-white/10" : "border-[var(--color-border)]"}`}>
         Copyright {new Date().getFullYear()} Myra AI. All rights reserved.
       </div>
     </footer>
@@ -752,14 +808,11 @@ function LogoMark() {
   );
 }
 
-function ThemeToggle() {
-  const [theme, setTheme] = useState<"light" | "dark">(() => {
-    if (typeof window !== "undefined") {
-      const storedTheme = localStorage.getItem("myra-theme");
-      return storedTheme === "dark" || storedTheme === "light" ? storedTheme : "light";
-    }
-
-    return "light";
+function usePublicTheme(fallback: PublicTheme = "dark") {
+  const [theme, setTheme] = useState<PublicTheme>(() => {
+    if (typeof window === "undefined") return fallback;
+    const storedTheme = localStorage.getItem("myra-theme");
+    return storedTheme === "dark" || storedTheme === "light" ? storedTheme : fallback;
   });
 
   useEffect(() => {
@@ -767,11 +820,19 @@ function ThemeToggle() {
     localStorage.setItem("myra-theme", theme);
   }, [theme]);
 
+  return [theme, setTheme] as const;
+}
+
+function ThemeToggle({ theme, setTheme, isDark }: { theme: PublicTheme; setTheme: Dispatch<SetStateAction<PublicTheme>>; isDark: boolean }) {
   return (
     <button
       aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
       onClick={() => setTheme((currentTheme) => (currentTheme === "dark" ? "light" : "dark"))}
-      className="flex h-9 w-9 items-center justify-center rounded-md border border-white/20 bg-white/10 text-white transition-colors hover:bg-white/20"
+      className={`flex h-9 w-9 items-center justify-center rounded-md border transition-colors ${
+        isDark
+          ? "border-white/20 bg-white/10 text-white hover:bg-white/20"
+          : "border-[var(--color-border)] bg-[var(--color-bg-card)] text-[var(--color-text-main)] hover:bg-[var(--color-bg-muted)]"
+      }`}
       type="button"
     >
       {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
@@ -779,25 +840,48 @@ function ThemeToggle() {
   );
 }
 
-export function PublicNav() {
+export function PublicNav({
+  theme: controlledTheme,
+  setTheme: controlledSetTheme
+}: {
+  theme?: PublicTheme;
+  setTheme?: Dispatch<SetStateAction<PublicTheme>>;
+} = {}) {
+  const [internalTheme, setInternalTheme] = usePublicTheme("dark");
+  const theme = controlledTheme ?? internalTheme;
+  const setTheme = controlledSetTheme ?? setInternalTheme;
+  const isDark = theme === "dark";
+
   return (
-    <header className="public-nav sticky top-0 z-30 border-b backdrop-blur-xl">
+    <header className={`public-nav sticky top-0 z-30 border-b backdrop-blur-xl ${isDark ? "public-nav-dark" : "public-nav-light"}`}>
       <div className="public-container flex h-16 items-center gap-4 px-6">
         <Link to="/" className="flex items-center gap-3">
           <LogoMark />
           <div>
-            <p className="text-sm font-semibold text-white">Myra AI</p>
-            <p className="text-xs text-slate-300">Assistant Platform</p>
+            <p className={`text-sm font-semibold ${isDark ? "text-white" : "text-[var(--color-text-main)]"}`}>Myra AI</p>
+            <p className={`text-xs ${isDark ? "text-slate-300" : "text-[var(--color-text-muted)]"}`}>Assistant Platform</p>
           </div>
         </Link>
         <nav className="ml-auto flex items-center gap-2">
-          <Button asChild variant="ghost" className="text-slate-200 hover:bg-white/10 hover:text-white">
+          <Button
+            asChild
+            variant="ghost"
+            className={isDark ? "text-slate-200 hover:bg-white/10 hover:text-white" : "text-[var(--color-text-secondary)] hover:bg-primary/10 hover:text-primary"}
+          >
             <Link to="/pricing">Pricing</Link>
           </Button>
-          <Button asChild variant="ghost" className="hidden text-slate-200 hover:bg-white/10 hover:text-white sm:inline-flex">
+          <Button
+            asChild
+            variant="ghost"
+            className={
+              isDark
+                ? "hidden text-slate-200 hover:bg-white/10 hover:text-white sm:inline-flex"
+                : "hidden text-[var(--color-text-secondary)] hover:bg-primary/10 hover:text-primary sm:inline-flex"
+            }
+          >
             <Link to="/login">Login</Link>
           </Button>
-          <ThemeToggle />
+          <ThemeToggle theme={theme} setTheme={setTheme} isDark={isDark} />
           <Button asChild>
             <Link to="/register">Register</Link>
           </Button>
