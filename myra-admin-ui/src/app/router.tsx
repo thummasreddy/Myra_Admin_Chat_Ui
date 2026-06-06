@@ -35,16 +35,22 @@ import { TenantDetailPage } from "@/features/tenants/pages/TenantDetailPage";
 import { TenantListPage } from "@/features/tenants/pages/TenantListPage";
 import { WidgetConfigPage } from "@/features/widget/pages/WidgetConfigPage";
 
-function ThemeRoute({ theme, children }: { theme: "light" | "dark"; children: ReactNode }) {
+function ThemeRoute({ theme, children, useStoredTheme }: { theme: "light" | "dark"; children: ReactNode; useStoredTheme?: boolean }) {
   useEffect(() => {
-    document.documentElement.setAttribute("data-theme", theme);
-  }, [theme]);
+    const storedTheme = useStoredTheme ? localStorage.getItem("myra-theme") : null;
+    const nextTheme = storedTheme === "dark" || storedTheme === "light" ? storedTheme : theme;
+    document.documentElement.setAttribute("data-theme", nextTheme);
+  }, [theme, useStoredTheme]);
 
   return <>{children}</>;
 }
 
-function withTheme(theme: "light" | "dark", element: ReactNode) {
-  return <ThemeRoute theme={theme}>{element}</ThemeRoute>;
+function withTheme(theme: "light" | "dark", element: ReactNode, useStoredTheme = false) {
+  return (
+    <ThemeRoute theme={theme} useStoredTheme={useStoredTheme}>
+      {element}
+    </ThemeRoute>
+  );
 }
 
 function ProtectedAdminRoutes() {
@@ -80,7 +86,7 @@ function ProtectedCustomerRoutes() {
 }
 
 export const router = createBrowserRouter([
-  { path: "/", element: withTheme("light", <PublicLandingPage />) },
+  { path: "/", element: withTheme("light", <PublicLandingPage />, true) },
   { path: "/pricing", element: withTheme("light", <PricingPage />) },
   { path: "/register", element: withTheme("light", <RegisterBusinessPage />) },
   { path: "/mock-payment/:registrationId", element: withTheme("light", <MockPaymentPage />) },

@@ -16,6 +16,7 @@ import {
   MailCheck,
   MessageCircle,
   MessageSquare,
+  Moon,
   PanelTop,
   Receipt,
   ShieldAlert,
@@ -23,13 +24,14 @@ import {
   ShoppingBag,
   Sparkles,
   Store,
+  Sun,
   UploadCloud,
   Users,
   Utensils,
   WandSparkles,
   Zap
 } from "lucide-react";
-import type { ComponentType } from "react";
+import { useEffect, useState, type ComponentType } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { DOCUMENT_REVIEW_MESSAGE, formatPlanPrice, SUBSCRIPTION_PLANS } from "@/features/onboarding/onboarding.data";
@@ -55,7 +57,11 @@ const metricCards = [
 ];
 
 const valueCards = [
-  { title: "Real conversations from visitors", description: "Turn passive browsing into guided customer conversations.", icon: MessageCircle },
+  {
+    title: "Real conversations from visitors",
+    description: "Turn passive browsing into guided customer conversations.",
+    icon: MessageCircle
+  },
   { title: "Instant approved answers", description: "Respond from the business knowledge your team provides.", icon: Zap },
   { title: "24/7 assistant support", description: "Help visitors after hours without adding a full-time team.", icon: Clock3 },
   { title: "More leads and opportunities", description: "Capture names, contact details, and customer intent.", icon: Users }
@@ -119,18 +125,7 @@ const featureIcons: IconType[] = [
   CheckCircle2
 ];
 
-const processIcons: IconType[] = [
-  Store,
-  Receipt,
-  Check,
-  PanelTop,
-  UploadCloud,
-  Clock3,
-  ShieldCheck,
-  MailCheck,
-  Code2,
-  Zap
-];
+const processIcons: IconType[] = [Store, Receipt, Check, PanelTop, UploadCloud, Clock3, ShieldCheck, MailCheck, Code2, Zap];
 
 const planBadges: Record<string, string> = {
   MONTHLY: "Starter",
@@ -143,7 +138,7 @@ const SELECTED_PLAN_STORAGE_KEY = "myra-selected-plan";
 
 export function PublicLandingPage() {
   return (
-    <main className="min-h-screen bg-[#222831] text-white">
+    <main className="min-h-screen bg-[#080616] text-white">
       <PublicNav />
       <HeroSection />
       <MetricStrip />
@@ -164,7 +159,7 @@ export function PublicLandingPage() {
 
 function HeroSection() {
   return (
-    <section className="public-hero relative overflow-hidden bg-[#222831] px-6 pb-20 pt-24 text-white sm:pb-24 sm:pt-28 lg:pb-28">
+    <section className="public-hero relative overflow-hidden bg-[#080616] px-6 pb-20 pt-24 text-white sm:pb-24 sm:pt-28 lg:pb-28">
       <div className="public-container grid gap-12 lg:grid-cols-[1.02fr_0.98fr] lg:items-center">
         <div className="max-w-3xl">
           <Badge tone="dark">AI Website Assistant for Businesses</Badge>
@@ -203,7 +198,7 @@ function ProductMockup() {
       <div className="public-product-card">
         <div className="flex items-center justify-between border-b border-white/10 px-5 py-4">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-md bg-[#EA5455]">
+            <div className="flex h-10 w-10 items-center justify-center rounded-md bg-[#1591DC]">
               <Bot className="h-5 w-5" />
             </div>
             <div>
@@ -215,18 +210,18 @@ function ProductMockup() {
         </div>
 
         <div className="space-y-4 p-5">
-          <div className="ml-auto max-w-[82%] rounded-md bg-[#EA5455] px-4 py-3 text-sm font-medium text-white shadow-lg shadow-red-500/20">
+          <div className="ml-auto max-w-[82%] rounded-md bg-[#1591DC] px-4 py-3 text-sm font-medium text-white shadow-lg shadow-blue-500/20">
             Do you offer weekend appointments?
           </div>
           <div className="max-w-[88%] rounded-md border border-white/10 bg-white/10 px-4 py-3 text-sm leading-6 text-slate-100">
-            Yes. Weekend appointments are available on Saturday from 10 AM to 4 PM. I can collect your details so the team
-            can confirm a time.
+            Yes. Weekend appointments are available on Saturday from 10 AM to 4 PM. I can collect your details so the team can confirm a
+            time.
           </div>
 
           <div className="grid gap-3 sm:grid-cols-3">
             {["Knowledge connected", "Lead captured", "Admin approved"].map((status) => (
               <div key={status} className="rounded-md border border-white/10 bg-white/[0.08] p-3">
-                <CheckCircle2 className="h-4 w-4 text-[#EA5455]" />
+                <CheckCircle2 className="h-4 w-4 text-[#1591DC]" />
                 <p className="mt-2 text-xs font-semibold text-white">{status}</p>
               </div>
             ))}
@@ -235,7 +230,7 @@ function ProductMockup() {
           <div className="rounded-md border border-white/10 bg-slate-950/60 p-4">
             <div className="flex items-center justify-between">
               <p className="text-sm font-semibold text-white">Captured lead</p>
-              <span className="rounded-full bg-red-400/15 px-2.5 py-1 text-xs font-semibold text-red-200">New</span>
+              <span className="rounded-full bg-blue-400/15 px-2.5 py-1 text-xs font-semibold text-blue-200">New</span>
             </div>
             <div className="mt-3 grid gap-2 text-xs text-slate-300 sm:grid-cols-2">
               <span>Name: Sarah M.</span>
@@ -317,12 +312,7 @@ function ProblemsSection() {
           centered
         />
         <div className="mt-10 grid gap-6 lg:grid-cols-2">
-          <InsightPanel
-            title="Business Problems"
-            icon={ShieldAlert}
-            tone="warning"
-            items={businessProblems.slice(0, 6)}
-          />
+          <InsightPanel title="Business Problems" icon={ShieldAlert} tone="warning" items={businessProblems.slice(0, 6)} />
           <InsightPanel title="How Myra Helps" icon={ShieldCheck} tone="success" items={ownerBenefits.slice(0, 6)} />
         </div>
       </div>
@@ -340,7 +330,7 @@ function ComparisonSection() {
           description="Contact forms and manual replies can be slow. Myra creates instant engagement while keeping answers grounded in approved business information."
           centered
         />
-        <div className="public-comparison mt-10 grid gap-0 overflow-hidden rounded-md border border-slate-200 bg-white shadow-[0_24px_70px_rgba(34,40,49,0.1)] lg:grid-cols-2">
+        <div className="public-comparison mt-10 grid gap-0 overflow-hidden rounded-md border border-[var(--color-border)] bg-[var(--color-bg-card)] shadow-[0_24px_70px_rgba(8,6,22,0.1)] lg:grid-cols-2">
           <ComparisonCard title="Regular Process" items={regularProcessItems} icon={Clock3} />
           <ComparisonCard title="Myra AI Assistant" items={myraProcessItems} icon={Zap} highlighted />
         </div>
@@ -398,20 +388,20 @@ function FeaturesSection() {
 function TrustSection() {
   return (
     <section className="px-6 py-14 sm:py-24">
-      <div className="public-container overflow-hidden rounded-md bg-[#222831] text-white shadow-[0_28px_80px_rgba(34,40,49,0.22)]">
+      <div className="public-container overflow-hidden rounded-md bg-[#080616] text-white shadow-[0_28px_80px_rgba(8,6,22,0.22)]">
         <div className="grid gap-0 lg:grid-cols-[0.9fr_1.1fr]">
           <div className="p-8 sm:p-12">
             <Badge tone="dark">Trust and safety</Badge>
             <h2 className="mt-5 text-3xl font-bold tracking-normal sm:text-4xl">Reviewed before going live</h2>
             <p className="mt-4 text-base leading-8 text-slate-300">
-              Myra is reviewed before launch so the assistant can stay aligned with approved business information and use a
-              fallback message when information is unavailable.
+              Myra is reviewed before launch so the assistant can stay aligned with approved business information and use a fallback message
+              when information is unavailable.
             </p>
           </div>
           <div className="grid gap-3 bg-white/5 p-6 sm:grid-cols-2 sm:p-8">
             {trustSafetyPoints.slice(1, 8).map((point) => (
               <div key={point} className="rounded-md border border-white/10 bg-white/[0.08] p-4">
-                <ShieldCheck className="h-5 w-5 text-[#EA5455]" />
+                <ShieldCheck className="h-5 w-5 text-[#1591DC]" />
                 <p className="mt-3 text-sm font-medium leading-6 text-slate-100">{point}</p>
               </div>
             ))}
@@ -475,7 +465,7 @@ function PricingSection() {
 function FinalCtaSection() {
   return (
     <section className="px-6 pb-16 pt-4 sm:pb-24">
-      <div className="public-container rounded-md bg-[#222831] px-6 py-12 text-center text-white shadow-[0_28px_80px_rgba(34,40,49,0.24)] sm:px-10">
+      <div className="public-container rounded-md bg-[#080616] px-6 py-12 text-center text-white shadow-[0_28px_80px_rgba(8,6,22,0.24)] sm:px-10">
         <Badge tone="dark">Launch after approval</Badge>
         <h2 className="mx-auto mt-5 max-w-3xl text-3xl font-bold tracking-normal sm:text-4xl">
           Ready to launch your business AI assistant?
@@ -501,7 +491,7 @@ function FinalCtaSection() {
 
 function PublicFooter() {
   return (
-    <footer className="border-t border-white/10 bg-[#222831] px-6 py-10 text-white">
+    <footer className="border-t border-white/10 bg-[#080616] px-6 py-10 text-white">
       <div className="public-container flex flex-col gap-8 md:flex-row md:items-center md:justify-between">
         <div className="max-w-md">
           <Link to="/" className="flex items-center gap-3">
@@ -558,34 +548,24 @@ function FeatureCard({
       <div className="public-icon-box">
         <Icon className="h-5 w-5" />
       </div>
-      <h3 className={`mt-5 font-semibold tracking-normal text-slate-950 ${compact ? "text-base" : "text-lg"}`}>{title}</h3>
-      <p className="mt-2 text-sm leading-6 text-slate-500">{description}</p>
+      <h3 className={`mt-5 font-semibold tracking-normal text-[var(--color-text-main)] ${compact ? "text-base" : "text-lg"}`}>{title}</h3>
+      <p className="mt-2 text-sm leading-6 text-[var(--color-text-secondary)]">{description}</p>
     </article>
   );
 }
 
-function InsightPanel({
-  title,
-  items,
-  icon: Icon,
-  tone
-}: {
-  title: string;
-  items: string[];
-  icon: IconType;
-  tone: "warning" | "success";
-}) {
+function InsightPanel({ title, items, icon: Icon, tone }: { title: string; items: string[]; icon: IconType; tone: "warning" | "success" }) {
   return (
     <article className={`public-insight-card ${tone === "warning" ? "public-insight-warning" : "public-insight-success"}`}>
       <div className="flex items-center gap-3">
         <div className="public-icon-box">
           <Icon className="h-5 w-5" />
         </div>
-        <h3 className="text-xl font-semibold tracking-normal text-slate-950">{title}</h3>
+        <h3 className="text-xl font-semibold tracking-normal text-[var(--color-text-main)]">{title}</h3>
       </div>
       <div className="mt-6 space-y-3">
         {items.map((item) => (
-          <div key={item} className="flex items-start gap-3 text-sm leading-6 text-slate-600">
+          <div key={item} className="flex items-start gap-3 text-sm leading-6 text-[var(--color-text-secondary)]">
             <CheckCircle2 className="mt-1 h-4 w-4 shrink-0" />
             <span>{item}</span>
           </div>
@@ -595,20 +575,30 @@ function InsightPanel({
   );
 }
 
-function ComparisonCard({ title, items, icon: Icon, highlighted }: { title: string; items: string[]; icon: IconType; highlighted?: boolean }) {
+function ComparisonCard({
+  title,
+  items,
+  icon: Icon,
+  highlighted
+}: {
+  title: string;
+  items: string[];
+  icon: IconType;
+  highlighted?: boolean;
+}) {
   return (
-    <article className={`p-6 sm:p-8 ${highlighted ? "public-comparison-highlight" : "bg-white"}`}>
+    <article className={`p-6 sm:p-8 ${highlighted ? "public-comparison-highlight" : "bg-[var(--color-bg-card)]"}`}>
       <div className="flex items-center gap-3">
         <div className="public-icon-box">
           <Icon className="h-5 w-5" />
         </div>
-        <h3 className="text-xl font-semibold tracking-normal text-slate-950">{title}</h3>
+        <h3 className="text-xl font-semibold tracking-normal text-[var(--color-text-main)]">{title}</h3>
       </div>
       <div className="mt-6 space-y-4">
         {items.map((item) => (
           <div key={item} className="flex items-start gap-3 text-sm leading-6">
-            <CheckCircle2 className={`mt-1 h-4 w-4 shrink-0 ${highlighted ? "text-[#EA5455]" : "text-slate-400"}`} />
-            <span className={highlighted ? "font-medium text-slate-800" : "text-slate-500"}>{item}</span>
+            <CheckCircle2 className={`mt-1 h-4 w-4 shrink-0 ${highlighted ? "text-[#1591DC]" : "text-slate-400"}`} />
+            <span className={highlighted ? "font-medium text-[var(--color-text-main)]" : "text-[var(--color-text-secondary)]"}>{item}</span>
           </div>
         ))}
       </div>
@@ -623,12 +613,12 @@ function UseCaseCard({ useCase, icon: Icon }: { useCase: { type: string; example
         <div className="public-icon-box">
           <Icon className="h-5 w-5" />
         </div>
-        <h3 className="text-lg font-semibold tracking-normal text-slate-950">{useCase.type}</h3>
+        <h3 className="text-lg font-semibold tracking-normal text-[var(--color-text-main)]">{useCase.type}</h3>
       </div>
       <div className="mt-5 space-y-3">
         {useCase.examples.slice(0, 5).map((example) => (
-          <div key={example} className="flex items-start gap-3 text-sm leading-6 text-slate-600">
-            <Check className="mt-1 h-4 w-4 shrink-0 text-[#EA5455]" />
+          <div key={example} className="flex items-start gap-3 text-sm leading-6 text-[var(--color-text-secondary)]">
+            <Check className="mt-1 h-4 w-4 shrink-0 text-[#1591DC]" />
             <span>{example}</span>
           </div>
         ))}
@@ -646,12 +636,12 @@ function ProcessStep({ step, index, icon: Icon }: { step: string; index: number;
   return (
     <article className="public-card relative p-5">
       <div className="flex items-center gap-3">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-[#EA5455] text-sm font-bold text-white shadow-[0_12px_28px_rgba(234,84,85,0.22)]">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-[#1591DC] text-sm font-bold text-white shadow-[0_12px_28px_rgba(21,145,220,0.22)]">
           {index + 1}
         </div>
-        <Icon className="h-5 w-5 text-slate-500" />
+        <Icon className="h-5 w-5 text-[var(--color-text-secondary)]" />
       </div>
-      <p className="mt-4 text-sm font-semibold leading-6 text-slate-800">{step}</p>
+      <p className="mt-4 text-sm font-semibold leading-6 text-[var(--color-text-main)]">{step}</p>
     </article>
   );
 }
@@ -663,19 +653,19 @@ function PricingCard({ plan, badge }: { plan: (typeof SUBSCRIPTION_PLANS)[number
     <article className="public-card public-plan-card flex flex-col p-6">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="text-xl font-semibold tracking-normal text-slate-950">{plan.name}</p>
-          <p className="mt-1 text-sm text-slate-500">{plan.renewalCadence}</p>
+          <p className="text-xl font-semibold tracking-normal text-[var(--color-text-main)]">{plan.name}</p>
+          <p className="mt-1 text-sm text-[var(--color-text-secondary)]">{plan.renewalCadence}</p>
         </div>
         <span className="rounded-full bg-slate-900 px-3 py-1 text-xs font-semibold uppercase text-white">{badge}</span>
       </div>
-      <p className="mt-7 text-4xl font-bold tracking-normal text-slate-950">{formatPlanPrice(plan)}</p>
-      <p className="mt-2 text-sm text-slate-500">
+      <p className="mt-7 text-4xl font-bold tracking-normal text-[var(--color-text-main)]">{formatPlanPrice(plan)}</p>
+      <p className="mt-2 text-sm text-[var(--color-text-secondary)]">
         {plan.durationMonths} month{plan.durationMonths > 1 ? "s" : ""} of access
       </p>
       <div className="mt-6 flex-1 space-y-3">
         {included.map((item) => (
-          <div key={item} className="flex items-start gap-3 text-sm leading-6 text-slate-600">
-            <Check className="mt-1 h-4 w-4 shrink-0 text-[#EA5455]" />
+          <div key={item} className="flex items-start gap-3 text-sm leading-6 text-[var(--color-text-secondary)]">
+            <Check className="mt-1 h-4 w-4 shrink-0 text-[#1591DC]" />
             <span>{item}</span>
           </div>
         ))}
@@ -694,18 +684,26 @@ function SectionHeader({
   eyebrow,
   title,
   description,
-  centered
+  centered,
+  dark
 }: {
   eyebrow: string;
   title: string;
   description: string;
   centered?: boolean;
+  dark?: boolean;
 }) {
   return (
     <div className={centered ? "mx-auto max-w-3xl text-center" : "max-w-2xl"}>
-      <Badge>{eyebrow}</Badge>
-      <h2 className="mt-4 text-3xl font-bold leading-tight tracking-normal text-white sm:text-4xl">{title}</h2>
-      <p className="mt-4 text-base leading-8 text-slate-300 sm:text-lg">{description}</p>
+      <Badge tone={dark ? "dark" : "light"}>{eyebrow}</Badge>
+      <h2
+        className={`mt-4 text-3xl font-bold leading-tight tracking-normal sm:text-4xl ${dark ? "text-white" : "text-[var(--color-text-main)]"}`}
+      >
+        {title}
+      </h2>
+      <p className={`mt-4 text-base leading-8 sm:text-lg ${dark ? "text-slate-300" : "text-[var(--color-text-secondary)]"}`}>
+        {description}
+      </p>
     </div>
   );
 }
@@ -714,7 +712,7 @@ function Badge({ children, tone = "light" }: { children: string; tone?: "light" 
   return (
     <span
       className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-bold uppercase tracking-normal ${
-        tone === "dark" ? "border-white/15 bg-white/10 text-red-100" : "border-red-200 bg-red-50 text-red-700"
+        tone === "dark" ? "border-white/15 bg-white/10 text-blue-100" : "border-blue-200 bg-blue-50 text-blue-700"
       }`}
     >
       <Sparkles className="h-3.5 w-3.5" />
@@ -748,9 +746,36 @@ function Notice({ children, tone }: { children: string; tone: "warning" | "succe
 
 function LogoMark() {
   return (
-    <div className="flex h-10 w-10 items-center justify-center rounded-md bg-[#EA5455] text-white shadow-lg shadow-red-500/20">
+    <div className="flex h-10 w-10 items-center justify-center rounded-md bg-[#1591DC] text-white shadow-lg shadow-blue-500/20">
       <Bot className="h-5 w-5" />
     </div>
+  );
+}
+
+function ThemeToggle() {
+  const [theme, setTheme] = useState<"light" | "dark">(() => {
+    if (typeof window !== "undefined") {
+      const storedTheme = localStorage.getItem("myra-theme");
+      return storedTheme === "dark" || storedTheme === "light" ? storedTheme : "light";
+    }
+
+    return "light";
+  });
+
+  useEffect(() => {
+    document.documentElement.setAttribute("data-theme", theme);
+    localStorage.setItem("myra-theme", theme);
+  }, [theme]);
+
+  return (
+    <button
+      aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+      onClick={() => setTheme((currentTheme) => (currentTheme === "dark" ? "light" : "dark"))}
+      className="flex h-9 w-9 items-center justify-center rounded-md border border-white/20 bg-white/10 text-white transition-colors hover:bg-white/20"
+      type="button"
+    >
+      {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+    </button>
   );
 }
 
@@ -772,6 +797,7 @@ export function PublicNav() {
           <Button asChild variant="ghost" className="hidden text-slate-200 hover:bg-white/10 hover:text-white sm:inline-flex">
             <Link to="/login">Login</Link>
           </Button>
+          <ThemeToggle />
           <Button asChild>
             <Link to="/register">Register</Link>
           </Button>
