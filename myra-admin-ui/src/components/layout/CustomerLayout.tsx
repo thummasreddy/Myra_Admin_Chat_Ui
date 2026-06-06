@@ -42,20 +42,21 @@ export function CustomerLayout() {
   }
 
   useEffect(() => {
-    document.documentElement.setAttribute("data-theme", "dark");
+    const storedTheme = localStorage.getItem("myra-theme");
+    document.documentElement.setAttribute("data-theme", storedTheme === "light" ? "light" : "dark");
   }, []);
 
   return (
     <div className="customer-shell">
-      <header className="sticky top-0 z-30 border-b border-white/10 bg-[#222831]/90 text-white backdrop-blur-xl">
+      <header className="sticky top-0 z-30 border-b border-border/70 bg-[var(--color-bg-surface)] text-[var(--color-text-main)] backdrop-blur-xl">
         <div className="mx-auto flex h-16 max-w-7xl items-center gap-3 px-4 sm:px-6 lg:px-8">
           <NavLink to="/customer/dashboard" className="flex items-center gap-2">
-            <div className="flex h-9 w-9 items-center justify-center rounded-md bg-[#EA5455] text-white shadow-lg shadow-red-500/20">
+            <div className="flex h-9 w-9 items-center justify-center rounded-md bg-[#1591DC] text-white shadow-lg shadow-blue-500/20">
               <Bot className="h-5 w-5" />
             </div>
             <div>
-              <p className="text-sm font-semibold text-white">Myra Customer</p>
-              <p className="text-xs text-slate-300">Business dashboard</p>
+              <p className="text-sm font-semibold text-[var(--color-text-main)]">Myra Customer</p>
+              <p className="text-xs text-[var(--color-text-muted)]">Business dashboard</p>
             </div>
           </NavLink>
 
@@ -72,13 +73,13 @@ export function CustomerLayout() {
                 </option>
               ))}
             </Select>
-            <div className="hidden items-center gap-2 rounded-md border px-3 py-2 md:flex">
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-red-400/15 text-xs font-semibold text-red-200">
+            <div className="hidden items-center gap-2 rounded-md border border-border/70 px-3 py-2 md:flex">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/15 text-xs font-semibold text-primary">
                 {initials(user?.name ?? "Owner")}
               </div>
               <div className="leading-tight">
-                <p className="text-sm font-medium text-white">{user?.name ?? "Tenant Owner"}</p>
-                <p className="text-xs text-slate-300">{user?.role ?? "TENANT_OWNER"}</p>
+                <p className="text-sm font-medium text-[var(--color-text-main)]">{user?.name ?? "Tenant Owner"}</p>
+                <p className="text-xs text-[var(--color-text-muted)]">{user?.role ?? "TENANT_OWNER"}</p>
               </div>
             </div>
             <Button variant="ghost" size="icon" onClick={handleLogout} aria-label="Log out">
@@ -89,7 +90,7 @@ export function CustomerLayout() {
       </header>
 
       <div className="mx-auto grid max-w-7xl gap-6 px-4 py-6 sm:px-6 lg:grid-cols-[220px_1fr] lg:px-8">
-        <aside className="rounded-lg border border-white/10 bg-[#222831] p-2 shadow-2xl shadow-slate-950/20 backdrop-blur lg:sticky lg:top-24 lg:h-fit">
+        <aside className="rounded-lg border border-border/70 bg-[var(--color-bg-surface)] p-2 shadow-2xl shadow-slate-950/20 backdrop-blur lg:sticky lg:top-24 lg:h-fit">
           <nav className="grid gap-1 sm:grid-cols-4 lg:grid-cols-1">
             {navItems.map((item) => (
               <NavLink
@@ -99,8 +100,8 @@ export function CustomerLayout() {
                   cn(
                     "flex items-center gap-2 rounded-md border px-3 py-2.5 text-sm font-medium transition-colors",
                     isActive
-                      ? "border-red-300/30 bg-white/15 text-white shadow-lg shadow-red-500/10"
-                      : "border-transparent text-slate-300 hover:border-white/10 hover:bg-white/10 hover:text-white"
+                      ? "border-blue-300/30 bg-primary/15 text-[var(--color-text-main)] shadow-lg shadow-blue-500/10"
+                      : "border-transparent text-[var(--color-text-muted)] hover:border-primary/15 hover:bg-primary/10 hover:text-[var(--color-text-main)]"
                   )
                 }
               >
@@ -109,8 +110,8 @@ export function CustomerLayout() {
               </NavLink>
             ))}
           </nav>
-          <div className="mt-2 rounded-md border border-white/10 bg-slate-950/40 p-3 text-sm text-slate-300">
-            <div className="mb-1 flex items-center gap-2 font-medium text-white">
+          <div className="mt-2 rounded-md border border-border/70 bg-[var(--color-bg-muted)] p-3 text-sm text-[var(--color-text-secondary)]">
+            <div className="mb-1 flex items-center gap-2 font-medium text-[var(--color-text-main)]">
               <Settings className="h-4 w-4" />
               Manual activation
             </div>

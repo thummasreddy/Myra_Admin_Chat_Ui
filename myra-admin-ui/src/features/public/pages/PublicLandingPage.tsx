@@ -523,7 +523,7 @@ function PublicFooter() {
           </a>
         </nav>
       </div>
-      <div className="public-container mt-8 border-t border-white/10 pt-6 text-sm text-slate-500">
+      <div className="public-container mt-8 border-t border-white/10 pt-6 text-sm text-muted-foreground">
         Copyright {new Date().getFullYear()} Myra AI. All rights reserved.
       </div>
     </footer>
@@ -624,7 +624,7 @@ function UseCaseCard({ useCase, icon: Icon }: { useCase: { type: string; example
         ))}
       </div>
       {useCase.type.includes("Healthcare") ? (
-        <p className="mt-4 rounded-md border border-amber-200 bg-amber-50 p-3 text-xs font-medium leading-5 text-amber-800">
+        <p className="mt-4 rounded-md border border-amber-400/30 bg-[var(--color-warning-bg)] p-3 text-xs font-medium leading-5 text-[var(--color-warning)]">
           Myra should not provide medical diagnosis or treatment advice.
         </p>
       ) : null}
@@ -712,7 +712,7 @@ function Badge({ children, tone = "light" }: { children: string; tone?: "light" 
   return (
     <span
       className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-bold uppercase tracking-normal ${
-        tone === "dark" ? "border-white/15 bg-white/10 text-blue-100" : "border-blue-200 bg-blue-50 text-blue-700"
+        tone === "dark" ? "border-white/15 bg-white/10 text-blue-100" : "border-blue-400/30 bg-primary/10 text-primary"
       }`}
     >
       <Sparkles className="h-3.5 w-3.5" />
@@ -736,7 +736,7 @@ function Notice({ children, tone }: { children: string; tone: "warning" | "succe
   return (
     <div
       className={`rounded-md border px-4 py-4 text-sm font-medium ${
-        tone === "warning" ? "border-amber-200 bg-amber-50 text-amber-800" : "border-emerald-200 bg-emerald-50 text-emerald-800"
+        tone === "warning" ? "border-amber-400/30 bg-[var(--color-warning-bg)] text-[var(--color-warning)]" : "border-emerald-400/30 bg-[var(--color-success-bg)] text-[var(--color-success)]"
       }`}
     >
       {children}

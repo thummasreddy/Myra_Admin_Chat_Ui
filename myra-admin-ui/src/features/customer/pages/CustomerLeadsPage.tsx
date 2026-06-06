@@ -22,7 +22,7 @@ export function CustomerLeadsPage() {
       header: "Customer",
       accessor: (lead) => (
         <div>
-          <p className="font-medium text-slate-950">{lead.name}</p>
+          <p className="font-medium text-[var(--color-text-main)]">{lead.name}</p>
           <p className="text-sm text-muted-foreground">{lead.message}</p>
         </div>
       )
@@ -82,7 +82,7 @@ function LeadMetric({ title, value }: { title: string; value: string }) {
         <Users className="h-4 w-4 text-primary" />
       </CardHeader>
       <CardContent>
-        <div className="text-2xl font-semibold text-slate-950">{value}</div>
+        <div className="text-2xl font-semibold text-[var(--color-text-main)]">{value}</div>
       </CardContent>
     </Card>
   );

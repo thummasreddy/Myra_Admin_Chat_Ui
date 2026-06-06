@@ -73,7 +73,7 @@ export function KnowledgeDocumentsReviewPage() {
     <>
       <PageHeader title="Knowledge Documents" description="Review uploaded documents, processing status, notes, and submitter details." />
       <Card className="mb-4">
-        <CardContent className="p-4 text-sm font-medium text-amber-800">
+        <CardContent className="p-4 text-sm font-medium text-[var(--color-warning)]">
           Customer has been informed that {documentReviewMessage.toLowerCase()}
         </CardContent>
       </Card>
@@ -88,8 +88,8 @@ export function KnowledgeDocumentsReviewPage() {
 
       {rejectSource ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 p-4">
-          <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-xl">
-            <h2 className="text-lg font-semibold text-slate-950">Reject document</h2>
+          <div className="w-full max-w-md rounded-lg bg-[var(--color-bg-card)] p-6 shadow-xl">
+            <h2 className="text-lg font-semibold text-[var(--color-text-main)]">Reject document</h2>
             <p className="mt-2 text-sm text-muted-foreground">Add review notes for {rejectSource.name}.</p>
             <Textarea className="mt-4 min-h-28" value={notes} onChange={(event) => setNotes(event.target.value)} />
             <div className="mt-6 flex justify-end gap-2">

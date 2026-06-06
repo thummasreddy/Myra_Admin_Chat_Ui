@@ -19,7 +19,7 @@ export function TenantReviewIndexPage() {
         header: "Business",
         accessor: (tenant) => (
           <div>
-            <p className="font-medium text-slate-950">{tenant.tenantName}</p>
+            <p className="font-medium text-[var(--color-text-main)]">{tenant.tenantName}</p>
             <p className="text-sm text-muted-foreground">{tenant.businessEmail ?? tenant.supportEmail}</p>
           </div>
         )

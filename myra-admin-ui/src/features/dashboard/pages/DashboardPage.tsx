@@ -81,9 +81,9 @@ export function DashboardPage() {
           </CardHeader>
           <CardContent className="space-y-3">
             {pendingApprovals.slice(0, 5).map((tenant) => (
-              <div key={tenant.tenantId} className="flex items-center justify-between gap-3 rounded-md border bg-slate-50 p-3">
+              <div key={tenant.tenantId} className="flex items-center justify-between gap-3 rounded-md border bg-[var(--color-bg-muted)] p-3">
                 <div className="min-w-0">
-                  <p className="truncate text-sm font-semibold text-slate-950">{tenant.tenantName}</p>
+                  <p className="truncate text-sm font-semibold text-[var(--color-text-main)]">{tenant.tenantName}</p>
                   <p className="truncate text-xs text-muted-foreground">{tenant.websiteUrl}</p>
                 </div>
                 <div className="flex shrink-0 items-center gap-2">
@@ -108,11 +108,11 @@ export function DashboardPage() {
               return (
                 <div key={plan}>
                   <div className="mb-1 flex items-center justify-between text-sm">
-                    <span className="font-medium text-slate-800">{plan}</span>
+                    <span className="font-medium text-[var(--color-text-secondary)]">{plan}</span>
                     <span className="text-muted-foreground">{count}</span>
                   </div>
-                  <div className="h-2 rounded-full bg-slate-100">
-                    <div className="h-2 rounded-full bg-[#EA5455]" style={{ width: `${width}%` }} />
+                  <div className="h-2 rounded-full bg-[var(--color-bg-muted)]">
+                    <div className="h-2 rounded-full bg-[#1591DC]" style={{ width: `${width}%` }} />
                   </div>
                 </div>
               );
@@ -126,9 +126,9 @@ export function DashboardPage() {
           </CardHeader>
           <CardContent className="space-y-3">
             {tenants.slice(0, 5).map((tenant) => (
-              <div key={tenant.tenantId} className="flex items-center justify-between gap-3 rounded-md border bg-slate-50 p-3">
+              <div key={tenant.tenantId} className="flex items-center justify-between gap-3 rounded-md border bg-[var(--color-bg-muted)] p-3">
                 <div className="min-w-0">
-                  <p className="truncate text-sm font-semibold text-slate-950">{tenant.tenantName}</p>
+                  <p className="truncate text-sm font-semibold text-[var(--color-text-main)]">{tenant.tenantName}</p>
                   <p className="truncate text-xs text-muted-foreground">{tenant.industry}</p>
                 </div>
                 <StatusBadge status={tenant.status} />
@@ -146,13 +146,13 @@ export function DashboardPage() {
           <CardContent>
             <div className="grid gap-3 md:grid-cols-2">
               {(analyticsQuery.data?.tenantUsage ?? []).map((tenant) => (
-                <div key={tenant.tenantName} className="rounded-md border bg-slate-50 p-3">
+                <div key={tenant.tenantName} className="rounded-md border bg-[var(--color-bg-muted)] p-3">
                   <div className="mb-2 flex items-center justify-between gap-3 text-sm">
-                    <span className="font-medium text-slate-950">{tenant.tenantName}</span>
+                    <span className="font-medium text-[var(--color-text-main)]">{tenant.tenantName}</span>
                     <span className="text-muted-foreground">{tenant.conversations.toLocaleString()}</span>
                   </div>
-                  <div className="h-2 rounded-full bg-white">
-                    <div className="h-2 rounded-full bg-[#16A596]" style={{ width: `${Math.min(tenant.conversations / 6, 100)}%` }} />
+                  <div className="h-2 rounded-full bg-[var(--color-bg-card)]">
+                    <div className="h-2 rounded-full bg-[#22C55E]" style={{ width: `${Math.min(tenant.conversations / 6, 100)}%` }} />
                   </div>
                 </div>
               ))}
@@ -169,7 +169,7 @@ export function DashboardPage() {
             <HealthRow label="Knowledge service" status={failedUploads ? "FAILED" : "ACTIVE"} />
             <HealthRow label="Chat service" status="ACTIVE" />
             <HealthRow label="Lead service" status="ACTIVE" />
-            <div className="flex items-center gap-2 rounded-md border bg-slate-50 p-3 text-sm text-muted-foreground">
+            <div className="flex items-center gap-2 rounded-md border bg-[var(--color-bg-muted)] p-3 text-sm text-muted-foreground">
               <Clock className="h-4 w-4 text-primary" />
               Avg response time: {summaryQuery.data?.averageResponseTimeMs ?? 0} ms
             </div>
@@ -203,15 +203,15 @@ function MetricCard({
         <CardTitle className="text-sm font-medium text-muted-foreground">{label}</CardTitle>
         <Icon className="h-4 w-4 text-primary" />
       </CardHeader>
-      <CardContent>{loading ? <Skeleton className="h-8 w-24" /> : <div className="text-2xl font-semibold text-slate-950">{formatted}</div>}</CardContent>
+      <CardContent>{loading ? <Skeleton className="h-8 w-24" /> : <div className="text-2xl font-semibold text-[var(--color-text-main)]">{formatted}</div>}</CardContent>
     </Card>
   );
 }
 
 function HealthRow({ label, status }: { label: string; status: string }) {
   return (
-    <div className="flex items-center justify-between gap-3 rounded-md border bg-slate-50 p-3 text-sm">
-      <span className="font-medium text-slate-800">{label}</span>
+    <div className="flex items-center justify-between gap-3 rounded-md border bg-[var(--color-bg-muted)] p-3 text-sm">
+      <span className="font-medium text-[var(--color-text-secondary)]">{label}</span>
       <StatusBadge status={status} />
     </div>
   );

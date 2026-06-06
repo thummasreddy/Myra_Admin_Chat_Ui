@@ -56,7 +56,7 @@ export function TestExtractionPanel({ tenantId }: TestExtractionPanelProps) {
         </Button>
 
         {result ? (
-          <div className="space-y-3 rounded-md border bg-slate-50 p-3">
+          <div className="space-y-3 rounded-md border bg-[var(--color-bg-muted)] p-3">
             <div className="flex flex-wrap items-center gap-2">
               <span className="text-xs font-semibold uppercase text-muted-foreground">Intent</span>
               <Badge>{result.intent}</Badge>
@@ -92,7 +92,7 @@ function JsonResult({ label, value }: { label: string; value: Record<string, unk
   return (
     <div>
       <p className="text-xs font-semibold uppercase text-muted-foreground">{label}</p>
-      <pre className="mt-2 max-h-40 overflow-auto rounded-md border bg-white p-3 text-xs leading-5 text-slate-700">
+      <pre className="mt-2 max-h-40 overflow-auto rounded-md border bg-[var(--color-bg-card)] p-3 text-xs leading-5 text-[var(--color-text-secondary)]">
         {JSON.stringify(value, null, 2)}
       </pre>
     </div>

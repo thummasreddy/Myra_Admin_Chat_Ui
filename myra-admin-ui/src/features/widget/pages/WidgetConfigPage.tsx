@@ -54,7 +54,7 @@ export function WidgetConfigPage() {
       tenantId,
       assistantName: "Myra",
       assistantIntro: "Hi, I am Myra, your AI assistant.",
-      brandColor: "#EA5455",
+      brandColor: "#1591DC",
       chatPosition: "bottom-right",
       launcherLabel: "Chat with Myra",
       welcomeMessage: "Hi, I am Myra. How can I help?",
@@ -154,7 +154,7 @@ export function WidgetConfigPage() {
                   </div>
                 </>
               ) : (
-                <div className="rounded-md border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
+                <div className="rounded-md border border-amber-400/30 bg-[var(--color-warning-bg)] p-4 text-sm text-[var(--color-warning)]">
                   Embed code is generated only after admin approval. Current status:{" "}
                   <StatusBadge status={tenant?.status ?? "PENDING_ADMIN_APPROVAL"} />
                 </div>

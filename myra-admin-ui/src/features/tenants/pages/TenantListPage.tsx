@@ -90,7 +90,7 @@ export function TenantListPage() {
         header: "Tenant name",
         accessor: (tenant) => (
           <div>
-            <p className="font-medium text-slate-950">{tenant.tenantName}</p>
+            <p className="font-medium text-[var(--color-text-main)]">{tenant.tenantName}</p>
             <p className="text-sm text-muted-foreground">{tenant.businessEmail ?? tenant.supportEmail}</p>
           </div>
         )
@@ -116,13 +116,13 @@ export function TenantListPage() {
               <Link to={`/tenant-review/${tenant.tenantId}`}>Review</Link>
             </Button>
             <Button variant="ghost" size="icon" onClick={() => approveMutation.mutate(tenant.tenantId)} aria-label={`Approve ${tenant.tenantName}`}>
-              <ShieldCheck className="h-4 w-4 text-emerald-600" />
+              <ShieldCheck className="h-4 w-4 text-[var(--color-success)]" />
             </Button>
             <Button variant="ghost" size="icon" onClick={() => rejectMutation.mutate(tenant.tenantId)} aria-label={`Reject ${tenant.tenantName}`}>
-              <XCircle className="h-4 w-4 text-red-600" />
+              <XCircle className="h-4 w-4 text-destructive" />
             </Button>
             <Button variant="ghost" size="icon" onClick={() => deactivateMutation.mutate(tenant.tenantId)} aria-label={`Deactivate ${tenant.tenantName}`}>
-              <PowerOff className="h-4 w-4 text-slate-500" />
+              <PowerOff className="h-4 w-4 text-muted-foreground" />
             </Button>
             <Button variant="ghost" size="icon" onClick={() => emailMutation.mutate(tenant.tenantId)} disabled={!tenant.embedCode} aria-label={`Resend embed code for ${tenant.tenantName}`}>
               <Send className="h-4 w-4 text-primary" />

@@ -64,7 +64,7 @@ export function KnowledgeBasePage() {
         header: "Source",
         accessor: (source) => (
           <div>
-            <p className="font-medium text-slate-950">{source.name}</p>
+            <p className="font-medium text-[var(--color-text-main)]">{source.name}</p>
             <p className="text-sm text-muted-foreground">{source.type} {source.size ? `- ${source.size}` : ""}</p>
           </div>
         )
@@ -76,7 +76,7 @@ export function KnowledgeBasePage() {
         className: "text-right",
         accessor: (source) => (
           <Button variant="ghost" size="icon" onClick={() => setDeleteId(source.id)} aria-label={`Delete ${source.name}`}>
-            <Trash2 className="h-4 w-4 text-red-600" />
+            <Trash2 className="h-4 w-4 text-destructive" />
           </Button>
         )
       }
@@ -100,7 +100,7 @@ export function KnowledgeBasePage() {
         }
       />
 
-      <div className="mb-4 rounded-md border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-800">
+      <div className="mb-4 rounded-md border border-amber-400/30 bg-[var(--color-warning-bg)] px-4 py-3 text-sm font-medium text-[var(--color-warning)]">
         {documentReviewMessage}
       </div>
 

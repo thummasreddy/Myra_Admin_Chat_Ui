@@ -39,7 +39,7 @@ export function MockPaymentPage() {
   if (registrationQuery.isLoading) return <LoadingSpinner label="Loading payment details" />;
   if (!registrationQuery.data) {
     return (
-      <main className="min-h-screen bg-[#222831]">
+      <main className="min-h-screen bg-[var(--color-bg-main)]">
         <PublicNav />
         <section className="mx-auto max-w-3xl px-4 py-12">
           <Card className="public-card">
@@ -56,7 +56,7 @@ export function MockPaymentPage() {
   const plan = getSubscriptionPlan(registration.selectedSubscriptionPlan);
 
   return (
-    <main className="min-h-screen bg-[#222831] text-white">
+    <main className="min-h-screen bg-[var(--color-bg-main)] text-white">
       <PublicNav />
       <section className="public-pricing-hero border-b px-4 py-12 text-white sm:px-6 lg:px-8">
         <div className="mx-auto max-w-7xl">
@@ -88,7 +88,7 @@ export function MockPaymentPage() {
                 <SummaryItem label="Plan" value={plan.name} />
                 <SummaryItem label="Duration" value={`${plan.durationMonths} month${plan.durationMonths > 1 ? "s" : ""}`} />
               </div>
-              <div className="rounded-md border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-800">
+              <div className="rounded-md border border-amber-400/30 bg-[var(--color-warning-bg)] px-4 py-3 text-sm font-medium text-[var(--color-warning)]">
                 Payment integration is currently in test mode. This screen will later connect to Stripe, Razorpay, or another payment provider.
               </div>
               <div className="rounded-md border border-primary/15 bg-primary/5 p-4">
@@ -111,21 +111,21 @@ export function MockPaymentPage() {
           <Card className="public-card">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-base">
-                <LockKeyhole className="h-5 w-5 text-emerald-600" />
+                <LockKeyhole className="h-5 w-5 text-[var(--color-success)]" />
                 What happens next
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3 text-sm text-muted-foreground">
               <div className="flex gap-2">
-                <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />
+                <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-[var(--color-success)]" />
                 <p>Subscription and payment records are created.</p>
               </div>
               <div className="flex gap-2">
-                <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />
+                <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-[var(--color-success)]" />
                 <p>Tenant onboarding status becomes PENDING_ADMIN_APPROVAL.</p>
               </div>
               <div className="flex gap-2">
-                <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />
+                <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-[var(--color-success)]" />
                 <p>You will see an onboarding success page with instructions to log in and upload knowledge documents.</p>
               </div>
             </CardContent>
@@ -152,9 +152,9 @@ export function MockPaymentPage() {
 
 function SummaryItem({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-md border border-primary/15 bg-white p-3">
+    <div className="rounded-md border border-primary/15 bg-[var(--color-bg-card)] p-3">
       <p className="text-xs font-medium uppercase text-muted-foreground">{label}</p>
-      <p className="mt-1 break-words text-sm font-semibold text-slate-950">{value}</p>
+      <p className="mt-1 break-words text-sm font-semibold text-[var(--color-text-main)]">{value}</p>
     </div>
   );
 }

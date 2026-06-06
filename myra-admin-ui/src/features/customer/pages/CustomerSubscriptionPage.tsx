@@ -43,7 +43,7 @@ export function CustomerSubscriptionPage() {
           <CardContent className="space-y-4">
             <div>
               <p className="text-sm font-medium text-muted-foreground">Plan</p>
-              <p className="mt-1 text-4xl font-semibold text-slate-950">{plan.name}</p>
+              <p className="mt-1 text-4xl font-semibold text-[var(--color-text-main)]">{plan.name}</p>
               <p className="mt-2 text-sm text-muted-foreground">{formatPlanPrice(plan)} · {plan.renewalCadence}</p>
             </div>
             <div className="grid gap-3 sm:grid-cols-2">
@@ -58,7 +58,7 @@ export function CustomerSubscriptionPage() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <ShieldCheck className="h-5 w-5 text-emerald-600" />
+              <ShieldCheck className="h-5 w-5 text-[var(--color-success)]" />
               Included
             </CardTitle>
           </CardHeader>
@@ -73,8 +73,8 @@ export function CustomerSubscriptionPage() {
               "Basic analytics",
               "Email onboarding updates"
             ].map((item) => (
-              <div key={item} className="flex items-start gap-2 rounded-md border bg-slate-50 p-3 text-sm">
-                <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />
+              <div key={item} className="flex items-start gap-2 rounded-md border bg-[var(--color-bg-muted)] p-3 text-sm">
+                <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-[var(--color-success)]" />
                 <span>{item}</span>
               </div>
             ))}
@@ -87,9 +87,9 @@ export function CustomerSubscriptionPage() {
 
 function Info({ label, value }: { label: string; value: ReactNode }) {
   return (
-    <div className="rounded-md border bg-slate-50 p-3">
+    <div className="rounded-md border bg-[var(--color-bg-muted)] p-3">
       <p className="text-xs font-medium uppercase text-muted-foreground">{label}</p>
-      <div className="mt-1 text-sm font-semibold text-slate-950">{value}</div>
+      <div className="mt-1 text-sm font-semibold text-[var(--color-text-main)]">{value}</div>
     </div>
   );
 }

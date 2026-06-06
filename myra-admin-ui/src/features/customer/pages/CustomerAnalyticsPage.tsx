@@ -41,7 +41,7 @@ export function CustomerAnalyticsPage() {
                 <div key={point.label} className="flex min-w-0 flex-1 flex-col items-center gap-2">
                   <div className="flex h-48 w-full items-end rounded-md bg-white/5 p-1">
                     <div
-                      className="w-full rounded-sm bg-[#EA5455]"
+                      className="w-full rounded-sm bg-[#1591DC]"
                       style={{ height: `${Math.max((point.conversations / maxConversations) * 100, 8)}%` }}
                       aria-label={`${point.conversations} conversations on ${point.label}`}
                     />
@@ -59,9 +59,9 @@ export function CustomerAnalyticsPage() {
           </CardHeader>
           <CardContent className="space-y-3">
             {(summary?.topQuestions ?? []).map((item) => (
-              <div key={item.question} className="rounded-md border bg-slate-50 p-3">
+              <div key={item.question} className="rounded-md border bg-[var(--color-bg-muted)] p-3">
                 <div className="flex items-center justify-between gap-3">
-                  <p className="text-sm font-medium text-slate-950">{item.question}</p>
+                  <p className="text-sm font-medium text-[var(--color-text-main)]">{item.question}</p>
                   <span className="text-sm font-semibold text-primary">{item.count}</span>
                 </div>
               </div>
@@ -81,7 +81,7 @@ function Metric({ title, value, icon: Icon }: { title: string; value: string; ic
         <Icon className="h-4 w-4 text-primary" />
       </CardHeader>
       <CardContent>
-        <div className="text-2xl font-semibold text-slate-950">{value}</div>
+        <div className="text-2xl font-semibold text-[var(--color-text-main)]">{value}</div>
       </CardContent>
     </Card>
   );

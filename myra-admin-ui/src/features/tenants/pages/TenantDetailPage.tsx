@@ -31,7 +31,7 @@ import { formatDate } from "@/lib/utils";
 
 function FieldError({ name, errors }: { name: keyof TenantWizardFormValues; errors: FieldErrors<TenantWizardFormValues> }) {
   const message = errors[name]?.message;
-  return message ? <p className="text-sm text-red-600">{String(message)}</p> : null;
+  return message ? <p className="text-sm text-destructive">{String(message)}</p> : null;
 }
 
 export function TenantDetailPage() {
@@ -156,7 +156,7 @@ export function TenantDetailPage() {
             <CardTitle>API Key</CardTitle>
           </CardHeader>
           <CardContent className="flex flex-col gap-3 sm:flex-row sm:items-center">
-            <code className="min-w-0 flex-1 break-all rounded-md bg-slate-100 px-3 py-2 text-sm">{tenant.apiKey}</code>
+            <code className="min-w-0 flex-1 break-all rounded-md bg-[var(--color-bg-muted)] px-3 py-2 text-sm">{tenant.apiKey}</code>
             <Button variant="outline" onClick={() => copy(tenant.apiKey)}>
               <Copy className="h-4 w-4" />
               Copy
@@ -176,17 +176,17 @@ export function TenantDetailPage() {
         <CardContent className="grid gap-4 text-sm md:grid-cols-2">
           <div>
             <p className="text-muted-foreground">Business email</p>
-            <p className="font-medium text-slate-950">{tenant.businessEmail ?? tenant.supportEmail}</p>
+            <p className="font-medium text-[var(--color-text-main)]">{tenant.businessEmail ?? tenant.supportEmail}</p>
           </div>
           <div>
             <p className="text-muted-foreground">Phone number</p>
-            <p className="font-medium text-slate-950">{tenant.phoneNumber ?? "N/A"}</p>
+            <p className="font-medium text-[var(--color-text-main)]">{tenant.phoneNumber ?? "N/A"}</p>
           </div>
           <div className="md:col-span-2">
             <p className="text-muted-foreground">Business description</p>
-            <p className="font-medium text-slate-950">{tenant.businessDescription ?? "No public registration description was provided."}</p>
+            <p className="font-medium text-[var(--color-text-main)]">{tenant.businessDescription ?? "No public registration description was provided."}</p>
           </div>
-          <div className="rounded-md border border-amber-200 bg-amber-50 px-4 py-3 text-amber-800 md:col-span-2">
+          <div className="rounded-md border border-amber-400/30 bg-[var(--color-warning-bg)] px-4 py-3 text-[var(--color-warning)] md:col-span-2">
             {documentReviewMessage}
           </div>
         </CardContent>

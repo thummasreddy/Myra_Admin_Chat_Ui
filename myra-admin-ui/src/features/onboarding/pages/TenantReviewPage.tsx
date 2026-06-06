@@ -183,7 +183,7 @@ export function TenantReviewPage() {
       />
 
       {!paid ? (
-        <div className="mb-6 rounded-md border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-800">
+        <div className="mb-6 rounded-md border border-amber-400/30 bg-[var(--color-warning-bg)] px-4 py-3 text-sm font-medium text-[var(--color-warning)]">
           Admin cannot approve this tenant until payment status is SUCCESS.
         </div>
       ) : null}
@@ -231,7 +231,7 @@ export function TenantReviewPage() {
           <InfoRow label="Review owner" value={user?.name ?? "Admin"} />
           <InfoRow label="Risk signal" value={tenant.documentProcessingStatus === "REJECTED" ? "Document issue detected" : "No blocking issue"} />
           <InfoRow label="Requested action" value={tenant.approvalStatus === "PENDING_REVIEW" ? "Approve, reject, or request more information" : "No pending action"} />
-          <p className="rounded-md border bg-slate-50 p-3 text-sm text-muted-foreground">
+          <p className="rounded-md border bg-[var(--color-bg-muted)] p-3 text-sm text-muted-foreground">
             Review website legitimacy, uploaded knowledge quality, payment status, assistant configuration, and any business-specific compliance concerns before activation.
           </p>
         </ReviewCard>
@@ -242,7 +242,7 @@ export function TenantReviewPage() {
           <CardTitle>Uploaded Knowledge Documents</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="rounded-md border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-800">
+          <div className="rounded-md border border-amber-400/30 bg-[var(--color-warning-bg)] px-4 py-3 text-sm font-medium text-[var(--color-warning)]">
             Customer has been informed that documents are usually reviewed and processed within 3 business days.
           </div>
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
@@ -304,7 +304,7 @@ export function TenantReviewPage() {
             {notifications.map((event) => (
               <div key={event.id} className="flex items-start justify-between gap-3 rounded-md border p-3">
                 <div>
-                  <p className="text-sm font-medium text-slate-950">{event.subject}</p>
+                  <p className="text-sm font-medium text-[var(--color-text-main)]">{event.subject}</p>
                   <p className="text-xs text-muted-foreground">{event.recipient}</p>
                   {event.body ? <p className="mt-1 text-xs text-muted-foreground">{event.body}</p> : null}
                 </div>
@@ -327,10 +327,10 @@ export function TenantReviewPage() {
 
       {rejectOpen ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 p-4">
-          <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-xl">
+          <div className="w-full max-w-md rounded-lg bg-[var(--color-bg-card)] p-6 shadow-xl">
             <div className="mb-4 flex items-center gap-2">
-              <XCircle className="h-5 w-5 text-red-600" />
-              <h2 className="text-lg font-semibold text-slate-950">Reject tenant</h2>
+              <XCircle className="h-5 w-5 text-destructive" />
+              <h2 className="text-lg font-semibold text-[var(--color-text-main)]">Reject tenant</h2>
             </div>
             <p className="mb-3 text-sm text-muted-foreground">A rejection reason is required.</p>
             <Textarea value={rejectionReason} onChange={(event) => setRejectionReason(event.target.value)} className="min-h-28" />
@@ -371,7 +371,7 @@ function InfoRow({ label, value }: { label: string; value: ReactNode }) {
   return (
     <div className="flex items-start justify-between gap-4 border-b pb-2 last:border-b-0 last:pb-0">
       <span className="text-muted-foreground">{label}</span>
-      <span className="max-w-[65%] break-words text-right font-medium text-slate-950">{value}</span>
+      <span className="max-w-[65%] break-words text-right font-medium text-[var(--color-text-main)]">{value}</span>
     </div>
   );
 }

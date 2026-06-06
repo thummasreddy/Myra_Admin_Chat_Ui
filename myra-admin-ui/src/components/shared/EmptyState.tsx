@@ -10,7 +10,7 @@ export function EmptyState({ title, description, action }: { title: string; desc
           <Inbox className="h-6 w-6" />
         </div>
         <div>
-          <h3 className="font-semibold text-slate-950">{title}</h3>
+          <h3 className="font-semibold text-[var(--color-text-main)]">{title}</h3>
           {description ? <p className="mt-1 max-w-md text-sm text-muted-foreground">{description}</p> : null}
         </div>
         {action}

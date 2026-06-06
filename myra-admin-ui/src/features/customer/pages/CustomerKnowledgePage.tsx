@@ -82,7 +82,7 @@ export function CustomerKnowledgePage() {
               {source.type === "WEBSITE" ? <Globe className="h-4 w-4" /> : <FileText className="h-4 w-4" />}
             </div>
             <div>
-              <p className="font-medium text-slate-950">{source.name}</p>
+              <p className="font-medium text-[var(--color-text-main)]">{source.name}</p>
               <p className="text-sm text-muted-foreground">
                 {source.type} {source.size ? `- ${source.size}` : ""}
               </p>
@@ -107,7 +107,7 @@ export function CustomerKnowledgePage() {
               <RefreshCw className="h-4 w-4 text-primary" />
             </Button>
             <Button variant="ghost" size="icon" onClick={() => setDeleteId(source.id)} aria-label={`Delete ${source.name}`}>
-              <Trash2 className="h-4 w-4 text-red-600" />
+              <Trash2 className="h-4 w-4 text-destructive" />
             </Button>
           </div>
         )
@@ -125,7 +125,7 @@ export function CustomerKnowledgePage() {
         description={customerDashboardMessages.knowledgeUpload}
       />
 
-      <div className="mb-6 rounded-md border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-800">
+      <div className="mb-6 rounded-md border border-amber-400/30 bg-[var(--color-warning-bg)] px-4 py-3 text-sm font-medium text-[var(--color-warning)]">
         {documentReviewMessage} Myra answers based on business-provided and approved knowledge.
       </div>
 

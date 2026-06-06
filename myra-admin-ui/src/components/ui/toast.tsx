@@ -52,15 +52,15 @@ export function Toaster() {
         <div
           key={item.id}
           className={cn(
-            "rounded-lg border bg-white p-4 shadow-lg",
-            item.variant === "success" && "border-emerald-200",
-            item.variant === "error" && "border-red-200",
+            "rounded-lg border bg-[var(--color-bg-card)] p-4 shadow-lg",
+            item.variant === "success" && "border-emerald-400/30",
+            item.variant === "error" && "border-destructive/30",
             item.variant === "info" && "border-primary/20"
           )}
         >
           <div className="flex items-start gap-3">
             <div className="min-w-0 flex-1">
-              <p className="font-medium text-slate-950">{item.title}</p>
+              <p className="font-medium text-[var(--color-text-main)]">{item.title}</p>
               {item.description ? <p className="mt-1 text-sm text-muted-foreground">{item.description}</p> : null}
             </div>
             <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => dismissToast(item.id)} aria-label="Dismiss toast">

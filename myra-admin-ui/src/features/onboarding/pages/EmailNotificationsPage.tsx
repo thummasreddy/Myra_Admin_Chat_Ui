@@ -20,7 +20,7 @@ export function EmailNotificationsPage() {
         header: "Email content",
         accessor: (event) => (
           <div>
-            <p className="font-medium text-slate-950">{event.subject}</p>
+            <p className="font-medium text-[var(--color-text-main)]">{event.subject}</p>
             <p className="mt-1 max-w-xl text-sm text-muted-foreground">{event.body ?? emailTemplates[event.type].body}</p>
           </div>
         )

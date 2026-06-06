@@ -44,7 +44,7 @@ export function AdminApprovalsPage() {
 
   const columns = useMemo<DataTableColumn<Tenant>[]>(
     () => [
-      { header: "Business name", accessor: (tenant) => <span className="font-medium text-slate-950">{tenant.tenantName}</span> },
+      { header: "Business name", accessor: (tenant) => <span className="font-medium text-[var(--color-text-main)]">{tenant.tenantName}</span> },
       { header: "Website URL", accessor: (tenant) => <span className="break-all text-sm">{tenant.websiteUrl}</span> },
       { header: "Business email", accessor: (tenant) => tenant.businessEmail ?? tenant.supportEmail },
       { header: "Plan", accessor: (tenant) => getSubscriptionPlan(tenant.selectedSubscriptionPlan).name },
@@ -141,7 +141,7 @@ function SummaryCard({ title, value }: { title: string; value: number }) {
         <ShieldCheck className="h-4 w-4 text-primary" />
       </CardHeader>
       <CardContent>
-        <div className="text-2xl font-semibold text-slate-950">{value}</div>
+        <div className="text-2xl font-semibold text-[var(--color-text-main)]">{value}</div>
       </CardContent>
     </Card>
   );

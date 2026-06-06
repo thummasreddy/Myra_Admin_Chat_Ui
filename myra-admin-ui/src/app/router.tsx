@@ -86,13 +86,13 @@ function ProtectedCustomerRoutes() {
 }
 
 export const router = createBrowserRouter([
-  { path: "/", element: withTheme("light", <PublicLandingPage />, true) },
-  { path: "/pricing", element: withTheme("light", <PricingPage />) },
-  { path: "/register", element: withTheme("light", <RegisterBusinessPage />) },
-  { path: "/mock-payment/:registrationId", element: withTheme("light", <MockPaymentPage />) },
-  { path: "/onboarding-success/:registrationId", element: withTheme("light", <OnboardingSuccessPage />) },
-  { path: "/pending-approval/:registrationId", element: withTheme("light", <OnboardingSuccessPage />) },
-  { path: "/login", element: withTheme("light", <LoginPage />) },
+  { path: "/", element: withTheme("dark", <PublicLandingPage />, true) },
+  { path: "/pricing", element: withTheme("dark", <PricingPage />) },
+  { path: "/register", element: withTheme("dark", <RegisterBusinessPage />) },
+  { path: "/mock-payment/:registrationId", element: withTheme("dark", <MockPaymentPage />) },
+  { path: "/onboarding-success/:registrationId", element: withTheme("dark", <OnboardingSuccessPage />) },
+  { path: "/pending-approval/:registrationId", element: withTheme("dark", <OnboardingSuccessPage />) },
+  { path: "/login", element: withTheme("dark", <LoginPage />) },
   {
     element: <ProtectedAdminRoutes />,
     children: [

@@ -34,7 +34,7 @@ export function PaymentsPage() {
           <CreditCard className="h-4 w-4 text-primary" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-semibold text-slate-950">MOCK</div>
+          <div className="text-2xl font-semibold text-[var(--color-text-main)]">MOCK</div>
         </CardContent>
       </Card>
       <DataTable

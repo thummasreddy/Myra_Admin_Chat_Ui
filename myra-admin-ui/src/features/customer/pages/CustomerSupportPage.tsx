@@ -150,7 +150,7 @@ export function CustomerSupportPage() {
               <Send className="h-4 w-4" />
               {chatTestMutation.isPending ? "Testing..." : "Send Test Message"}
             </Button>
-            {chatReply ? <div className="rounded-md border bg-slate-50 p-3 text-sm leading-6 text-slate-700">{chatReply}</div> : null}
+            {chatReply ? <div className="rounded-md border bg-[var(--color-bg-muted)] p-3 text-sm leading-6 text-[var(--color-text-secondary)]">{chatReply}</div> : null}
           </CardContent>
         </Card>
 

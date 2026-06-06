@@ -86,7 +86,7 @@ export function TenantCreateWizardPage() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid gap-3 md:grid-cols-2">
-              <div className="rounded-md border bg-slate-50 p-4">
+              <div className="rounded-md border bg-[var(--color-bg-muted)] p-4">
                 <p className="text-sm font-medium text-muted-foreground">tenantId</p>
                 <div className="mt-2 flex items-center justify-between gap-2">
                   <code className="break-all text-sm font-semibold">{created.tenantId}</code>
@@ -95,7 +95,7 @@ export function TenantCreateWizardPage() {
                   </Button>
                 </div>
               </div>
-              <div className="rounded-md border bg-slate-50 p-4">
+              <div className="rounded-md border bg-[var(--color-bg-muted)] p-4">
                 <p className="text-sm font-medium text-muted-foreground">apiKey</p>
                 <div className="mt-2 flex items-center justify-between gap-2">
                   <code className="break-all text-sm font-semibold">{created.apiKey}</code>

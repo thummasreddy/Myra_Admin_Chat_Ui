@@ -5,12 +5,12 @@ import { cn } from "@/lib/utils";
 export function WidgetPreview({ config }: { config: WidgetConfig }) {
   return (
     <div className="relative min-h-[520px] overflow-hidden rounded-lg border bg-gradient-to-br from-slate-50 to-primary/10 p-6">
-      <div className="rounded-md bg-white p-5 shadow-sm">
-        <p className="text-sm font-medium text-slate-950">Website preview</p>
+      <div className="rounded-md bg-[var(--color-bg-card)] p-5 shadow-sm">
+        <p className="text-sm font-medium text-[var(--color-text-main)]">Website preview</p>
         <div className="mt-4 space-y-2">
           <div className="h-3 w-2/3 rounded bg-slate-200" />
           <div className="h-3 w-1/2 rounded bg-slate-200" />
-          <div className="h-28 rounded bg-slate-100" />
+          <div className="h-28 rounded bg-[var(--color-bg-muted)]" />
         </div>
       </div>
 
@@ -20,7 +20,7 @@ export function WidgetPreview({ config }: { config: WidgetConfig }) {
           config.chatPosition === "bottom-left" ? "left-6" : "right-6"
         )}
       >
-        <div className="overflow-hidden rounded-lg border bg-white shadow-xl">
+        <div className="overflow-hidden rounded-lg border bg-[var(--color-bg-card)] shadow-xl">
           <div className="flex items-center gap-3 p-4 text-white" style={{ backgroundColor: config.brandColor }}>
             <div className="flex h-9 w-9 items-center justify-center rounded-full bg-white/20">
               <Bot className="h-5 w-5" />
@@ -31,11 +31,11 @@ export function WidgetPreview({ config }: { config: WidgetConfig }) {
             </div>
           </div>
           <div className="space-y-3 p-4">
-            <div className="max-w-[85%] rounded-lg bg-slate-100 p-3 text-sm text-slate-700">{config.welcomeMessage}</div>
+            <div className="max-w-[85%] rounded-lg bg-[var(--color-bg-muted)] p-3 text-sm text-[var(--color-text-secondary)]">{config.welcomeMessage}</div>
             {config.enableSuggestedPrompts ? (
               <div className="flex flex-wrap gap-2">
                 {["What can you help with?", "Contact support"].map((prompt) => (
-                  <span key={prompt} className="rounded-full border px-3 py-1 text-xs text-slate-600">
+                  <span key={prompt} className="rounded-full border px-3 py-1 text-xs text-[var(--color-text-muted)]">
                     {prompt}
                   </span>
                 ))}

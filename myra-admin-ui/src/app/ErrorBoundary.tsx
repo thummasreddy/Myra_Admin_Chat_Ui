@@ -23,7 +23,7 @@ export class ErrorBoundary extends Component<{ children: ReactNode }, ErrorBound
     if (!this.state.hasError) return this.props.children;
 
     return (
-      <main className="flex min-h-screen items-center justify-center bg-[#222831] p-4">
+      <main className="flex min-h-screen items-center justify-center bg-[var(--color-bg-main)] p-4">
         <Card className="max-w-lg">
           <CardHeader>
             <CardTitle>Something went wrong</CardTitle>
@@ -32,7 +32,7 @@ export class ErrorBoundary extends Component<{ children: ReactNode }, ErrorBound
             <p className="text-sm text-muted-foreground">
               The admin portal hit an unexpected error. Refreshing usually restores the session.
             </p>
-            {this.state.message ? <pre className="rounded-md bg-slate-100 p-3 text-xs text-slate-700">{this.state.message}</pre> : null}
+            {this.state.message ? <pre className="rounded-md bg-[var(--color-bg-muted)] p-3 text-xs text-[var(--color-text-secondary)]">{this.state.message}</pre> : null}
             <Button onClick={() => window.location.reload()}>Refresh app</Button>
           </CardContent>
         </Card>

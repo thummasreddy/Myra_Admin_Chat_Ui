@@ -40,8 +40,8 @@ export function DocumentUpload({
       <CardContent className="space-y-4">
         <div
           className={cn(
-            "rounded-lg border border-dashed bg-slate-50 p-6 text-center transition-colors",
-            isDragging ? "border-primary bg-primary/10" : "border-slate-300"
+            "rounded-lg border border-dashed bg-[var(--color-bg-muted)] p-6 text-center transition-colors",
+            isDragging ? "border-primary bg-primary/10" : "border-input"
           )}
           onDragOver={(event) => {
             event.preventDefault();
@@ -55,7 +55,7 @@ export function DocumentUpload({
           }}
         >
           <UploadCloud className="mx-auto h-9 w-9 text-primary" />
-          <p className="mt-3 text-sm font-medium text-slate-950">{fileName || "Drop PDF, DOCX, TXT, or CSV files"}</p>
+          <p className="mt-3 text-sm font-medium text-[var(--color-text-main)]">{fileName || "Drop PDF, DOCX, TXT, or CSV files"}</p>
           <p className="mt-1 text-xs text-muted-foreground">Uploads move through UPLOADED, PROCESSING, READY, or FAILED states.</p>
           <input
             ref={inputRef}
@@ -74,8 +74,8 @@ export function DocumentUpload({
         </Button>
 
         {onWebsiteUrl ? (
-          <div className="space-y-2 rounded-md border bg-slate-50 p-3">
-            <div className="flex items-center gap-2 text-sm font-semibold text-slate-950">
+          <div className="space-y-2 rounded-md border bg-[var(--color-bg-muted)] p-3">
+            <div className="flex items-center gap-2 text-sm font-semibold text-[var(--color-text-main)]">
               <Globe className="h-4 w-4 text-primary" />
               Website URL content
             </div>

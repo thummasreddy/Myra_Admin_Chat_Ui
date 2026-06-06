@@ -7,7 +7,7 @@ import type { TenantWizardFormValues } from "@/features/tenants/tenant.schema";
 function FieldError({ name }: { name: keyof TenantWizardFormValues }) {
   const { formState } = useFormContext<TenantWizardFormValues>();
   const message = formState.errors[name]?.message;
-  return message ? <p className="text-sm text-red-600">{String(message)}</p> : null;
+  return message ? <p className="text-sm text-destructive">{String(message)}</p> : null;
 }
 
 export function AiConfigStep() {

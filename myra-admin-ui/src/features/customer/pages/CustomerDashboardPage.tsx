@@ -59,16 +59,16 @@ export function CustomerDashboardPage() {
         }
       />
 
-      <div className="mb-6 rounded-md border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-800">
+      <div className="mb-6 rounded-md border border-amber-400/30 bg-[var(--color-warning-bg)] px-4 py-3 text-sm font-medium text-[var(--color-warning)]">
         {documentReviewMessage}
       </div>
 
       {!embedReady ? (
-        <div className="mb-6 rounded-md border bg-white px-4 py-3 text-sm font-medium text-slate-800">
+        <div className="mb-6 rounded-md border bg-[var(--color-bg-card)] px-4 py-3 text-sm font-medium text-[var(--color-text-secondary)]">
           {customerDashboardMessages.approvalPending}
         </div>
       ) : (
-        <div className="mb-6 rounded-md border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-800">
+        <div className="mb-6 rounded-md border border-emerald-400/30 bg-[var(--color-success-bg)] px-4 py-3 text-sm font-medium text-[var(--color-success)]">
           {customerDashboardMessages.embedReady}
         </div>
       )}
@@ -132,7 +132,7 @@ export function CustomerDashboardPage() {
           <CardContent className="space-y-3">
             {analyticsQuery.data?.topQuestions.slice(0, 4).map((item) => (
               <div key={item.question} className="flex items-center justify-between gap-3 rounded-md border p-3 text-sm">
-                <span className="font-medium text-slate-800">{item.question}</span>
+                <span className="font-medium text-[var(--color-text-secondary)]">{item.question}</span>
                 <span className="text-muted-foreground">{item.count}</span>
               </div>
             ))}
@@ -147,7 +147,7 @@ export function CustomerDashboardPage() {
             {(notificationsQuery.data ?? []).slice(0, 6).map((event) => (
               <div key={event.id} className="flex items-start justify-between gap-3 rounded-md border p-3">
                 <div>
-                  <p className="text-sm font-medium text-slate-950">{event.subject}</p>
+                  <p className="text-sm font-medium text-[var(--color-text-main)]">{event.subject}</p>
                   <p className="text-xs text-muted-foreground">{formatDate(event.sendAt ?? event.createdAt)}</p>
                 </div>
                 <StatusBadge status={event.status} />
@@ -181,7 +181,7 @@ function MetricCard({
         <Icon className="h-4 w-4 text-primary" />
       </CardHeader>
       <CardContent>
-        {badge ? <StatusBadge status={value} /> : <div className="text-2xl font-semibold text-slate-950">{value}</div>}
+        {badge ? <StatusBadge status={value} /> : <div className="text-2xl font-semibold text-[var(--color-text-main)]">{value}</div>}
         {helper ? <p className="mt-1 text-sm text-muted-foreground">{helper}</p> : null}
       </CardContent>
     </Card>
@@ -192,7 +192,7 @@ function InfoRow({ label, value }: { label: string; value: ReactNode }) {
   return (
     <div className="flex items-center justify-between gap-4 border-b pb-2 last:border-b-0 last:pb-0">
       <span className="text-muted-foreground">{label}</span>
-      <span className="text-right font-medium text-slate-950">{value}</span>
+      <span className="text-right font-medium text-[var(--color-text-main)]">{value}</span>
     </div>
   );
 }

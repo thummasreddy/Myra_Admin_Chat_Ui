@@ -15,7 +15,7 @@ export function LeadsPage() {
         header: "Lead",
         accessor: (lead) => (
           <div>
-            <p className="font-medium text-slate-950">{lead.name}</p>
+            <p className="font-medium text-[var(--color-text-main)]">{lead.name}</p>
             <p className="text-sm text-muted-foreground">{lead.email}</p>
           </div>
         )

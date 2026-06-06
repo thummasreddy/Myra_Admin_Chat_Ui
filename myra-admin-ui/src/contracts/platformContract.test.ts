@@ -61,7 +61,7 @@ describe("platform contract", () => {
   it("maps tenant UI fields to backend snake_case contract fields", () => {
     const payload = toTenantUpdateRequest({
       tenantName: "Acme",
-      brandColor: "#EA5455",
+      brandColor: "#1591DC",
       responseStyle: "CASUAL",
       enableLeadCapture: true,
       suggestedPrompts: ["What services do you offer?"]
@@ -69,7 +69,7 @@ describe("platform contract", () => {
 
     expect(payload).toMatchObject({
       tenant_name: "Acme",
-      brand_color: "#EA5455",
+      brand_color: "#1591DC",
       response_style: "CASUAL",
       enable_lead_capture: true,
       suggested_prompts: ["What services do you offer?"]

@@ -20,7 +20,7 @@ export function AnalyticsPage() {
             <CardTitle>Conversations Over Time</CardTitle>
           </CardHeader>
           <CardContent>
-            <BarSeries data={data?.timeline.map((point) => ({ label: point.label, value: point.conversations })) ?? []} color="#EA5455" />
+            <BarSeries data={data?.timeline.map((point) => ({ label: point.label, value: point.conversations })) ?? []} color="#1591DC" />
           </CardContent>
         </Card>
         <Card>
@@ -28,7 +28,7 @@ export function AnalyticsPage() {
             <CardTitle>Leads Over Time</CardTitle>
           </CardHeader>
           <CardContent>
-            <BarSeries data={data?.timeline.map((point) => ({ label: point.label, value: point.leads })) ?? []} color="#16A596" />
+            <BarSeries data={data?.timeline.map((point) => ({ label: point.label, value: point.leads })) ?? []} color="#22C55E" />
           </CardContent>
         </Card>
         <Card>
@@ -56,11 +56,11 @@ export function AnalyticsPage() {
             <CardTitle>Failed Response Count</CardTitle>
           </CardHeader>
           <CardContent className="flex items-center gap-4">
-            <div className="rounded-full bg-amber-50 p-3 text-amber-600">
+            <div className="rounded-full bg-[var(--color-warning-bg)] p-3 text-[var(--color-warning)]">
               <AlertTriangle className="h-6 w-6" />
             </div>
             <div>
-              <p className="text-3xl font-semibold text-slate-950">{data?.failedResponseCount ?? 0}</p>
+              <p className="text-3xl font-semibold text-[var(--color-text-main)]">{data?.failedResponseCount ?? 0}</p>
               <p className="text-sm text-muted-foreground">Responses that fell back or could not answer confidently.</p>
             </div>
           </CardContent>
@@ -76,11 +76,11 @@ function BarSeries({ data, color }: { data: { label: string; value: number }[]; 
     <div className="flex h-72 items-end gap-3">
       {data.map((item) => (
         <div key={item.label} className="flex flex-1 flex-col items-center gap-2">
-          <div className="flex h-56 w-full items-end rounded-md bg-slate-100">
+          <div className="flex h-56 w-full items-end rounded-md bg-[var(--color-bg-muted)]">
             <div className="w-full rounded-md" style={{ height: `${(item.value / max) * 100}%`, backgroundColor: color }} />
           </div>
           <div className="text-center">
-            <p className="text-xs font-medium text-slate-800">{item.value}</p>
+            <p className="text-xs font-medium text-[var(--color-text-secondary)]">{item.value}</p>
             <p className="text-[11px] text-muted-foreground">{item.label}</p>
           </div>
         </div>
@@ -93,10 +93,10 @@ function ProgressRow({ label, value, max }: { label: string; value: number; max:
   return (
     <div>
       <div className="mb-1 flex justify-between gap-3 text-sm">
-        <span className="font-medium text-slate-800">{label}</span>
+        <span className="font-medium text-[var(--color-text-secondary)]">{label}</span>
         <span className="text-muted-foreground">{value}</span>
       </div>
-      <div className="h-2 rounded-full bg-slate-100">
+      <div className="h-2 rounded-full bg-[var(--color-bg-muted)]">
         <div className="h-2 rounded-full bg-primary" style={{ width: `${Math.max((value / max) * 100, 8)}%` }} />
       </div>
     </div>

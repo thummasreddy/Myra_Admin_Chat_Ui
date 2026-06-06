@@ -22,7 +22,7 @@ export function PricingPage() {
   const plans = plansQuery.data ?? SUBSCRIPTION_PLANS;
 
   return (
-    <main className="min-h-screen bg-[#222831] text-white">
+    <main className="min-h-screen bg-[var(--color-bg-main)] text-white">
       <PublicNav />
       <section className="public-pricing-hero border-b px-4 py-16 text-white sm:px-6 lg:px-8">
         <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[1fr_380px] lg:items-end">
@@ -61,7 +61,7 @@ export function PricingPage() {
       </section>
 
       <section className="public-section mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-        <div className="mb-6 rounded-md border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-800">
+        <div className="mb-6 rounded-md border border-amber-400/30 bg-[var(--color-warning-bg)] px-4 py-3 text-sm font-medium text-[var(--color-warning)]">
           Activation happens after registration, payment, knowledge document upload, review, and approval. {DOCUMENT_REVIEW_MESSAGE}
         </div>
 
@@ -83,7 +83,7 @@ export function PricingPage() {
                 <div className="mt-6 space-y-3">
                   {[...planCapabilities[plan.id], ...pricingIncludedFeatures.slice(0, 4)].map((item) => (
                     <div key={item} className="flex items-start gap-2 text-sm">
-                      <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />
+                      <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-[var(--color-success)]" />
                       <span>{item}</span>
                     </div>
                   ))}

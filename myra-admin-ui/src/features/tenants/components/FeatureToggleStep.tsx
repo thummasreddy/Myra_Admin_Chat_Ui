@@ -37,7 +37,7 @@ export function FeatureToggleStep() {
   return (
     <div className="grid gap-3">
       {toggles.map((toggle) => (
-        <label key={toggle.name} className="flex cursor-pointer gap-3 rounded-md border bg-white p-4">
+        <label key={toggle.name} className="flex cursor-pointer gap-3 rounded-md border bg-[var(--color-bg-card)] p-4">
           <Checkbox {...register(toggle.name)} />
           <span>
             <Label className="cursor-pointer">{toggle.label}</Label>

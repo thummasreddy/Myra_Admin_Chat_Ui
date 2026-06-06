@@ -27,7 +27,7 @@ const registrationSchema = z.object({
   phoneNumber: z.string().min(7, "Phone number is required"),
   industry: z.string().min(2, "Industry is required"),
   assistantName: z.string().min(2, "Assistant name is required"),
-  brandColor: z.string().regex(/^#[0-9A-Fa-f]{6}$/, "Use a hex color like #EA5455"),
+  brandColor: z.string().regex(/^#[0-9A-Fa-f]{6}$/, "Use a hex color like #1591DC"),
   businessDescription: z.string().min(30, "Add a short business description"),
   fallbackMessage: z.string().min(10, "Fallback message is required"),
   selectedSubscriptionPlan: z.enum(["MONTHLY", "THREE_MONTHS", "SIX_MONTHS", "TWELVE_MONTHS"])
@@ -43,7 +43,7 @@ function selectedPlanFromSearch(value: string | null): SubscriptionPlanId {
 
 function FieldError({ name, errors }: { name: keyof RegistrationFormValues; errors: FieldErrors<RegistrationFormValues> }) {
   const message = errors[name]?.message;
-  return message ? <p className="text-sm text-red-600">{String(message)}</p> : null;
+  return message ? <p className="text-sm text-destructive">{String(message)}</p> : null;
 }
 
 export function RegisterBusinessPage() {
@@ -63,7 +63,7 @@ export function RegisterBusinessPage() {
       phoneNumber: "",
       industry: "",
       assistantName: "Myra",
-      brandColor: "#EA5455",
+      brandColor: "#1591DC",
       businessDescription: "",
       fallbackMessage: "I do not have that answer yet. Please contact our team.",
       selectedSubscriptionPlan: selectedPlanFromSearch(searchParams.get("plan"))
@@ -94,7 +94,7 @@ export function RegisterBusinessPage() {
   });
 
   return (
-    <main className="min-h-screen bg-[#222831] text-white">
+    <main className="min-h-screen bg-[var(--color-bg-main)] text-white">
       <PublicNav />
       <section className="public-pricing-hero border-b px-4 py-12 text-white sm:px-6 lg:px-8">
         <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[1fr_380px] lg:items-center">
@@ -217,7 +217,7 @@ export function RegisterBusinessPage() {
                 onClick={() => fileInputRef.current?.click()}
               >
                 <UploadCloud className="mx-auto h-8 w-8 text-primary" />
-                <span className="mt-3 block text-sm font-semibold text-slate-950">Upload business documents</span>
+                <span className="mt-3 block text-sm font-semibold text-[var(--color-text-main)]">Upload business documents</span>
                 <span className="mt-1 block text-xs text-muted-foreground">
                   PDF, DOCX, TXT, CSV, FAQs, product catalogs, policies, service details, menus, or training notes.
                 </span>
@@ -237,7 +237,7 @@ export function RegisterBusinessPage() {
               {uploadedKnowledgeFiles.length ? (
                 <div className="grid gap-2 sm:grid-cols-2">
                   {uploadedKnowledgeFiles.map((file) => (
-                    <div key={file} className="flex items-center gap-2 rounded-md border bg-white p-3 text-sm">
+                    <div key={file} className="flex items-center gap-2 rounded-md border bg-[var(--color-bg-card)] p-3 text-sm">
                       <FileText className="h-4 w-4 shrink-0 text-primary" />
                       <span className="truncate">{file}</span>
                     </div>
@@ -260,11 +260,11 @@ export function RegisterBusinessPage() {
                 <label
                   key={plan.id}
                   className={`cursor-pointer rounded-md border p-4 transition-colors ${
-                    selectedPlanId === plan.id ? "border-primary bg-primary/10 shadow-sm" : "bg-white hover:bg-slate-50"
+                    selectedPlanId === plan.id ? "border-primary bg-primary/10 shadow-sm" : "bg-[var(--color-bg-card)] hover:bg-[var(--color-bg-muted)]"
                   }`}
                 >
                   <input type="radio" value={plan.id} className="sr-only" {...form.register("selectedSubscriptionPlan")} />
-                  <span className="block text-sm font-semibold text-slate-950">{plan.name}</span>
+                  <span className="block text-sm font-semibold text-[var(--color-text-main)]">{plan.name}</span>
                   <span className="mt-2 block text-2xl font-semibold">{formatPlanPrice(plan)}</span>
                   <span className="mt-1 block text-sm text-muted-foreground">{plan.renewalCadence}</span>
                 </label>
@@ -285,7 +285,7 @@ export function RegisterBusinessPage() {
           <Card className="public-card lg:sticky lg:top-24">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-base">
-                <ShieldCheck className="h-5 w-5 text-emerald-600" />
+                <ShieldCheck className="h-5 w-5 text-[var(--color-success)]" />
                 MVP Activation
               </CardTitle>
             </CardHeader>
@@ -333,13 +333,13 @@ function OnboardingStepper() {
     <Card className="public-card">
       <CardContent className="grid gap-3 p-4 sm:grid-cols-5">
         {steps.map((step, index) => (
-          <div key={step.label} className="flex items-center gap-2 rounded-md border bg-white p-3">
+          <div key={step.label} className="flex items-center gap-2 rounded-md border bg-[var(--color-bg-card)] p-3">
             <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
               <step.icon className="h-4 w-4" />
             </div>
             <div className="min-w-0">
               <p className="text-xs font-medium text-muted-foreground">Step {index + 1}</p>
-              <p className="truncate text-sm font-semibold text-slate-950">{step.label}</p>
+              <p className="truncate text-sm font-semibold text-[var(--color-text-main)]">{step.label}</p>
             </div>
           </div>
         ))}

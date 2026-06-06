@@ -112,7 +112,7 @@ const sessionExpirationOptions = [
 const settingsSchema = z.object({
   assistantName: z.string().min(2, "Assistant name is required"),
   assistantIntro: z.string().min(10, "Intro message should be more descriptive"),
-  brandColor: z.string().regex(/^#[0-9A-Fa-f]{6}$/, "Use a hex color like #EA5455"),
+  brandColor: z.string().regex(/^#[0-9A-Fa-f]{6}$/, "Use a hex color like #1591DC"),
   responseStyle: z.enum(RESPONSE_STYLES),
   businessDescription: z.string().min(30, "Business description should be at least 30 characters"),
   allowedTopics: z.string().min(2, "Choose at least one allowed topic"),
@@ -191,7 +191,7 @@ export function CustomerAssistantSettingsPage() {
     defaultValues: {
       assistantName: "Myra",
       assistantIntro: "Hi, I am Myra. I can help with questions, services, pricing, and next steps.",
-      brandColor: "#EA5455",
+      brandColor: "#1591DC",
       responseStyle: "PROFESSIONAL",
       businessDescription: "",
       allowedTopics: "products, pricing, services, appointments, policies, support",
@@ -357,7 +357,7 @@ export function CustomerAssistantSettingsPage() {
         <Card>
           <CardContent className="p-5">
             <Tabs defaultValue="branding">
-              <TabsList className="flex h-auto w-full flex-wrap justify-start gap-1 bg-slate-100">
+              <TabsList className="flex h-auto w-full flex-wrap justify-start gap-1 bg-[var(--color-bg-muted)]">
                 <TabsTrigger value="branding">
                   <Palette className="mr-2 h-4 w-4" />
                   Branding
@@ -442,11 +442,11 @@ export function CustomerAssistantSettingsPage() {
                 {featureToggles.map((feature) => (
                   <label
                     key={feature.name}
-                    className="flex cursor-pointer gap-3 rounded-md border bg-slate-50 p-4 transition-colors hover:bg-white"
+                    className="flex cursor-pointer gap-3 rounded-md border bg-[var(--color-bg-muted)] p-4 transition-colors hover:bg-[var(--color-bg-card)]"
                   >
                     <Checkbox {...form.register(feature.name)} />
                     <span>
-                      <span className="block text-sm font-semibold text-slate-950">{feature.title}</span>
+                      <span className="block text-sm font-semibold text-[var(--color-text-main)]">{feature.title}</span>
                       <span className="mt-1 block text-sm text-muted-foreground">{feature.description}</span>
                     </span>
                   </label>
@@ -459,28 +459,28 @@ export function CustomerAssistantSettingsPage() {
                   description="Control how much conversational context Myra keeps and whether it extracts structured customer requests."
                 >
                   <div className="grid gap-3 md:grid-cols-2">
-                    <label className="flex cursor-pointer gap-3 rounded-md border bg-slate-50 p-4 transition-colors hover:bg-white">
+                    <label className="flex cursor-pointer gap-3 rounded-md border bg-[var(--color-bg-muted)] p-4 transition-colors hover:bg-[var(--color-bg-card)]">
                       <Checkbox {...form.register("enableMultiTurnMemory")} />
                       <span>
-                        <span className="block text-sm font-semibold text-slate-950">Multi-turn memory</span>
+                        <span className="block text-sm font-semibold text-[var(--color-text-main)]">Multi-turn memory</span>
                         <span className="mt-1 block text-sm text-muted-foreground">
                           Remember context within a session so follow-up questions feel continuous.
                         </span>
                       </span>
                     </label>
-                    <label className="flex cursor-pointer gap-3 rounded-md border bg-slate-50 p-4 transition-colors hover:bg-white">
+                    <label className="flex cursor-pointer gap-3 rounded-md border bg-[var(--color-bg-muted)] p-4 transition-colors hover:bg-[var(--color-bg-card)]">
                       <Checkbox {...form.register("enableStructuredExtraction")} />
                       <span>
-                        <span className="block text-sm font-semibold text-slate-950">Structured extraction</span>
+                        <span className="block text-sm font-semibold text-[var(--color-text-main)]">Structured extraction</span>
                         <span className="mt-1 block text-sm text-muted-foreground">
                           Detect intent and extract lead, order, and appointment fields from conversations.
                         </span>
                       </span>
                     </label>
-                    <label className="flex cursor-pointer gap-3 rounded-md border bg-slate-50 p-4 transition-colors hover:bg-white">
+                    <label className="flex cursor-pointer gap-3 rounded-md border bg-[var(--color-bg-muted)] p-4 transition-colors hover:bg-[var(--color-bg-card)]">
                       <Checkbox {...form.register("enableConversationSummary")} />
                       <span>
-                        <span className="block text-sm font-semibold text-slate-950">Conversation summary</span>
+                        <span className="block text-sm font-semibold text-[var(--color-text-main)]">Conversation summary</span>
                         <span className="mt-1 block text-sm text-muted-foreground">
                           Summarize important details for admin review and human follow-up.
                         </span>
@@ -509,7 +509,7 @@ export function CustomerAssistantSettingsPage() {
                     disabled={!values.enableLeadCapture}
                     onToggle={(fieldValue, checked) => toggleRequiredField("leadRequiredFields", fieldValue, checked)}
                   />
-                  {typeof leadRequiredFieldsError === "string" ? <p className="text-sm text-red-600">{leadRequiredFieldsError}</p> : null}
+                  {typeof leadRequiredFieldsError === "string" ? <p className="text-sm text-destructive">{leadRequiredFieldsError}</p> : null}
                 </SectionBlock>
 
                 <SectionBlock
@@ -517,13 +517,13 @@ export function CustomerAssistantSettingsPage() {
                   description="Let Myra collect order intent and hand the request to your team for confirmation."
                 >
                   <label
-                    className={`flex gap-3 rounded-md border bg-slate-50 p-4 transition-colors ${
-                      values.enableStructuredExtraction ? "cursor-pointer hover:bg-white" : "cursor-not-allowed opacity-60"
+                    className={`flex gap-3 rounded-md border bg-[var(--color-bg-muted)] p-4 transition-colors ${
+                      values.enableStructuredExtraction ? "cursor-pointer hover:bg-[var(--color-bg-card)]" : "cursor-not-allowed opacity-60"
                     }`}
                   >
                     <Checkbox {...form.register("enableOrderCapture")} disabled={!values.enableStructuredExtraction} />
                     <span>
-                      <span className="block text-sm font-semibold text-slate-950">Enable order capture</span>
+                      <span className="block text-sm font-semibold text-[var(--color-text-main)]">Enable order capture</span>
                       <span className="mt-1 block text-sm text-muted-foreground">
                         Collect order details after the assistant detects a purchase or quote request.
                       </span>
@@ -549,13 +549,13 @@ export function CustomerAssistantSettingsPage() {
                   description="Collect scheduling details so staff can confirm an appointment."
                 >
                   <label
-                    className={`flex gap-3 rounded-md border bg-slate-50 p-4 transition-colors ${
-                      values.enableStructuredExtraction ? "cursor-pointer hover:bg-white" : "cursor-not-allowed opacity-60"
+                    className={`flex gap-3 rounded-md border bg-[var(--color-bg-muted)] p-4 transition-colors ${
+                      values.enableStructuredExtraction ? "cursor-pointer hover:bg-[var(--color-bg-card)]" : "cursor-not-allowed opacity-60"
                     }`}
                   >
                     <Checkbox {...form.register("enableAppointmentCapture")} disabled={!values.enableStructuredExtraction} />
                     <span>
-                      <span className="block text-sm font-semibold text-slate-950">Enable appointment capture</span>
+                      <span className="block text-sm font-semibold text-[var(--color-text-main)]">Enable appointment capture</span>
                       <span className="mt-1 block text-sm text-muted-foreground">
                         Ask for service, date, time, and contact details before passing the request to staff.
                       </span>
@@ -651,16 +651,16 @@ function Field({ label, error, helper, children }: { label: string; error?: stri
       <Label>{label}</Label>
       {children}
       {helper ? <p className="text-xs text-muted-foreground">{helper}</p> : null}
-      {error ? <p className="text-sm text-red-600">{error}</p> : null}
+      {error ? <p className="text-sm text-destructive">{error}</p> : null}
     </div>
   );
 }
 
 function SectionBlock({ title, description, children }: { title: string; description?: string; children: ReactNode }) {
   return (
-    <section className="space-y-4 rounded-md border bg-white p-4">
+    <section className="space-y-4 rounded-md border bg-[var(--color-bg-card)] p-4">
       <div>
-        <h3 className="text-base font-semibold text-slate-950">{title}</h3>
+        <h3 className="text-base font-semibold text-[var(--color-text-main)]">{title}</h3>
         {description ? <p className="mt-1 text-sm text-muted-foreground">{description}</p> : null}
       </div>
       {children}
@@ -671,8 +671,8 @@ function SectionBlock({ title, description, children }: { title: string; descrip
 function InfoBox({ children, variant = "info" }: { children: ReactNode; variant?: "info" | "warning" }) {
   const className =
     variant === "warning"
-      ? "rounded-md border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900"
-      : "rounded-md border border-sky-200 bg-sky-50 p-3 text-sm text-sky-900";
+      ? "rounded-md border border-amber-400/30 bg-[var(--color-warning-bg)] p-3 text-sm text-[var(--color-warning)]"
+      : "rounded-md border border-sky-400/30 bg-[var(--color-info-bg)] p-3 text-sm text-[var(--color-info)]";
 
   return <div className={className}>{children}</div>;
 }
@@ -693,8 +693,8 @@ function RequiredFieldChecklist({
       {options.map((option) => (
         <label
           key={option.value}
-          className={`flex gap-3 rounded-md border bg-slate-50 p-3 transition-colors ${
-            disabled ? "cursor-not-allowed opacity-60" : "cursor-pointer hover:bg-white"
+          className={`flex gap-3 rounded-md border bg-[var(--color-bg-muted)] p-3 transition-colors ${
+            disabled ? "cursor-not-allowed opacity-60" : "cursor-pointer hover:bg-[var(--color-bg-card)]"
           }`}
         >
           <Checkbox
@@ -703,7 +703,7 @@ function RequiredFieldChecklist({
             onChange={(event) => onToggle(option.value, event.currentTarget.checked)}
           />
           <span>
-            <span className="block text-sm font-semibold text-slate-950">{option.label}</span>
+            <span className="block text-sm font-semibold text-[var(--color-text-main)]">{option.label}</span>
             <span className="mt-1 block text-xs text-muted-foreground">{option.description}</span>
           </span>
         </label>

@@ -12,14 +12,14 @@ const config = {
           primaryHover: "#0F75B8",
           primarySoft: "#EAF5FF",
           primaryBorder: "#B4D4FF",
+          accent: "#6A5CFF",
           secondary: "#37353E",
           secondaryHover: "#2B2932",
           secondarySoft: "#F3F4F6",
-          background: "#F8FAFC",
-          backgroundDark: "#080616",
-          surface: "#FFFFFF",
-          card: "#FFFFFF",
-          muted: "#EEF4FA",
+          background: "#080616",
+          surface: "#1E1B2E",
+          card: "#1E1B2E",
+          muted: "#252236",
           sidebar: "#080616",
           text: {
             primary: "#080616",
@@ -27,46 +27,46 @@ const config = {
             muted: "#8A8F98",
             inverse: "#FFFFFF"
           },
-          border: "#DDE3EA",
+          border: "#343044",
           borderStrong: "#CBD5E1",
           divider: "#E5E7EB",
-          success: "#16A34A",
-          warning: "#F59E0B",
-          error: "#DC2626",
-          info: "#0284C7"
+          success: "#22C55E",
+          warning: "#FBBF24",
+          error: "#F87171",
+          info: "#38BDF8"
         },
-        border: "rgb(var(--color-border-rgb) / <alpha-value>)",
-        input: "rgb(var(--color-chat-input-border-rgb, var(--color-border-rgb)) / <alpha-value>)",
-        ring: "rgb(var(--color-primary-rgb) / <alpha-value>)",
-        background: "rgb(var(--color-bg-main-rgb) / <alpha-value>)",
-        foreground: "rgb(var(--color-text-main-rgb) / <alpha-value>)",
+        border: "hsl(var(--border))",
+        input: "hsl(var(--input))",
+        ring: "hsl(var(--ring))",
+        background: "hsl(var(--background))",
+        foreground: "hsl(var(--foreground))",
         primary: {
-          DEFAULT: "rgb(var(--color-primary-rgb) / <alpha-value>)",
-          foreground: "var(--color-button-primary-text)"
+          DEFAULT: "hsl(var(--primary))",
+          foreground: "hsl(var(--primary-foreground))"
         },
         secondary: {
-          DEFAULT: "rgb(var(--color-primary-rgb) / <alpha-value>)",
-          foreground: "var(--color-button-primary-text)"
+          DEFAULT: "hsl(var(--secondary))",
+          foreground: "hsl(var(--secondary-foreground))"
         },
         destructive: {
-          DEFAULT: "rgb(var(--color-error-rgb) / <alpha-value>)",
-          foreground: "#FFFFFF"
+          DEFAULT: "hsl(var(--destructive))",
+          foreground: "hsl(var(--destructive-foreground))"
         },
         muted: {
-          DEFAULT: "rgb(var(--color-bg-muted-rgb) / <alpha-value>)",
-          foreground: "rgb(var(--color-text-muted-rgb) / <alpha-value>)"
+          DEFAULT: "hsl(var(--muted))",
+          foreground: "hsl(var(--muted-foreground))"
         },
         accent: {
-          DEFAULT: "rgb(var(--color-secondary-rgb) / <alpha-value>)",
-          foreground: "rgb(var(--color-text-inverse-rgb) / <alpha-value>)"
+          DEFAULT: "hsl(var(--accent))",
+          foreground: "hsl(var(--accent-foreground))"
         },
         popover: {
-          DEFAULT: "rgb(var(--color-bg-card-rgb) / <alpha-value>)",
-          foreground: "rgb(var(--color-text-main-rgb) / <alpha-value>)"
+          DEFAULT: "hsl(var(--popover))",
+          foreground: "hsl(var(--popover-foreground))"
         },
         card: {
-          DEFAULT: "rgb(var(--color-bg-card-rgb) / <alpha-value>)",
-          foreground: "rgb(var(--color-text-main-rgb) / <alpha-value>)"
+          DEFAULT: "hsl(var(--card))",
+          foreground: "hsl(var(--card-foreground))"
         }
       },
       borderRadius: {

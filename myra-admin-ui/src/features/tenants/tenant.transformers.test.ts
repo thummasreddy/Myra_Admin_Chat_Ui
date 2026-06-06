@@ -47,7 +47,7 @@ describe("tenant transformers", () => {
   it("maps camelCase updates to snake_case backend payloads", () => {
     const payload = toTenantUpdateRequest({
       tenantName: "Acme",
-      brandColor: "#EA5455",
+      brandColor: "#1591DC",
       responseStyle: "FRIENDLY",
       enableLeadCapture: true,
       enableStructuredExtraction: false
@@ -55,7 +55,7 @@ describe("tenant transformers", () => {
 
     expect(payload).toEqual({
       tenant_name: "Acme",
-      brand_color: "#EA5455",
+      brand_color: "#1591DC",
       response_style: "FRIENDLY",
       enable_lead_capture: true,
       enable_structured_extraction: false

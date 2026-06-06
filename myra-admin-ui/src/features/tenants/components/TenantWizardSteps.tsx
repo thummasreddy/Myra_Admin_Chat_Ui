@@ -16,19 +16,19 @@ export function TenantWizardSteps({ currentStep }: { currentStep: number }) {
         const complete = step.id < currentStep;
         const active = step.id === currentStep;
         return (
-          <div key={step.id} className={cn("rounded-md border bg-white p-3", active && "border-primary/30 bg-primary/10")}>
+          <div key={step.id} className={cn("rounded-md border bg-[var(--color-bg-card)] p-3", active && "border-primary/30 bg-primary/10")}>
             <div className="flex items-center gap-2">
               <div
                 className={cn(
                   "flex h-7 w-7 items-center justify-center rounded-full text-xs font-semibold",
                   complete && "bg-primary text-white",
                   active && "bg-primary/10 text-primary",
-                  !complete && !active && "bg-slate-100 text-slate-500"
+                  !complete && !active && "bg-[var(--color-bg-muted)] text-muted-foreground"
                 )}
               >
                 {complete ? <Check className="h-4 w-4" /> : step.id + 1}
               </div>
-              <span className="text-sm font-medium text-slate-800">{step.title}</span>
+              <span className="text-sm font-medium text-[var(--color-text-secondary)]">{step.title}</span>
             </div>
           </div>
         );

@@ -44,12 +44,12 @@ export function FaqEditor({
           <div className="space-y-2">
             <Label htmlFor="question">Question</Label>
             <Textarea id="question" {...form.register("question")} />
-            {form.formState.errors.question ? <p className="text-sm text-red-600">{form.formState.errors.question.message}</p> : null}
+            {form.formState.errors.question ? <p className="text-sm text-destructive">{form.formState.errors.question.message}</p> : null}
           </div>
           <div className="space-y-2">
             <Label htmlFor="answer">Answer</Label>
             <Textarea id="answer" className="min-h-32" {...form.register("answer")} />
-            {form.formState.errors.answer ? <p className="text-sm text-red-600">{form.formState.errors.answer.message}</p> : null}
+            {form.formState.errors.answer ? <p className="text-sm text-destructive">{form.formState.errors.answer.message}</p> : null}
           </div>
           <Button type="submit" disabled={disabled}>
             Add FAQ

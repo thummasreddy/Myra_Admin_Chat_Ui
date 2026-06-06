@@ -85,20 +85,20 @@ export function ConversationsPage() {
                 </div>
               </div>
             </CardHeader>
-            <CardContent className="space-y-4 bg-slate-50 p-4">
+            <CardContent className="space-y-4 bg-[var(--color-bg-muted)] p-4">
               {selectedSession?.messages.map((message) => (
                 <div key={message.id} className={cn("flex", message.role === "user" ? "justify-end" : "justify-start")}>
                   <div
                     className={cn(
                       "max-w-[82%] rounded-lg px-4 py-3 text-sm shadow-sm",
-                      message.role === "user" ? "bg-primary text-white" : "border bg-white text-slate-800"
+                      message.role === "user" ? "bg-primary text-white" : "border bg-[var(--color-bg-card)] text-[var(--color-text-secondary)]"
                     )}
                   >
                     <p>{message.content}</p>
                     <div className={cn("mt-2 flex items-center gap-2 text-xs", message.role === "user" ? "text-white/80" : "text-muted-foreground")}>
                       {message.confidence !== undefined ? <span>{Math.round(message.confidence * 100)}% confidence</span> : null}
                       {message.fallback ? (
-                        <span className="inline-flex items-center gap-1 text-amber-600">
+                        <span className="inline-flex items-center gap-1 text-[var(--color-warning)]">
                           <AlertTriangle className="h-3 w-3" />
                           fallback
                         </span>
@@ -120,11 +120,11 @@ function SessionButton({ session, selected, onClick }: { session: ChatSession; s
     <button
       type="button"
       onClick={onClick}
-      className={cn("w-full rounded-md border p-3 text-left transition-colors", selected ? "border-primary/30 bg-primary/10" : "bg-white hover:bg-slate-50")}
+      className={cn("w-full rounded-md border p-3 text-left transition-colors", selected ? "border-primary/30 bg-primary/10" : "bg-[var(--color-bg-card)] hover:bg-[var(--color-bg-muted)]")}
     >
       <div className="flex items-start justify-between gap-2">
         <div>
-          <p className="font-medium text-slate-950">{session.visitorName}</p>
+          <p className="font-medium text-[var(--color-text-main)]">{session.visitorName}</p>
           <p className="text-sm text-muted-foreground">{session.tenantName}</p>
         </div>
         <MessageSquare className="h-4 w-4 text-primary" />

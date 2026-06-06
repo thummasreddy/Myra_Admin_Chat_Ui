@@ -51,7 +51,7 @@ export function fromTenantResponse(apiTenant: unknown): Tenant {
     timezone: stringValue(record, "timezone") || "",
     assistantName: stringValue(record, "assistantName", "assistant_name") || "Myra",
     assistantIntro: stringValue(record, "assistantIntro", "assistant_intro") || "Hi, I am Myra.",
-    brandColor: stringValue(record, "brandColor", "brand_color") || "#EA5455",
+    brandColor: stringValue(record, "brandColor", "brand_color") || "#1591DC",
     logoUrl: optionalStringValue(record, "logoUrl", "logo_url"),
     avatarUrl: optionalStringValue(record, "avatarUrl", "avatar_url"),
     chatPosition: stringValue(record, "chatPosition", "chat_position") === "bottom-left" ? "bottom-left" : "bottom-right",
