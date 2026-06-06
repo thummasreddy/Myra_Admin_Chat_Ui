@@ -1,3 +1,4 @@
+import { type ReactNode, useEffect } from "react";
 import { Navigate, createBrowserRouter, useLocation } from "react-router-dom";
 import { AdminLayout } from "@/components/layout/AdminLayout";
 import { CustomerLayout } from "@/components/layout/CustomerLayout";
@@ -34,6 +35,18 @@ import { TenantDetailPage } from "@/features/tenants/pages/TenantDetailPage";
 import { TenantListPage } from "@/features/tenants/pages/TenantListPage";
 import { WidgetConfigPage } from "@/features/widget/pages/WidgetConfigPage";
 
+function ThemeRoute({ theme, children }: { theme: "light" | "dark"; children: ReactNode }) {
+  useEffect(() => {
+    document.documentElement.setAttribute("data-theme", theme);
+  }, [theme]);
+
+  return <>{children}</>;
+}
+
+function withTheme(theme: "light" | "dark", element: ReactNode) {
+  return <ThemeRoute theme={theme}>{element}</ThemeRoute>;
+}
+
 function ProtectedAdminRoutes() {
   const token = useAuthStore((state) => state.token);
   const user = useAuthStore((state) => state.user);
@@ -67,13 +80,13 @@ function ProtectedCustomerRoutes() {
 }
 
 export const router = createBrowserRouter([
-  { path: "/", element: <PublicLandingPage /> },
-  { path: "/pricing", element: <PricingPage /> },
-  { path: "/register", element: <RegisterBusinessPage /> },
-  { path: "/mock-payment/:registrationId", element: <MockPaymentPage /> },
-  { path: "/onboarding-success/:registrationId", element: <OnboardingSuccessPage /> },
-  { path: "/pending-approval/:registrationId", element: <OnboardingSuccessPage /> },
-  { path: "/login", element: <LoginPage /> },
+  { path: "/", element: withTheme("light", <PublicLandingPage />) },
+  { path: "/pricing", element: withTheme("light", <PricingPage />) },
+  { path: "/register", element: withTheme("light", <RegisterBusinessPage />) },
+  { path: "/mock-payment/:registrationId", element: withTheme("light", <MockPaymentPage />) },
+  { path: "/onboarding-success/:registrationId", element: withTheme("light", <OnboardingSuccessPage />) },
+  { path: "/pending-approval/:registrationId", element: withTheme("light", <OnboardingSuccessPage />) },
+  { path: "/login", element: withTheme("light", <LoginPage />) },
   {
     element: <ProtectedAdminRoutes />,
     children: [

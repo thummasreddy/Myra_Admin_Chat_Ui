@@ -1,10 +1,27 @@
-import { useState } from "react";
-import { Outlet } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Outlet, useLocation } from "react-router-dom";
 import { Header } from "@/components/layout/Header";
 import { Sidebar } from "@/components/layout/Sidebar";
 
+const lightAdminRoutePrefixes = [
+  "/approvals",
+  "/tenant-review",
+  "/payments",
+  "/knowledge-documents",
+  "/subscriptions",
+  "/email-notifications"
+];
+
 export function AdminLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const location = useLocation();
+  const useLightTheme = lightAdminRoutePrefixes.some(
+    (prefix) => location.pathname === prefix || location.pathname.startsWith(`${prefix}/`)
+  );
+
+  useEffect(() => {
+    document.documentElement.setAttribute("data-theme", useLightTheme ? "light" : "dark");
+  }, [useLightTheme]);
 
   return (
     <div className="admin-shell min-h-screen lg:grid lg:grid-cols-[18rem_1fr]">

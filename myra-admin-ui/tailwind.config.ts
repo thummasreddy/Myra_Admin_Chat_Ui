@@ -2,58 +2,71 @@ import type { Config } from "tailwindcss";
 import animate from "tailwindcss-animate";
 
 const config = {
-  darkMode: ["class"],
+  darkMode: ["selector", '[data-theme="dark"]'],
   content: ["./index.html", "./src/**/*.{ts,tsx}"],
   theme: {
     extend: {
       colors: {
         brand: {
-          primary: "#EA5455",
-          secondary: "#16A596",
-          accent: "#968C83",
-          background: "#222831",
+          primary: "#1591DC",
+          primaryHover: "#0F75B8",
+          primarySoft: "#EAF5FF",
+          primaryBorder: "#B4D4FF",
+          secondary: "#37353E",
+          secondaryHover: "#2B2932",
+          secondarySoft: "#F3F4F6",
+          background: "#F8FAFC",
+          backgroundDark: "#080616",
           surface: "#FFFFFF",
+          card: "#FFFFFF",
+          muted: "#EEF4FA",
+          sidebar: "#080616",
           text: {
-            primary: "#222831",
-            secondary: "#5F6872"
+            primary: "#080616",
+            secondary: "#4B5563",
+            muted: "#8A8F98",
+            inverse: "#FFFFFF"
           },
-          border: "#E3E0DD",
-          success: "#22C55E",
+          border: "#DDE3EA",
+          borderStrong: "#CBD5E1",
+          divider: "#E5E7EB",
+          success: "#16A34A",
           warning: "#F59E0B",
-          error: "#EF4444"
+          error: "#DC2626",
+          info: "#0284C7"
         },
-        border: "hsl(var(--border))",
-        input: "hsl(var(--input))",
-        ring: "hsl(var(--ring))",
-        background: "hsl(var(--background))",
-        foreground: "hsl(var(--foreground))",
+        border: "rgb(var(--color-border-rgb) / <alpha-value>)",
+        input: "rgb(var(--color-chat-input-border-rgb, var(--color-border-rgb)) / <alpha-value>)",
+        ring: "rgb(var(--color-primary-rgb) / <alpha-value>)",
+        background: "rgb(var(--color-bg-main-rgb) / <alpha-value>)",
+        foreground: "rgb(var(--color-text-main-rgb) / <alpha-value>)",
         primary: {
-          DEFAULT: "hsl(var(--primary))",
-          foreground: "hsl(var(--primary-foreground))"
+          DEFAULT: "rgb(var(--color-primary-rgb) / <alpha-value>)",
+          foreground: "var(--color-button-primary-text)"
         },
         secondary: {
-          DEFAULT: "hsl(var(--secondary))",
-          foreground: "hsl(var(--secondary-foreground))"
+          DEFAULT: "rgb(var(--color-primary-rgb) / <alpha-value>)",
+          foreground: "var(--color-button-primary-text)"
         },
         destructive: {
-          DEFAULT: "hsl(var(--destructive))",
-          foreground: "hsl(var(--destructive-foreground))"
+          DEFAULT: "rgb(var(--color-error-rgb) / <alpha-value>)",
+          foreground: "#FFFFFF"
         },
         muted: {
-          DEFAULT: "hsl(var(--muted))",
-          foreground: "hsl(var(--muted-foreground))"
+          DEFAULT: "rgb(var(--color-bg-muted-rgb) / <alpha-value>)",
+          foreground: "rgb(var(--color-text-muted-rgb) / <alpha-value>)"
         },
         accent: {
-          DEFAULT: "hsl(var(--accent))",
-          foreground: "hsl(var(--accent-foreground))"
+          DEFAULT: "rgb(var(--color-secondary-rgb) / <alpha-value>)",
+          foreground: "rgb(var(--color-text-inverse-rgb) / <alpha-value>)"
         },
         popover: {
-          DEFAULT: "hsl(var(--popover))",
-          foreground: "hsl(var(--popover-foreground))"
+          DEFAULT: "rgb(var(--color-bg-card-rgb) / <alpha-value>)",
+          foreground: "rgb(var(--color-text-main-rgb) / <alpha-value>)"
         },
         card: {
-          DEFAULT: "hsl(var(--card))",
-          foreground: "hsl(var(--card-foreground))"
+          DEFAULT: "rgb(var(--color-bg-card-rgb) / <alpha-value>)",
+          foreground: "rgb(var(--color-text-main-rgb) / <alpha-value>)"
         }
       },
       borderRadius: {

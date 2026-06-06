@@ -1,4 +1,5 @@
 import { BarChart3, Bot, Code2, CreditCard, FileText, HelpCircle, LogOut, Palette, Settings, Users } from "lucide-react";
+import { useEffect } from "react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -39,6 +40,10 @@ export function CustomerLayout() {
     logout();
     navigate("/", { replace: true });
   }
+
+  useEffect(() => {
+    document.documentElement.setAttribute("data-theme", "dark");
+  }, []);
 
   return (
     <div className="customer-shell">
