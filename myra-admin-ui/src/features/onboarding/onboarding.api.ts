@@ -17,6 +17,7 @@ import type {
 import { readFallbackTenants, writeFallbackTenants } from "@/features/tenants/tenant.api";
 import type { Tenant } from "@/features/tenants/tenant.types";
 import { listKnowledgeSources } from "@/features/knowledge/knowledge.api";
+import { normalizeHexColor } from "@/lib/colors";
 
 const REGISTRATION_STORAGE_KEY = "myra-admin-fallback-registrations";
 const PAYMENT_STORAGE_KEY = "myra-admin-fallback-payments";
@@ -132,7 +133,7 @@ function buildTenantFromRegistration(registration: BusinessRegistration, tenantI
     timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || "America/Phoenix",
     assistantName: registration.assistantName,
     assistantIntro: `Hi, I am ${registration.assistantName}, the AI assistant for ${registration.businessName}.`,
-    brandColor: registration.brandColor,
+    brandColor: normalizeHexColor(registration.brandColor),
     chatPosition: "bottom-right",
     systemPrompt: `You are ${registration.assistantName}, a helpful AI assistant for ${registration.businessName}. Business context: ${registration.businessDescription}`,
     responseStyle: "PROFESSIONAL",
@@ -190,14 +191,16 @@ export async function listSubscriptionPlans(): Promise<SubscriptionPlan[]> {
 }
 
 export async function createBusinessRegistration(payload: BusinessRegistrationInput): Promise<BusinessRegistration> {
+  const normalizedPayload = { ...payload, brandColor: normalizeHexColor(payload.brandColor) };
+
   try {
-    const { data } = await apiClient.post<BusinessRegistration>("/onboarding/register", payload);
+    const { data } = await apiClient.post<BusinessRegistration>("/onboarding/register", normalizedPayload);
     return data;
   } catch (error) {
     if (!isBackendUnavailable(error)) throw error;
-    const tenantId = tenantIdFromName(payload.businessName);
+    const tenantId = tenantIdFromName(normalizedPayload.businessName);
     const registration: BusinessRegistration = {
-      ...payload,
+      ...normalizedPayload,
       id: id("reg"),
       tenantId,
       onboardingStatus: "PAYMENT_PENDING",

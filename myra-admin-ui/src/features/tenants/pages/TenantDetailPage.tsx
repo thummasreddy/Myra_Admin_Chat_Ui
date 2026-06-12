@@ -2,7 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Copy, CreditCard, KeyRound, Power } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useForm, type FieldErrors, type Resolver } from "react-hook-form";
+import { Controller, useForm, type FieldErrors, type Resolver } from "react-hook-form";
 import { Link, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,6 +13,7 @@ import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/toast";
 import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
+import { BrandColorField } from "@/components/shared/BrandColorPicker";
 import { LoadingSpinner } from "@/components/shared/LoadingSpinner";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { StatusBadge } from "@/components/shared/StatusBadge";
@@ -27,6 +28,7 @@ import {
 import type { TenantStatus } from "@/features/tenants/tenant.types";
 import { documentReviewMessage } from "@/features/onboarding/onboarding.api";
 import { formatPlanPrice, getSubscriptionPlan } from "@/features/onboarding/onboarding.data";
+import { normalizeHexColor } from "@/lib/colors";
 import { formatDate } from "@/lib/utils";
 
 function FieldError({ name, errors }: { name: keyof TenantWizardFormValues; errors: FieldErrors<TenantWizardFormValues> }) {
@@ -184,7 +186,9 @@ export function TenantDetailPage() {
           </div>
           <div className="md:col-span-2">
             <p className="text-muted-foreground">Business description</p>
-            <p className="font-medium text-[var(--color-text-main)]">{tenant.businessDescription ?? "No public registration description was provided."}</p>
+            <p className="font-medium text-[var(--color-text-main)]">
+              {tenant.businessDescription ?? "No public registration description was provided."}
+            </p>
           </div>
           <div className="rounded-md border border-amber-400/30 bg-[var(--color-warning-bg)] px-4 py-3 text-[var(--color-warning)] md:col-span-2">
             {documentReviewMessage}
@@ -244,7 +248,13 @@ export function TenantDetailPage() {
               </div>
               <div className="space-y-2">
                 <Label>Brand color</Label>
-                <Input {...form.register("brandColor")} />
+                <Controller
+                  control={form.control}
+                  name="brandColor"
+                  render={({ field }) => (
+                    <BrandColorField value={field.value} onChange={(color) => field.onChange(normalizeHexColor(color))} />
+                  )}
+                />
                 <FieldError name="brandColor" errors={form.formState.errors} />
               </div>
               <div className="space-y-2">

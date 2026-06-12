@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { useParams } from "react-router-dom";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
@@ -14,6 +14,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/toast";
 import { LoadingSpinner } from "@/components/shared/LoadingSpinner";
 import { PageHeader } from "@/components/shared/PageHeader";
+import { BrandColorField } from "@/components/shared/BrandColorPicker";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { getTenant } from "@/features/tenants/tenant.api";
 import { EmbedCodeBox } from "@/features/widget/components/EmbedCodeBox";
@@ -21,6 +22,7 @@ import { WidgetPreview } from "@/features/widget/components/WidgetPreview";
 import { getWidgetConfig, updateWidgetConfig } from "@/features/widget/widget.api";
 import type { WidgetConfig } from "@/features/widget/widget.types";
 import { isEmbedReady } from "@/features/customer/customer.hooks";
+import { normalizeHexColor } from "@/lib/colors";
 
 const widgetSchema = z.object({
   tenantId: z.string(),
@@ -94,7 +96,12 @@ export function WidgetConfigPage() {
               <CardTitle>Theme & Behavior</CardTitle>
             </CardHeader>
             <CardContent>
-              <form className="space-y-4" onSubmit={form.handleSubmit((values) => saveMutation.mutate(values))}>
+              <form
+                className="space-y-4"
+                onSubmit={form.handleSubmit((values) =>
+                  saveMutation.mutate({ ...values, brandColor: normalizeHexColor(values.brandColor) })
+                )}
+              >
                 <input type="hidden" {...form.register("tenantId")} />
                 <div className="space-y-2">
                   <Label>Assistant name</Label>
@@ -111,7 +118,13 @@ export function WidgetConfigPage() {
                 <div className="grid gap-3 sm:grid-cols-2">
                   <div className="space-y-2">
                     <Label>Brand color</Label>
-                    <Input {...form.register("brandColor")} />
+                    <Controller
+                      control={form.control}
+                      name="brandColor"
+                      render={({ field }) => (
+                        <BrandColorField value={field.value} onChange={(color) => field.onChange(normalizeHexColor(color))} />
+                      )}
+                    />
                   </div>
                   <div className="space-y-2">
                     <Label>Position</Label>

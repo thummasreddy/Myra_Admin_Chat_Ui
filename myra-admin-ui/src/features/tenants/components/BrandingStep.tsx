@@ -1,9 +1,11 @@
-import { useFormContext } from "react-hook-form";
+import { Controller, useFormContext } from "react-hook-form";
+import { BrandColorField } from "@/components/shared/BrandColorPicker";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import type { TenantWizardFormValues } from "@/features/tenants/tenant.schema";
+import { normalizeHexColor } from "@/lib/colors";
 
 function FieldError({ name }: { name: keyof TenantWizardFormValues }) {
   const { formState } = useFormContext<TenantWizardFormValues>();
@@ -12,8 +14,7 @@ function FieldError({ name }: { name: keyof TenantWizardFormValues }) {
 }
 
 export function BrandingStep() {
-  const { register, watch } = useFormContext<TenantWizardFormValues>();
-  const brandColor = watch("brandColor");
+  const { control, register } = useFormContext<TenantWizardFormValues>();
 
   return (
     <div className="space-y-5">
@@ -42,10 +43,13 @@ export function BrandingStep() {
       <div className="form-grid">
         <div className="space-y-2">
           <Label htmlFor="brandColor">Brand color</Label>
-          <div className="flex gap-2">
-            <Input id="brandColor" {...register("brandColor")} />
-            <div className="h-10 w-12 rounded-md border" style={{ backgroundColor: brandColor }} />
-          </div>
+          <Controller
+            control={control}
+            name="brandColor"
+            render={({ field }) => (
+              <BrandColorField id="brandColor" value={field.value} onChange={(color) => field.onChange(normalizeHexColor(color))} />
+            )}
+          />
           <FieldError name="brandColor" />
         </div>
         <div className="space-y-2">

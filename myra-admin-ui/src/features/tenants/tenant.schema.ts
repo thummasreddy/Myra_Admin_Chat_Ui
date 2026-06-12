@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { CHAT_POSITIONS, RESPONSE_STYLES, TENANT_STATUSES } from "@/lib/constants";
+import { normalizeHexColor } from "@/lib/colors";
 import type { TenantCreateRequest } from "@/features/tenants/tenant.types";
 
 export const defaultAiBehaviorCaptureValues = {
@@ -92,6 +93,7 @@ function splitList(value?: string) {
 export function toTenantCreateRequest(values: TenantWizardFormValues): TenantCreateRequest {
   return {
     ...values,
+    brandColor: normalizeHexColor(values.brandColor),
     logoUrl: values.logoUrl || undefined,
     avatarUrl: values.avatarUrl || undefined,
     allowedTopics: splitList(values.allowedTopics),
@@ -104,6 +106,7 @@ export function toTenantWizardValues(tenant: TenantCreateRequest): TenantWizardF
   return {
     ...defaultAiBehaviorCaptureValues,
     ...tenant,
+    brandColor: normalizeHexColor(tenant.brandColor),
     logoUrl: tenant.logoUrl ?? "",
     avatarUrl: tenant.avatarUrl ?? "",
     allowedTopics: tenant.allowedTopics.join(", "),

@@ -15,7 +15,12 @@ import { CustomerLeadsPage } from "@/features/customer/pages/CustomerLeadsPage";
 import { CustomerSubscriptionPage } from "@/features/customer/pages/CustomerSubscriptionPage";
 import { CustomerSupportPage } from "@/features/customer/pages/CustomerSupportPage";
 import { DashboardPage } from "@/features/dashboard/pages/DashboardPage";
+import { ApprovalPage } from "@/features/knowledge/pages/ApprovalPage";
+import { ComparisonPage } from "@/features/knowledge/pages/ComparisonPage";
+import { DocumentUploadPage } from "@/features/knowledge/pages/DocumentUploadPage";
 import { KnowledgeBasePage } from "@/features/knowledge/pages/KnowledgeBasePage";
+import { KnowledgeOverviewPage } from "@/features/knowledge/pages/KnowledgeOverviewPage";
+import { WebsiteScanPage } from "@/features/knowledge/pages/WebsiteScanPage";
 import { LeadsPage } from "@/features/leads/pages/LeadsPage";
 import { AdminApprovalsPage } from "@/features/onboarding/pages/AdminApprovalsPage";
 import { EmailNotificationsPage } from "@/features/onboarding/pages/EmailNotificationsPage";
@@ -29,6 +34,7 @@ import { OnboardingSuccessPage } from "@/features/public/pages/OnboardingSuccess
 import { PricingPage } from "@/features/public/pages/PricingPage";
 import { PublicLandingPage } from "@/features/public/pages/PublicLandingPage";
 import { RegisterBusinessPage } from "@/features/public/pages/RegisterBusinessPage";
+import { TenantPublicPage } from "@/features/public/pages/TenantPublicPage";
 import { SettingsPage } from "@/features/settings/pages/SettingsPage";
 import { TenantCreateWizardPage } from "@/features/tenants/pages/TenantCreateWizardPage";
 import { TenantDetailPage } from "@/features/tenants/pages/TenantDetailPage";
@@ -107,7 +113,13 @@ export const router = createBrowserRouter([
       { path: "tenants", element: <TenantListPage /> },
       { path: "tenants/new", element: <TenantCreateWizardPage /> },
       { path: "tenants/:tenantId", element: <TenantDetailPage /> },
-      { path: "knowledge", element: <KnowledgeBasePage /> },
+      { path: "knowledge", element: <KnowledgeOverviewPage /> },
+      { path: "knowledge/website-scan", element: <WebsiteScanPage /> },
+      { path: "knowledge/documents", element: <DocumentUploadPage /> },
+      { path: "knowledge/comparison", element: <ComparisonPage /> },
+      { path: "knowledge/differences/:comparisonId", element: <ComparisonPage /> },
+      { path: "knowledge/approval", element: <ApprovalPage /> },
+      { path: "knowledge/base", element: <KnowledgeBasePage /> },
       { path: "widget/:tenantId", element: <WidgetConfigPage /> },
       { path: "conversations", element: <ConversationsPage /> },
       { path: "leads", element: <LeadsPage /> },
@@ -130,5 +142,6 @@ export const router = createBrowserRouter([
       { path: "support", element: <CustomerSupportPage /> }
     ]
   },
+  { path: "/t/:tenantId", element: <TenantPublicPage /> },
   { path: "*", element: <Navigate to="/" replace /> }
 ]);

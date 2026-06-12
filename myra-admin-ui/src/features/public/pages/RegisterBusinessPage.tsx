@@ -2,7 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { ArrowRight, Building2, CheckCircle2, CreditCard, FileText, Palette, Phone, ShieldCheck, UploadCloud } from "lucide-react";
 import { useRef, useState } from "react";
-import { useForm, type FieldErrors } from "react-hook-form";
+import { Controller, useForm, type FieldErrors } from "react-hook-form";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
@@ -11,12 +11,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/toast";
+import { BrandColorField } from "@/components/shared/BrandColorPicker";
 import { DOCUMENT_REVIEW_MESSAGE, formatPlanPrice, SUBSCRIPTION_PLANS } from "@/features/onboarding/onboarding.data";
 import { createBusinessRegistration, listSubscriptionPlans } from "@/features/onboarding/onboarding.api";
 import { heroCopy } from "@/features/onboarding/onboarding.copy";
 import type { BusinessRegistrationInput } from "@/features/onboarding/onboarding.types";
 import type { SubscriptionPlanId } from "@/features/tenants/tenant.types";
 import { PublicNav } from "@/features/public/pages/PublicLandingPage";
+import { normalizeHexColor } from "@/lib/colors";
 
 const SELECTED_PLAN_STORAGE_KEY = "myra-selected-plan";
 
@@ -105,8 +107,8 @@ export function RegisterBusinessPage() {
             <div>
               <h1 className="text-4xl font-semibold tracking-normal sm:text-5xl">Register your business for Myra AI Assistant</h1>
               <p className="mt-4 max-w-3xl text-base leading-7 text-slate-300">
-                Share the details Myra needs to represent your business clearly. After payment, you will upload knowledge
-                documents from the customer dashboard for review and activation.
+                Share the details Myra needs to represent your business clearly. After payment, you will upload knowledge documents from the
+                customer dashboard for review and activation.
               </p>
             </div>
           </div>
@@ -120,7 +122,12 @@ export function RegisterBusinessPage() {
       </section>
 
       <section className="public-section mx-auto grid max-w-7xl gap-6 px-4 py-10 sm:px-6 lg:grid-cols-[1fr_360px] lg:px-8">
-        <form className="space-y-6" onSubmit={form.handleSubmit((values) => registrationMutation.mutate(values))}>
+        <form
+          className="space-y-6"
+          onSubmit={form.handleSubmit((values) =>
+            registrationMutation.mutate({ ...values, brandColor: normalizeHexColor(values.brandColor) })
+          )}
+        >
           <OnboardingStepper />
 
           <Card className="public-card">
@@ -185,13 +192,13 @@ export function RegisterBusinessPage() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="brandColor">Brand color</Label>
-                  <div className="flex items-center gap-3">
-                    <Input id="brandColor" type="color" className="h-10 w-16 p-1" {...form.register("brandColor")} />
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Palette className="h-4 w-4" />
-                      {form.watch("brandColor")}
-                    </div>
-                  </div>
+                  <Controller
+                    control={form.control}
+                    name="brandColor"
+                    render={({ field }) => (
+                      <BrandColorField id="brandColor" value={field.value} onChange={(color) => field.onChange(normalizeHexColor(color))} />
+                    )}
+                  />
                   <FieldError name="brandColor" errors={form.formState.errors} />
                 </div>
               </div>
@@ -260,7 +267,9 @@ export function RegisterBusinessPage() {
                 <label
                   key={plan.id}
                   className={`cursor-pointer rounded-md border p-4 transition-colors ${
-                    selectedPlanId === plan.id ? "border-primary bg-primary/10 shadow-sm" : "bg-[var(--color-bg-card)] hover:bg-[var(--color-bg-muted)]"
+                    selectedPlanId === plan.id
+                      ? "border-primary bg-primary/10 shadow-sm"
+                      : "bg-[var(--color-bg-card)] hover:bg-[var(--color-bg-muted)]"
                   }`}
                 >
                   <input type="radio" value={plan.id} className="sr-only" {...form.register("selectedSubscriptionPlan")} />
@@ -291,7 +300,10 @@ export function RegisterBusinessPage() {
             </CardHeader>
             <CardContent className="space-y-3 text-sm text-muted-foreground">
               <p>No knowledge files are uploaded during public registration.</p>
-              <p>After payment, log in to your customer dashboard to upload FAQs, service details, pricing, policies, menus, or product guides.</p>
+              <p>
+                After payment, log in to your customer dashboard to upload FAQs, service details, pricing, policies, menus, or product
+                guides.
+              </p>
               <p>Embed code is visible and emailed only after admin approval.</p>
               <p>Myra answers from business-provided and approved knowledge, not from unsupported guesses.</p>
             </CardContent>

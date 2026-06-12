@@ -1,5 +1,6 @@
 import { defaultAiBehaviorCaptureValues } from "@/features/tenants/tenant.schema";
 import type { ResponseStyle, Tenant, TenantCreateRequest } from "@/features/tenants/tenant.types";
+import { normalizeHexColor } from "@/lib/colors";
 
 type TenantApiRecord = Record<string, unknown>;
 
@@ -51,7 +52,7 @@ export function fromTenantResponse(apiTenant: unknown): Tenant {
     timezone: stringValue(record, "timezone") || "",
     assistantName: stringValue(record, "assistantName", "assistant_name") || "Myra",
     assistantIntro: stringValue(record, "assistantIntro", "assistant_intro") || "Hi, I am Myra.",
-    brandColor: stringValue(record, "brandColor", "brand_color") || "#1591DC",
+    brandColor: normalizeHexColor(stringValue(record, "brandColor", "brand_color")),
     logoUrl: optionalStringValue(record, "logoUrl", "logo_url"),
     avatarUrl: optionalStringValue(record, "avatarUrl", "avatar_url"),
     chatPosition: stringValue(record, "chatPosition", "chat_position") === "bottom-left" ? "bottom-left" : "bottom-right",
@@ -128,7 +129,7 @@ function toBackendTenantPayload(values: Partial<Tenant> & Partial<TenantCreateRe
     timezone: values.timezone,
     assistant_name: values.assistantName,
     assistant_intro: values.assistantIntro,
-    brand_color: values.brandColor,
+    brand_color: values.brandColor ? normalizeHexColor(values.brandColor) : undefined,
     logo_url: values.logoUrl,
     avatar_url: values.avatarUrl,
     chat_position: values.chatPosition,

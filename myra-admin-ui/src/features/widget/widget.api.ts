@@ -1,6 +1,7 @@
 import { apiClient, isBackendUnavailable } from "@/lib/apiClient";
 import type { WidgetConfig } from "@/features/widget/widget.types";
 import { getTenant } from "@/features/tenants/tenant.api";
+import { normalizeHexColor } from "@/lib/colors";
 
 const STORAGE_KEY = "myra-admin-fallback-widget-configs";
 
@@ -21,17 +22,17 @@ function writeConfigs(configs: Record<string, WidgetConfig>) {
 export async function getWidgetConfig(tenantId: string): Promise<WidgetConfig> {
   try {
     const { data } = await apiClient.get<WidgetConfig>(`/widget-config/${tenantId}`);
-    return data;
+    return { ...data, brandColor: normalizeHexColor(data.brandColor) };
   } catch (error) {
     if (!isBackendUnavailable(error)) throw error;
     const saved = readConfigs()[tenantId];
-    if (saved) return saved;
+    if (saved) return { ...saved, brandColor: normalizeHexColor(saved.brandColor) };
     const tenant = await getTenant(tenantId);
     return {
       tenantId,
       assistantName: tenant.assistantName,
       assistantIntro: tenant.assistantIntro,
-      brandColor: tenant.brandColor,
+      brandColor: normalizeHexColor(tenant.brandColor),
       chatPosition: tenant.chatPosition,
       launcherLabel: "Chat with Myra",
       welcomeMessage: tenant.assistantIntro,
@@ -42,14 +43,16 @@ export async function getWidgetConfig(tenantId: string): Promise<WidgetConfig> {
 }
 
 export async function updateWidgetConfig(tenantId: string, payload: WidgetConfig): Promise<WidgetConfig> {
+  const normalizedPayload = { ...payload, brandColor: normalizeHexColor(payload.brandColor) };
+
   try {
-    const { data } = await apiClient.put<WidgetConfig>(`/widget-config/${tenantId}`, payload);
-    return data;
+    const { data } = await apiClient.put<WidgetConfig>(`/widget-config/${tenantId}`, normalizedPayload);
+    return { ...data, brandColor: normalizeHexColor(data.brandColor) };
   } catch (error) {
     if (!isBackendUnavailable(error)) throw error;
     const configs = readConfigs();
-    configs[tenantId] = payload;
+    configs[tenantId] = normalizedPayload;
     writeConfigs(configs);
-    return payload;
+    return normalizedPayload;
   }
 }

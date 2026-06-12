@@ -1,7 +1,54 @@
+import axios, { type AxiosProgressEvent } from "axios";
 import { apiClient, isBackendUnavailable } from "@/lib/apiClient";
-import type { FaqInput, KnowledgeSource, KnowledgeStatus } from "@/features/knowledge/knowledge.types";
+import { appConfig, serviceBaseUrls } from "@/lib/config";
+import { normalizeApiError } from "@/lib/apiErrors";
+import { sanitizePayload } from "@/lib/sanitize";
+import { useAuthStore } from "@/features/auth/auth.store";
+import type {
+  ApprovalPayload,
+  ComparisonMode,
+  DifferenceFilters,
+  DifferenceResolutionPayload,
+  FaqInput,
+  KnowledgeApproval,
+  KnowledgeComparison,
+  KnowledgeDifference,
+  KnowledgeSource,
+  KnowledgeStatus,
+  KnowledgeVersion,
+  PaginatedResponse,
+  ScanPage,
+  UploadedDocument,
+  WebsiteScan
+} from "@/features/knowledge/knowledge.types";
 
 const STORAGE_KEY = "myra-admin-fallback-knowledge";
+
+const knowledgeServiceBaseUrl = import.meta.env.VITE_KNOWLEDGE_SERVICE_URL || serviceBaseUrls.knowledge;
+
+const knowledgeReviewClient = axios.create({
+  baseURL: knowledgeServiceBaseUrl,
+  timeout: appConfig.VITE_API_TIMEOUT_MS,
+  withCredentials: true,
+  headers: {
+    "Content-Type": "application/json"
+  }
+});
+
+knowledgeReviewClient.interceptors.request.use((config) => {
+  const token = useAuthStore.getState().token;
+  if (token) config.headers.Authorization = `Bearer ${token}`;
+  if (config.data && !(config.data instanceof FormData)) config.data = sanitizePayload(config.data);
+  return config;
+});
+
+knowledgeReviewClient.interceptors.response.use(
+  (response) => {
+    response.data = unwrapResponseEnvelope(response.data);
+    return response;
+  },
+  (error) => Promise.reject(normalizeApiError(error))
+);
 
 const fallbackSources: KnowledgeSource[] = [
   {
@@ -27,6 +74,62 @@ const fallbackSources: KnowledgeSource[] = [
   }
 ];
 
+function unwrapResponseEnvelope(payload: unknown) {
+  if (!payload || typeof payload !== "object") return payload;
+  const record = payload as Record<string, unknown>;
+  if (typeof record.success !== "boolean") return payload;
+  if (record.success) return record.data;
+
+  const error = record.error && typeof record.error === "object" ? (record.error as Record<string, unknown>) : undefined;
+  const message =
+    (typeof error?.message === "string" && error.message) ||
+    (typeof record.message === "string" && record.message) ||
+    "Knowledge service request failed";
+  throw new Error(message);
+}
+
+function normalizePaginatedResponse<T>(payload: unknown, fallbackPage: number, fallbackSize: number): PaginatedResponse<T> {
+  if (Array.isArray(payload)) {
+    return {
+      items: payload as T[],
+      total: payload.length,
+      page: fallbackPage,
+      size: fallbackSize,
+      pages: payload.length ? 1 : 0
+    };
+  }
+
+  if (!payload || typeof payload !== "object") {
+    return {
+      items: [],
+      total: 0,
+      page: fallbackPage,
+      size: fallbackSize,
+      pages: 0
+    };
+  }
+
+  const record = payload as Record<string, unknown>;
+  const rawItems = record.items ?? record.content ?? record.results ?? record.data ?? [];
+  const items = Array.isArray(rawItems) ? (rawItems as T[]) : [];
+  const total = Number(record.total ?? record.totalElements ?? record.total_count ?? items.length);
+  const page = Number(record.page ?? record.pageNumber ?? record.current_page ?? fallbackPage);
+  const size = Number(record.size ?? record.pageSize ?? record.per_page ?? fallbackSize);
+  const pages = Number(record.pages ?? record.totalPages ?? Math.ceil(total / Math.max(size, 1)));
+
+  return {
+    items,
+    total: Number.isFinite(total) ? total : items.length,
+    page: Number.isFinite(page) ? page : fallbackPage,
+    size: Number.isFinite(size) ? size : fallbackSize,
+    pages: Number.isFinite(pages) ? pages : undefined
+  };
+}
+
+function notFound(error: unknown) {
+  return normalizeApiError(error).status === 404;
+}
+
 function readSources() {
   const raw = localStorage.getItem(STORAGE_KEY);
   if (!raw) return fallbackSources;
@@ -45,6 +148,193 @@ function fileType(fileName: string): KnowledgeSource["type"] {
   const extension = fileName.split(".").pop()?.toUpperCase();
   if (extension === "PDF" || extension === "DOCX" || extension === "TXT" || extension === "CSV") return extension;
   return "TXT";
+}
+
+export async function startWebsiteScan(
+  tenantId: string,
+  websiteUrl: string,
+  maxPages: number,
+  maxDepth: number
+): Promise<WebsiteScan> {
+  const { data } = await knowledgeReviewClient.post<WebsiteScan>("/website-scans", {
+    tenant_id: tenantId,
+    website_url: websiteUrl,
+    max_pages: maxPages,
+    max_depth: maxDepth
+  });
+  return data;
+}
+
+export async function getScan(scanId: string, tenantId: string): Promise<WebsiteScan> {
+  const { data } = await knowledgeReviewClient.get<WebsiteScan>(`/website-scans/${scanId}`, {
+    params: { tenant_id: tenantId }
+  });
+  return data;
+}
+
+export async function listScans(tenantId: string, page = 1, size = 10): Promise<PaginatedResponse<WebsiteScan>> {
+  const { data } = await knowledgeReviewClient.get<unknown>("/website-scans", {
+    params: { tenant_id: tenantId, page, size }
+  });
+  return normalizePaginatedResponse<WebsiteScan>(data, page, size);
+}
+
+export async function getScanPages(scanId: string, tenantId: string, page = 1, size = 10): Promise<PaginatedResponse<ScanPage>> {
+  const { data } = await knowledgeReviewClient.get<unknown>(`/website-scans/${scanId}/pages`, {
+    params: { tenant_id: tenantId, page, size }
+  });
+  return normalizePaginatedResponse<ScanPage>(data, page, size);
+}
+
+export async function uploadDocument(
+  tenantId: string,
+  file: File,
+  uploadedByUserId?: string,
+  onUploadProgress?: (progress: number) => void
+): Promise<UploadedDocument> {
+  const formData = new FormData();
+  formData.append("tenant_id", tenantId);
+  formData.append("file", file);
+  if (uploadedByUserId) formData.append("uploaded_by_user_id", uploadedByUserId);
+
+  const { data } = await knowledgeReviewClient.post<UploadedDocument>("/documents/upload", formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+    onUploadProgress: (event: AxiosProgressEvent) => {
+      if (!event.total || !onUploadProgress) return;
+      onUploadProgress(Math.round((event.loaded / event.total) * 100));
+    }
+  });
+  return data;
+}
+
+export async function listUploadedDocuments(
+  tenantId: string,
+  page = 1,
+  size = 10
+): Promise<PaginatedResponse<UploadedDocument>> {
+  const { data } = await knowledgeReviewClient.get<unknown>("/documents", {
+    params: { tenant_id: tenantId, page, size }
+  });
+  return normalizePaginatedResponse<UploadedDocument>(data, page, size);
+}
+
+export async function getUploadedDocument(uploadId: string, tenantId: string): Promise<UploadedDocument> {
+  const { data } = await knowledgeReviewClient.get<UploadedDocument>(`/documents/${uploadId}`, {
+    params: { tenant_id: tenantId }
+  });
+  return data;
+}
+
+export async function deleteUploadedDocument(uploadId: string, tenantId: string): Promise<void> {
+  await knowledgeReviewClient.delete(`/documents/${uploadId}`, {
+    params: { tenant_id: tenantId }
+  });
+}
+
+export async function startComparison(
+  tenantId: string,
+  websiteScanId: string,
+  documentIds: string[],
+  comparisonMode?: ComparisonMode
+): Promise<KnowledgeComparison> {
+  const { data } = await knowledgeReviewClient.post<KnowledgeComparison>("/comparisons", {
+    tenant_id: tenantId,
+    website_scan_id: websiteScanId,
+    document_ids: documentIds,
+    comparison_mode: comparisonMode
+  });
+  return data;
+}
+
+export async function getComparison(comparisonId: string, tenantId: string): Promise<KnowledgeComparison> {
+  const { data } = await knowledgeReviewClient.get<KnowledgeComparison>(`/comparisons/${comparisonId}`, {
+    params: { tenant_id: tenantId }
+  });
+  return data;
+}
+
+export async function listComparisons(
+  tenantId: string,
+  page = 1,
+  size = 10
+): Promise<PaginatedResponse<KnowledgeComparison>> {
+  const { data } = await knowledgeReviewClient.get<unknown>("/comparisons", {
+    params: { tenant_id: tenantId, page, size }
+  });
+  return normalizePaginatedResponse<KnowledgeComparison>(data, page, size);
+}
+
+export async function getDifferences(
+  comparisonId: string,
+  tenantId: string,
+  filters?: DifferenceFilters,
+  page = 1,
+  size = 10
+): Promise<PaginatedResponse<KnowledgeDifference>> {
+  const { data } = await knowledgeReviewClient.get<unknown>(`/comparisons/${comparisonId}/differences`, {
+    params: {
+      tenant_id: tenantId,
+      category: filters?.category,
+      severity: filters?.severity,
+      resolution_status: filters?.resolution_status,
+      page,
+      size
+    }
+  });
+  return normalizePaginatedResponse<KnowledgeDifference>(data, page, size);
+}
+
+export async function resolveDifference(
+  comparisonId: string,
+  differenceId: string,
+  resolution: DifferenceResolutionPayload
+): Promise<KnowledgeDifference> {
+  const { data } = await knowledgeReviewClient.post<KnowledgeDifference>(
+    `/comparisons/${comparisonId}/differences/${differenceId}/resolve`,
+    resolution
+  );
+  return data;
+}
+
+export async function generateKnowledgeVersion(
+  tenantId: string,
+  comparisonId: string,
+  createdByUserId?: string
+): Promise<KnowledgeVersion> {
+  const { data } = await knowledgeReviewClient.post<KnowledgeVersion>("/knowledge-versions/generate", {
+    tenant_id: tenantId,
+    comparison_id: comparisonId,
+    created_by_user_id: createdByUserId
+  });
+  return data;
+}
+
+export async function submitApproval(payload: ApprovalPayload): Promise<KnowledgeApproval> {
+  const { data } = await knowledgeReviewClient.post<KnowledgeApproval>("/approvals", payload);
+  return data;
+}
+
+export async function listApprovals(
+  tenantId: string,
+  page = 1,
+  size = 10
+): Promise<PaginatedResponse<KnowledgeApproval>> {
+  const { data } = await knowledgeReviewClient.get<unknown>("/approvals", {
+    params: { tenant_id: tenantId, page, size }
+  });
+  return normalizePaginatedResponse<KnowledgeApproval>(data, page, size);
+}
+
+export async function getApprovedSourceOfTruth(tenantId: string): Promise<KnowledgeVersion | null> {
+  try {
+    const { data } = await knowledgeReviewClient.get<KnowledgeVersion>("/knowledge-versions/approved", {
+      params: { tenant_id: tenantId }
+    });
+    return data;
+  } catch (error) {
+    if (notFound(error)) return null;
+    throw error;
+  }
 }
 
 export async function listKnowledgeSources(tenantId?: string): Promise<KnowledgeSource[]> {

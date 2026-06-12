@@ -3,7 +3,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Bot, BrainCircuit, Palette, Save, Sparkles, Workflow, Zap } from "lucide-react";
 import { useEffect } from "react";
 import type { ReactNode } from "react";
-import { useForm, type FieldErrors, type Resolver } from "react-hook-form";
+import { Controller, useForm, type FieldErrors, type Resolver } from "react-hook-form";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -16,9 +16,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/toast";
 import { LoadingSpinner } from "@/components/shared/LoadingSpinner";
 import { PageHeader } from "@/components/shared/PageHeader";
+import { BrandColorField } from "@/components/shared/BrandColorPicker";
 import { TestExtractionPanel } from "@/features/customer/components/TestExtractionPanel";
 import { updateTenant } from "@/features/tenants/tenant.api";
 import { RESPONSE_STYLES } from "@/lib/constants";
+import { normalizeHexColor } from "@/lib/colors";
 import { defaultAiBehaviorCaptureValues } from "@/features/tenants/tenant.schema";
 import { useCustomerTenant } from "@/features/customer/customer.hooks";
 
@@ -212,7 +214,7 @@ export function CustomerAssistantSettingsPage() {
       form.reset({
         assistantName: tenantQuery.data.assistantName,
         assistantIntro: tenantQuery.data.assistantIntro,
-        brandColor: tenantQuery.data.brandColor,
+        brandColor: normalizeHexColor(tenantQuery.data.brandColor),
         responseStyle: tenantQuery.data.responseStyle,
         businessDescription: tenantQuery.data.businessDescription ?? "",
         allowedTopics: tenantQuery.data.allowedTopics.join(", "),
@@ -310,6 +312,7 @@ export function CustomerAssistantSettingsPage() {
 
     saveMutation.mutate({
       ...values,
+      brandColor: normalizeHexColor(values.brandColor),
       enableOrderCapture: values.enableStructuredExtraction && values.enableOrderCapture,
       enableAppointmentCapture: values.enableStructuredExtraction && values.enableAppointmentCapture
     });
@@ -398,10 +401,13 @@ export function CustomerAssistantSettingsPage() {
                   <Textarea className="min-h-24" {...form.register("assistantIntro")} />
                 </Field>
                 <Field label="Brand color" error={form.formState.errors.brandColor?.message}>
-                  <div className="flex items-center gap-3">
-                    <Input type="color" className="h-10 w-16 p-1" {...form.register("brandColor")} />
-                    <span className="text-sm font-medium text-muted-foreground">{values.brandColor}</span>
-                  </div>
+                  <Controller
+                    control={form.control}
+                    name="brandColor"
+                    render={({ field }) => (
+                      <BrandColorField id="brandColor" value={field.value} onChange={(color) => field.onChange(normalizeHexColor(color))} />
+                    )}
+                  />
                 </Field>
               </TabsContent>
 
@@ -509,7 +515,9 @@ export function CustomerAssistantSettingsPage() {
                     disabled={!values.enableLeadCapture}
                     onToggle={(fieldValue, checked) => toggleRequiredField("leadRequiredFields", fieldValue, checked)}
                   />
-                  {typeof leadRequiredFieldsError === "string" ? <p className="text-sm text-destructive">{leadRequiredFieldsError}</p> : null}
+                  {typeof leadRequiredFieldsError === "string" ? (
+                    <p className="text-sm text-destructive">{leadRequiredFieldsError}</p>
+                  ) : null}
                 </SectionBlock>
 
                 <SectionBlock
