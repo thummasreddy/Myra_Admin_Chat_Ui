@@ -1,13 +1,16 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { DataTable, type DataTableColumn } from "@/components/shared/DataTable";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { StatusBadge } from "@/components/shared/StatusBadge";
-import { auditEntries, type AuditEntry } from "@/features/admin/platformAdmin.data";
+import type { AuditEntry } from "@/features/admin/admin.types";
+import { fetchAuditEntries } from "@/features/admin/admin.api";
 import { formatDate } from "@/lib/utils";
 
 export function AuditLogsPage() {
+  const [entries, setEntries] = useState<AuditEntry[]>([]);
+  const [loading, setLoading] = useState(true);
   const [actor, setActor] = useState("");
   const [action, setAction] = useState("ALL");
   const [tenant, setTenant] = useState("");
@@ -15,8 +18,16 @@ export function AuditLogsPage() {
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
 
+  useEffect(() => {
+    let cancelled = false;
+    fetchAuditEntries()
+      .then((data) => { if (!cancelled) setEntries(data); })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+  }, []);
+
   const filtered = useMemo(() => {
-    return auditEntries.filter((entry) => {
+    return entries.filter((entry) => {
       const timestamp = new Date(entry.timestamp).getTime();
       return (
         (!actor || entry.adminUser.toLowerCase().includes(actor.toLowerCase())) &&
@@ -27,7 +38,7 @@ export function AuditLogsPage() {
         (!dateTo || timestamp <= new Date(`${dateTo}T23:59:59`).getTime())
       );
     });
-  }, [action, actor, dateFrom, dateTo, resourceType, tenant]);
+  }, [action, actor, dateFrom, dateTo, entries, resourceType, tenant]);
 
   const columns: DataTableColumn<AuditEntry>[] = [
     { header: "Admin user", accessor: "adminUser" },
@@ -40,6 +51,15 @@ export function AuditLogsPage() {
     { header: "Timestamp", accessor: (entry) => formatDate(entry.timestamp) },
     { header: "IP address", accessor: "ipAddress" }
   ];
+
+  if (loading) {
+    return (
+      <>
+        <PageHeader title="Audit Logs" description="Loading audit log data…" />
+        <p className="text-sm text-muted-foreground">Loading…</p>
+      </>
+    );
+  }
 
   return (
     <>

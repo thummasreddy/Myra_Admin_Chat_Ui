@@ -1,6 +1,6 @@
 import { AlertTriangle, FileSearch, Lock, RefreshCcw, Wrench } from "lucide-react";
 import type { ReactNode } from "react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select } from "@/components/ui/select";
@@ -8,12 +8,46 @@ import { toast } from "@/components/ui/toast";
 import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { PageHeader } from "@/components/shared/PageHeader";
-import { platformTenants } from "@/features/admin/platformAdmin.data";
+import type { PlatformTenant } from "@/features/admin/admin.types";
+import { fetchTenants } from "@/features/admin/admin.api";
 
 export function SupportDebugPage() {
-  const [tenantId, setTenantId] = useState(platformTenants[0]?.id ?? "");
+  const [tenants, setTenants] = useState<PlatformTenant[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [tenantId, setTenantId] = useState("");
   const [confirmOpen, setConfirmOpen] = useState(false);
-  const tenant = platformTenants.find((item) => item.id === tenantId) ?? platformTenants[0];
+
+  useEffect(() => {
+    let cancelled = false;
+    fetchTenants()
+      .then((data) => {
+        if (cancelled) return;
+        setTenants(data);
+        if (data.length > 0) setTenantId(data[0].id);
+      })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+  }, []);
+
+  const tenant = tenants.find((item) => item.id === tenantId);
+
+  if (loading) {
+    return (
+      <>
+        <PageHeader title="Support & Debug" description="Loading tenant data…" />
+        <p className="text-sm text-muted-foreground">Loading…</p>
+      </>
+    );
+  }
+
+  if (!tenant) {
+    return (
+      <>
+        <PageHeader title="Support & Debug" description="No tenants available." />
+        <p className="text-sm text-muted-foreground">No tenants found in the backend.</p>
+      </>
+    );
+  }
 
   return (
     <>
@@ -22,7 +56,7 @@ export function SupportDebugPage() {
         description="Safe support tools for viewing config, widget install status, failed API calls, ingestion failures, recent tenant errors, embed status, and QR status."
         actions={
           <Select value={tenantId} onChange={(event) => setTenantId(event.target.value)} className="w-72">
-            {platformTenants.map((item) => (
+            {tenants.map((item) => (
               <option key={item.id} value={item.id}>
                 {item.name}
               </option>
@@ -38,10 +72,10 @@ export function SupportDebugPage() {
 
       <section className="grid gap-4 lg:grid-cols-3">
         <DebugCard title="Tenant config" icon={FileSearch}>
-          <Row label="Plan" value={tenant.plan} />
+          <Row label="Plan" value={tenant.plan || "—"} />
           <Row label="Status" value={<StatusBadge status={tenant.status} />} />
-          <Row label="Owner" value={tenant.ownerEmail} />
-          <Row label="Category" value={tenant.category} />
+          <Row label="Owner" value={tenant.ownerEmail || "—"} />
+          <Row label="Category" value={tenant.category || "—"} />
         </DebugCard>
         <DebugCard title="Widget / embed / QR" icon={Wrench}>
           <Row label="Widget install" value={tenant.widgetIssue ? "Issue detected" : "Installed"} />

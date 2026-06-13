@@ -18,21 +18,16 @@ type BackendLoginResponse = {
   user?: LoginResponse["user"];
 };
 
-function apiV1Url(baseUrl: string) {
+function myraApiUrl(baseUrl: string) {
   const normalized = baseUrl.replace(/\/+$/, "");
-  if (normalized.endsWith("/api/v1")) return normalized;
-  if (normalized.endsWith("/api/v1/admin")) return normalized.replace(/\/admin$/, "");
-  return `${normalized}/api/v1`;
-}
-
-function fallbackRole(email?: string): LoginResponse["user"]["role"] {
-  return email?.toLowerCase().includes("support") ? "MYRA_SUPPORT_ADMIN" : "MYRA_SUPER_ADMIN";
+  if (normalized.endsWith("/api/myra")) return normalized;
+  return `${normalized}/api/myra`;
 }
 
 export async function login(payload: LoginRequest): Promise<LoginResponse> {
   try {
     const { data } = await axios.post<BackendLoginResponse>(
-      `${apiV1Url(appConfig.VITE_API_BASE_URL)}/auth/myra-admin/login`,
+      `${myraApiUrl(appConfig.VITE_API_BASE_URL)}/auth/admin/login`,
       payload,
       { withCredentials: true }
     );
@@ -44,16 +39,7 @@ export async function login(payload: LoginRequest): Promise<LoginResponse> {
 
     if (!isBackendUnavailable(error)) throw error;
 
-    const role = fallbackRole(payload.email);
-    return {
-      token: `demo-myra-admin-token-${Date.now()}`,
-      user: {
-        id: role === "MYRA_SUPPORT_ADMIN" ? "support-demo" : "super-admin-demo",
-        name: role === "MYRA_SUPPORT_ADMIN" ? "Myra Support" : "Myra Super Admin",
-        email: payload.email,
-        role
-      }
-    };
+    throw new Error("Backend is unavailable. Please check your connection and try again.");
   }
 }
 

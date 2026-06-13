@@ -1,13 +1,12 @@
 import { appConfig } from "@/lib/config";
 
-function adminGatewayUrl(baseUrl: string) {
+function myraApiUrl(baseUrl: string) {
   const normalized = baseUrl.replace(/\/+$/, "");
-  if (normalized.endsWith("/api/v1/admin")) return normalized;
-  if (normalized.endsWith("/api/v1")) return `${normalized}/admin`;
-  return `${normalized}/api/v1/admin`;
+  if (normalized.endsWith("/api/myra")) return normalized;
+  return `${normalized}/api/myra`;
 }
 
-export const API_BASE_URL = adminGatewayUrl(appConfig.VITE_API_BASE_URL);
+export const API_BASE_URL = myraApiUrl(appConfig.VITE_API_BASE_URL);
 
 export const TENANT_STATUSES = [
   "DRAFT",

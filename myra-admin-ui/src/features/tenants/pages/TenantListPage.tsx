@@ -1,5 +1,5 @@
 import { Eye, Flag, Lock, PauseCircle, RotateCcw, ShieldCheck, XCircle } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,11 +9,11 @@ import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
 import { DataTable, type DataTableColumn } from "@/components/shared/DataTable";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { StatusBadge } from "@/components/shared/StatusBadge";
-import {
-  platformTenants,
-  type PlatformTenant,
-  type PlatformTenantStatus
-} from "@/features/admin/platformAdmin.data";
+import type {
+  PlatformTenant,
+  PlatformTenantStatus
+} from "@/features/admin/admin.types";
+import { fetchTenants } from "@/features/admin/admin.api";
 import { useAuthStore } from "@/features/auth/auth.store";
 import { isSuperAdmin } from "@/features/admin/admin.permissions";
 import { formatDate } from "@/lib/utils";
@@ -25,18 +25,31 @@ type PendingAction =
 export function TenantListPage() {
   const user = useAuthStore((state) => state.user);
   const superAdmin = isSuperAdmin(user);
+  const [tenants, setTenants] = useState<PlatformTenant[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState<PlatformTenantStatus | "ALL">("ALL");
-  const [plan, setPlan] = useState<PlatformTenant["plan"] | "ALL">("ALL");
+  const [plan, setPlan] = useState<string>("ALL");
   const [category, setCategory] = useState("ALL");
   const [createdDate, setCreatedDate] = useState("");
   const [page, setPage] = useState(1);
   const [pendingAction, setPendingAction] = useState<PendingAction>(null);
 
-  const categories = useMemo(() => Array.from(new Set(platformTenants.map((tenant) => tenant.category))), []);
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    fetchTenants()
+      .then((data) => { if (!cancelled) setTenants(data); })
+      .catch((err: unknown) => { if (!cancelled) setError(err instanceof Error ? err.message : "Failed to load tenants"); })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+  }, []);
+
+  const categories = useMemo(() => Array.from(new Set(tenants.map((tenant) => tenant.category).filter(Boolean))), [tenants]);
   const filteredTenants = useMemo(() => {
     const term = search.trim().toLowerCase();
-    return platformTenants.filter((tenant) => {
+    return tenants.filter((tenant) => {
       const matchesSearch =
         !term ||
         tenant.name.toLowerCase().includes(term) ||
@@ -51,7 +64,7 @@ export function TenantListPage() {
         matchesDate
       );
     });
-  }, [category, createdDate, plan, search, status]);
+  }, [category, createdDate, plan, search, status, tenants]);
 
   const pageSize = 10;
   const pageCount = Math.max(Math.ceil(filteredTenants.length / pageSize), 1);
@@ -119,6 +132,24 @@ export function TenantListPage() {
     [superAdmin]
   );
 
+  if (loading) {
+    return (
+      <>
+        <PageHeader title="Tenant Management" description="Loading tenant data from backend…" />
+        <p className="text-sm text-muted-foreground">Loading…</p>
+      </>
+    );
+  }
+
+  if (error) {
+    return (
+      <>
+        <PageHeader title="Tenant Management" description="Failed to load tenant data." />
+        <p className="text-sm text-destructive">{error}</p>
+      </>
+    );
+  }
+
   return (
     <>
       <PageHeader
@@ -135,7 +166,7 @@ export function TenantListPage() {
           <option value="REJECTED">Rejected</option>
           <option value="SUSPENDED">Suspended</option>
         </Select>
-        <Select value={plan} onChange={(event) => setPlan(event.target.value as PlatformTenant["plan"] | "ALL")}>
+        <Select value={plan} onChange={(event) => setPlan(event.target.value)}>
           <option value="ALL">All plans</option>
           <option value="Starter">Starter</option>
           <option value="Growth">Growth</option>

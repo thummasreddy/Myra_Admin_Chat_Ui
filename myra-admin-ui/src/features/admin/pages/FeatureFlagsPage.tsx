@@ -1,5 +1,5 @@
 import { Lock } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -7,18 +7,47 @@ import { Select } from "@/components/ui/select";
 import { toast } from "@/components/ui/toast";
 import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
 import { PageHeader } from "@/components/shared/PageHeader";
-import { featureFlagKeys, platformTenants } from "@/features/admin/platformAdmin.data";
+import { featureFlagKeys } from "@/features/admin/admin.types";
+import type { PlatformTenant } from "@/features/admin/admin.types";
+import { fetchTenants } from "@/features/admin/admin.api";
 
 export function FeatureFlagsPage() {
-  const [tenantId, setTenantId] = useState(platformTenants[0]?.id ?? "");
-  const tenant = platformTenants.find((item) => item.id === tenantId) ?? platformTenants[0];
-  const [flags, setFlags] = useState<Record<string, boolean>>(tenant?.featureFlags ?? {});
+  const [tenants, setTenants] = useState<PlatformTenant[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [tenantId, setTenantId] = useState("");
+  const [flags, setFlags] = useState<Record<string, boolean>>({});
   const [confirmOpen, setConfirmOpen] = useState(false);
 
+  useEffect(() => {
+    let cancelled = false;
+    fetchTenants()
+      .then((data) => {
+        if (cancelled) return;
+        setTenants(data);
+        if (data.length > 0) {
+          setTenantId(data[0].id);
+          setFlags(data[0].featureFlags);
+        }
+      })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+  }, []);
+
+  const tenant = tenants.find((item) => item.id === tenantId);
+
   function handleTenantChange(nextTenantId: string) {
-    const nextTenant = platformTenants.find((item) => item.id === nextTenantId);
+    const nextTenant = tenants.find((item) => item.id === nextTenantId);
     setTenantId(nextTenantId);
     setFlags(nextTenant?.featureFlags ?? {});
+  }
+
+  if (loading) {
+    return (
+      <>
+        <PageHeader title="Feature Flags" description="Loading tenant data…" />
+        <p className="text-sm text-muted-foreground">Loading…</p>
+      </>
+    );
   }
 
   return (
@@ -33,7 +62,7 @@ export function FeatureFlagsPage() {
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <CardTitle>Tenant toggles</CardTitle>
             <Select value={tenantId} onChange={(event) => handleTenantChange(event.target.value)} className="sm:w-72">
-              {platformTenants.map((item) => (
+              {tenants.map((item) => (
                 <option key={item.id} value={item.id}>
                   {item.name}
                 </option>
@@ -60,7 +89,7 @@ export function FeatureFlagsPage() {
 
       <ConfirmDialog
         open={confirmOpen}
-        title={`Save feature flags for ${tenant?.name}?`}
+        title={`Save feature flags for ${tenant?.name ?? "tenant"}?`}
         description="Feature flag changes can affect customer-facing widget behavior and require confirmation."
         onCancel={() => setConfirmOpen(false)}
         onConfirm={() => {

@@ -1,17 +1,28 @@
 import { Edit, Lock, Plus, Power } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/toast";
 import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
 import { DataTable, type DataTableColumn } from "@/components/shared/DataTable";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { StatusBadge } from "@/components/shared/StatusBadge";
-import { platformPlans, type PlatformPlan } from "@/features/admin/platformAdmin.data";
+import type { PlatformPlan } from "@/features/admin/admin.types";
+import { fetchPlans } from "@/features/admin/admin.api";
 
 type PendingAction = { type: "create" | "edit" | "disable"; plan?: PlatformPlan } | null;
 
 export function PlansPage() {
+  const [plans, setPlans] = useState<PlatformPlan[]>([]);
+  const [loading, setLoading] = useState(true);
   const [pendingAction, setPendingAction] = useState<PendingAction>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetchPlans()
+      .then((data) => { if (!cancelled) setPlans(data); })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+  }, []);
 
   function confirmAction() {
     toast({
@@ -54,6 +65,15 @@ export function PlansPage() {
     []
   );
 
+  if (loading) {
+    return (
+      <>
+        <PageHeader title="Plans & Limits" description="Loading plan data…" />
+        <p className="text-sm text-muted-foreground">Loading…</p>
+      </>
+    );
+  }
+
   return (
     <>
       <PageHeader
@@ -70,7 +90,7 @@ export function PlansPage() {
         <Lock className="mr-2 inline h-4 w-4" />
         This route is hidden from MYRA_SUPPORT_ADMIN and protected by the router.
       </div>
-      <DataTable columns={columns} data={platformPlans} getRowKey={(plan) => plan.id} />
+      <DataTable columns={columns} data={plans} getRowKey={(plan) => plan.id} emptyTitle="No plans configured" emptyDescription="Plans will appear here once the backend plan management API is available." />
       <ConfirmDialog
         open={Boolean(pendingAction)}
         title={pendingAction?.type === "create" ? "Create plan?" : `${pendingAction?.type} ${pendingAction?.plan?.name}?`}

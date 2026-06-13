@@ -1,6 +1,6 @@
 import { AlertTriangle, Flag, Lock, NotebookPen, PauseCircle, ShieldCheck } from "lucide-react";
 import type { ReactNode } from "react";
-import { useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,7 +12,9 @@ import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
 import { ErrorState } from "@/components/shared/ErrorState";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { StatusBadge } from "@/components/shared/StatusBadge";
-import { featureFlagKeys, platformTenants, type PlatformTenant } from "@/features/admin/platformAdmin.data";
+import { featureFlagKeys } from "@/features/admin/admin.types";
+import type { PlatformTenant } from "@/features/admin/admin.types";
+import { fetchTenantById } from "@/features/admin/admin.api";
 import { useAuthStore } from "@/features/auth/auth.store";
 import { isSuperAdmin } from "@/features/admin/admin.permissions";
 import { formatDate } from "@/lib/utils";
@@ -23,15 +25,42 @@ export function TenantDetailPage() {
   const { tenantId = "" } = useParams();
   const user = useAuthStore((state) => state.user);
   const superAdmin = isSuperAdmin(user);
-  const tenant = useMemo(() => platformTenants.find((item) => item.id === tenantId), [tenantId]);
-  const [selectedPlan, setSelectedPlan] = useState<PlatformTenant["plan"]>(tenant?.plan ?? "Starter");
-  const [flags, setFlags] = useState<Record<string, boolean>>(tenant?.featureFlags ?? {});
-  const [notes, setNotes] = useState(tenant?.notes ?? "");
+  const [tenant, setTenant] = useState<PlatformTenant | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [selectedPlan, setSelectedPlan] = useState("Starter");
+  const [flags, setFlags] = useState<Record<string, boolean>>({});
+  const [notes, setNotes] = useState("");
   const [supportMode, setSupportMode] = useState(false);
   const [pendingAction, setPendingAction] = useState<PendingAction>(null);
 
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    fetchTenantById(tenantId)
+      .then((data) => {
+        if (cancelled) return;
+        setTenant(data);
+        if (data) {
+          setSelectedPlan(data.plan || "Starter");
+          setFlags(data.featureFlags);
+          setNotes(data.notes);
+        }
+      })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+  }, [tenantId]);
+
+  if (loading) {
+    return (
+      <>
+        <PageHeader title="Loading…" description="Fetching tenant details from backend." />
+        <p className="text-sm text-muted-foreground">Loading…</p>
+      </>
+    );
+  }
+
   if (!tenant) {
-    return <ErrorState title="Tenant not found" description="The tenant record is not available in the admin dataset." />;
+    return <ErrorState title="Tenant not found" description="The tenant record was not found in the backend." />;
   }
 
   const tenantName = tenant.name;
@@ -89,8 +118,8 @@ export function TenantDetailPage() {
             <CardDescription>View-only unless support mode is active.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-2 text-sm">
-            <Detail label="Category" value={tenant.category} />
-            <Detail label="Website" value={tenant.website} />
+            <Detail label="Category" value={tenant.category || "—"} />
+            <Detail label="Website" value={tenant.website || "—"} />
             <Detail label="Created" value={formatDate(tenant.createdAt)} />
             <Detail label="Last active" value={formatDate(tenant.lastActiveAt)} />
           </CardContent>
@@ -101,10 +130,10 @@ export function TenantDetailPage() {
             <CardTitle>Owner Details</CardTitle>
           </CardHeader>
           <CardContent className="space-y-2 text-sm">
-            <Detail label="Owner" value={tenant.ownerName} />
-            <Detail label="Email" value={tenant.ownerEmail} />
+            <Detail label="Owner" value={tenant.ownerName || "—"} />
+            <Detail label="Email" value={tenant.ownerEmail || "—"} />
             <Detail label="Status" value={<StatusBadge status={tenant.status} />} />
-            <Detail label="Plan" value={tenant.plan} />
+            <Detail label="Plan" value={tenant.plan || "—"} />
           </CardContent>
         </Card>
 
@@ -139,7 +168,7 @@ export function TenantDetailPage() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid gap-2 sm:grid-cols-[1fr_auto]">
-              <Select value={selectedPlan} onChange={(event) => setSelectedPlan(event.target.value as PlatformTenant["plan"])} disabled={!superAdmin}>
+              <Select value={selectedPlan} onChange={(event) => setSelectedPlan(event.target.value)} disabled={!superAdmin}>
                 <option value="Starter">Starter</option>
                 <option value="Growth">Growth</option>
                 <option value="Scale">Scale</option>

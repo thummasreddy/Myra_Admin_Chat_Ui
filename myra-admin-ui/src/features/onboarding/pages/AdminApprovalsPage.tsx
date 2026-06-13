@@ -1,19 +1,30 @@
 import { FileText, MessageSquare, ShieldCheck, XCircle } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/toast";
 import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
 import { DataTable, type DataTableColumn } from "@/components/shared/DataTable";
 import { PageHeader } from "@/components/shared/PageHeader";
-import { approvalQueue, type ApprovalTenant } from "@/features/admin/platformAdmin.data";
+import type { ApprovalTenant } from "@/features/admin/admin.types";
+import { fetchApprovalQueue } from "@/features/admin/admin.api";
 import { formatDate } from "@/lib/utils";
 
 type PendingAction = { action: "approve" | "reject" | "request more info" | "add internal note"; tenant: ApprovalTenant } | null;
 
 export function AdminApprovalsPage() {
+  const [queue, setQueue] = useState<ApprovalTenant[]>([]);
+  const [loading, setLoading] = useState(true);
   const [pendingAction, setPendingAction] = useState<PendingAction>(null);
   const [reason, setReason] = useState("");
+
+  useEffect(() => {
+    let cancelled = false;
+    fetchApprovalQueue()
+      .then((data) => { if (!cancelled) setQueue(data); })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+  }, []);
 
   function confirmAction() {
     if (!pendingAction) return;
@@ -32,7 +43,7 @@ export function AdminApprovalsPage() {
       { header: "Website", accessor: (tenant) => <span className="break-all text-sm">{tenant.website}</span> },
       { header: "Category", accessor: "category" },
       { header: "Owner contact", accessor: "ownerContact" },
-      { header: "Documents", accessor: (tenant) => tenant.uploadedDocuments.join(", ") },
+      { header: "Documents", accessor: (tenant) => tenant.uploadedDocuments.join(", ") || "—" },
       { header: "Requested plan", accessor: "requestedPlan" },
       { header: "Registration date", accessor: (tenant) => formatDate(tenant.registrationDate) },
       {
@@ -62,6 +73,15 @@ export function AdminApprovalsPage() {
     []
   );
 
+  if (loading) {
+    return (
+      <>
+        <PageHeader title="Approval Queue" description="Loading pending tenant registrations…" />
+        <p className="text-sm text-muted-foreground">Loading…</p>
+      </>
+    );
+  }
+
   return (
     <>
       <PageHeader
@@ -71,7 +91,7 @@ export function AdminApprovalsPage() {
 
       <DataTable
         columns={columns}
-        data={approvalQueue}
+        data={queue}
         getRowKey={(tenant) => tenant.id}
         emptyTitle="No pending approvals"
         emptyDescription="New tenant registrations will appear here after submission."
