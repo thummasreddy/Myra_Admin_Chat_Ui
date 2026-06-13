@@ -83,7 +83,7 @@ export function TenantListPage() {
         accessor: (tenant) => (
           <div className="flex flex-wrap gap-1">
             <Button asChild variant="outline" size="sm">
-              <Link to={`/myra-admin/tenants/${tenant.id}`}>
+              <Link to={`/tenants/${tenant.id}`}>
                 <Eye className="h-4 w-4" />
                 View
               </Link>

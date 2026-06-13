@@ -73,7 +73,7 @@ function DashboardContent({ dashboard }: { dashboard: MyraAdminDashboard }) {
           </p>
         </div>
         <Button asChild className="bg-[#3b82f6] hover:bg-[#2563eb]">
-          <Link to="/myra-admin/approvals">
+          <Link to="/approvals">
             <ShieldCheck className="h-4 w-4" />
             Review Queue
           </Link>
@@ -107,7 +107,7 @@ function DashboardContent({ dashboard }: { dashboard: MyraAdminDashboard }) {
                       <p className="mt-2 text-xs text-gray-400">{formatDate(tenant.registration_date)}</p>
                     </div>
                     <Button asChild size="sm" className="bg-[#3b82f6] hover:bg-[#2563eb]">
-                      <Link to="/myra-admin/approvals">Review</Link>
+                      <Link to="/approvals">Review</Link>
                     </Button>
                   </div>
                 </article>

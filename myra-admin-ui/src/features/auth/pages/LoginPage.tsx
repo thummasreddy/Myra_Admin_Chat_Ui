@@ -42,7 +42,7 @@ export function LoginPage() {
         description: `Signed in as ${session.user.role}.`,
         variant: "success"
       });
-      navigate("/myra-admin/dashboard", { replace: true });
+      navigate("/dashboard", { replace: true });
     },
     onError: (error) => {
       const message = error instanceof Error ? error.message : "Check your credentials and try again.";
@@ -58,7 +58,7 @@ export function LoginPage() {
     document.title = "Login | Myra Admin";
   }, []);
 
-  if (token) return <Navigate to="/myra-admin/dashboard" replace />;
+  if (token) return <Navigate to="/dashboard" replace />;
 
   return (
     <main className="grid min-h-screen bg-[var(--color-bg-main)] lg:grid-cols-[1.05fr_0.95fr]">

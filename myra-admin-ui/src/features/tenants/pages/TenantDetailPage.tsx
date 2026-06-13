@@ -54,7 +54,7 @@ export function TenantDetailPage() {
         actions={
           <>
             <Button asChild variant="outline">
-              <Link to="/myra-admin/tenants">Back to tenants</Link>
+              <Link to="/tenants">Back to tenants</Link>
             </Button>
             <Button variant="outline" onClick={() => setPendingAction("approval status")}>
               <ShieldCheck className="h-4 w-4" />

@@ -16,8 +16,8 @@ export function SettingsPage() {
   return (
     <>
       <PageHeader
-        title="Global Settings"
-        description="MYRA_SUPER_ADMIN only: platform defaults, safety instructions, abuse prevention, supported business categories, and platform-wide AI behavior rules."
+        title="Settings"
+        description="Platform defaults, safety instructions, abuse prevention, supported business categories, and platform-wide AI behavior rules."
       />
 
       <section className="mb-6 rounded-lg border border-amber-400/30 bg-amber-500/10 p-4 text-sm text-amber-100">

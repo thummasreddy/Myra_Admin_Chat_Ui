@@ -1,19 +1,25 @@
 import { type ReactNode, useEffect } from "react";
-import { Navigate, createBrowserRouter, useLocation } from "react-router-dom";
+import { Navigate, createBrowserRouter, useLocation, useParams } from "react-router-dom";
 import { AdminLayout } from "@/components/layout/AdminLayout";
 import { useAuthStore } from "@/features/auth/auth.store";
 import { LoginPage } from "@/features/auth/pages/LoginPage";
-import { AuditLogsPage } from "@/features/admin/pages/AuditLogsPage";
-import { FeatureFlagsPage } from "@/features/admin/pages/FeatureFlagsPage";
-import { PlansPage } from "@/features/admin/pages/PlansPage";
-import { SupportDebugPage } from "@/features/admin/pages/SupportDebugPage";
 import { AnalyticsPage } from "@/features/analytics/pages/AnalyticsPage";
 import { DashboardPage } from "@/features/dashboard/pages/DashboardPage";
 import { AdminApprovalsPage } from "@/features/onboarding/pages/AdminApprovalsPage";
 import { SettingsPage } from "@/features/settings/pages/SettingsPage";
 import { TenantDetailPage } from "@/features/tenants/pages/TenantDetailPage";
 import { TenantListPage } from "@/features/tenants/pages/TenantListPage";
-import { isMyraAdmin, isSuperAdmin } from "@/features/admin/admin.permissions";
+import {
+  ConversationsPage,
+  EmailNotificationsPage,
+  KnowledgeDocumentsPage,
+  KnowledgePage,
+  LeadsPage,
+  PaymentsPage,
+  SubscriptionsPage,
+  TenantReviewPage
+} from "@/features/admin/pages/MyraAdminOperationsPages";
+import { isMyraAdmin } from "@/features/admin/admin.permissions";
 
 function ThemeRoute({ theme, children, useStoredTheme }: { theme: "light" | "dark"; children: ReactNode; useStoredTheme?: boolean }) {
   useEffect(() => {
@@ -49,44 +55,38 @@ function ProtectedAdminRoutes() {
   return <AdminLayout />;
 }
 
-function RequireSuperAdmin({ children }: { children: ReactNode }) {
-  const user = useAuthStore((state) => state.user);
-  if (!isSuperAdmin(user)) return <Navigate to="/myra-admin/dashboard" replace />;
-  return <>{children}</>;
+function RedirectTenantDetailAlias() {
+  const { tenantId } = useParams();
+  return <Navigate to={`/tenants/${tenantId ?? ""}`} replace />;
 }
 
 export const router = createBrowserRouter([
-  { path: "/", element: <Navigate to="/myra-admin/login" replace /> },
-  { path: "/myra-admin", element: <Navigate to="/myra-admin/dashboard" replace /> },
+  { path: "/", element: <Navigate to="/dashboard" replace /> },
+  { path: "/myra-admin", element: <Navigate to="/dashboard" replace /> },
+  { path: "/myra-admin/dashboard", element: <Navigate to="/dashboard" replace /> },
+  { path: "/myra-admin/approvals", element: <Navigate to="/approvals" replace /> },
+  { path: "/myra-admin/tenants", element: <Navigate to="/tenants" replace /> },
+  { path: "/myra-admin/tenants/:tenantId", element: <RedirectTenantDetailAlias /> },
+  { path: "/myra-admin/analytics", element: <Navigate to="/analytics" replace /> },
+  { path: "/myra-admin/settings", element: <Navigate to="/settings" replace /> },
   { path: "/myra-admin/login", element: withTheme("dark", <LoginPage />, true) },
   {
-    path: "/myra-admin",
     element: <ProtectedAdminRoutes />,
     children: [
       { path: "dashboard", element: <DashboardPage /> },
+      { path: "approvals", element: <AdminApprovalsPage /> },
+      { path: "tenant-review", element: <TenantReviewPage /> },
+      { path: "payments", element: <PaymentsPage /> },
+      { path: "knowledge-documents", element: <KnowledgeDocumentsPage /> },
+      { path: "subscriptions", element: <SubscriptionsPage /> },
+      { path: "email-notifications", element: <EmailNotificationsPage /> },
       { path: "tenants", element: <TenantListPage /> },
       { path: "tenants/:tenantId", element: <TenantDetailPage /> },
-      { path: "approvals", element: <AdminApprovalsPage /> },
-      {
-        path: "plans",
-        element: (
-          <RequireSuperAdmin>
-            <PlansPage />
-          </RequireSuperAdmin>
-        )
-      },
-      { path: "feature-flags", element: <FeatureFlagsPage /> },
+      { path: "knowledge", element: <KnowledgePage /> },
+      { path: "conversations", element: <ConversationsPage /> },
+      { path: "leads", element: <LeadsPage /> },
       { path: "analytics", element: <AnalyticsPage /> },
-      { path: "audit-logs", element: <AuditLogsPage /> },
-      { path: "support", element: <SupportDebugPage /> },
-      {
-        path: "settings",
-        element: (
-          <RequireSuperAdmin>
-            <SettingsPage />
-          </RequireSuperAdmin>
-        )
-      }
+      { path: "settings", element: <SettingsPage /> }
     ]
   },
   { path: "*", element: <Navigate to="/myra-admin/login" replace /> }
