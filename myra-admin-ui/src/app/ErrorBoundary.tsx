@@ -5,14 +5,13 @@ import { captureError } from "@/lib/logger";
 
 type ErrorBoundaryState = {
   hasError: boolean;
-  message?: string;
 };
 
 export class ErrorBoundary extends Component<{ children: ReactNode }, ErrorBoundaryState> {
   state: ErrorBoundaryState = { hasError: false };
 
-  static getDerivedStateFromError(error: Error): ErrorBoundaryState {
-    return { hasError: true, message: error.message };
+  static getDerivedStateFromError(): ErrorBoundaryState {
+    return { hasError: true };
   }
 
   componentDidCatch(error: Error, info: ErrorInfo) {
@@ -32,7 +31,6 @@ export class ErrorBoundary extends Component<{ children: ReactNode }, ErrorBound
             <p className="text-sm text-muted-foreground">
               The admin portal hit an unexpected error. Refreshing usually restores the session.
             </p>
-            {this.state.message ? <pre className="rounded-md bg-[var(--color-bg-muted)] p-3 text-xs text-[var(--color-text-secondary)]">{this.state.message}</pre> : null}
             <Button onClick={() => window.location.reload()}>Refresh app</Button>
           </CardContent>
         </Card>

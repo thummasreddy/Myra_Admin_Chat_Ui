@@ -1,9 +1,9 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
-import { Bot, Lock, Mail } from "lucide-react";
+import { Bot, Lock, Mail, ShieldCheck } from "lucide-react";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { Navigate, useLocation, useNavigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,7 +12,6 @@ import { Label } from "@/components/ui/label";
 import { toast } from "@/components/ui/toast";
 import { login } from "@/features/auth/auth.api";
 import { useAuthStore } from "@/features/auth/auth.store";
-import { trackUserAction } from "@/lib/logger";
 
 const loginSchema = z.object({
   email: z.string().email("Enter a valid email"),
@@ -23,17 +22,13 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 
 export function LoginPage() {
   const navigate = useNavigate();
-  const location = useLocation();
   const token = useAuthStore((state) => state.token);
-  const user = useAuthStore((state) => state.user);
   const setSession = useAuthStore((state) => state.setSession);
-  const redirectTo = (location.state as { from?: { pathname?: string } } | null)?.from?.pathname ?? "/dashboard";
-  const isCustomerLogin = redirectTo.startsWith("/customer");
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      email: isCustomerLogin ? "customer@myra.ai" : "admin@myra.ai",
+      email: "admin@myra.ai",
       password: "password123"
     }
   });
@@ -42,16 +37,20 @@ export function LoginPage() {
     mutationFn: login,
     onSuccess: (session) => {
       setSession(session.token, session.user);
-      trackUserAction("login_success", { role: session.user.role });
       toast({
         title: "Welcome back",
-        description: isCustomerLogin ? "You are signed in to the Myra customer dashboard." : "You are signed in to Myra Admin.",
+        description: `Signed in as ${session.user.role}.`,
         variant: "success"
       });
-      navigate(redirectTo, { replace: true });
+      navigate("/myra-admin/dashboard", { replace: true });
     },
-    onError: () => {
-      toast({ title: "Login failed", description: "Check your credentials and try again.", variant: "error" });
+    onError: (error) => {
+      const message = error instanceof Error ? error.message : "Check your credentials and try again.";
+      toast({
+        title: message.includes("permission") ? "Access denied" : "Login failed",
+        description: message.includes("permission") ? "You do not have permission to access this." : message,
+        variant: "error"
+      });
     }
   });
 
@@ -59,7 +58,7 @@ export function LoginPage() {
     document.title = "Login | Myra Admin";
   }, []);
 
-  if (token) return <Navigate to={user?.role === "TENANT_OWNER" ? "/customer/dashboard" : "/dashboard"} replace />;
+  if (token) return <Navigate to="/myra-admin/dashboard" replace />;
 
   return (
     <main className="grid min-h-screen bg-[var(--color-bg-main)] lg:grid-cols-[1.05fr_0.95fr]">
@@ -70,16 +69,17 @@ export function LoginPage() {
           </div>
           <div>
             <p className="font-semibold">Myra AI</p>
-            <p className="text-sm text-white/80">Tenant control for conversational SaaS</p>
+            <p className="text-sm text-white/80">Internal platform administration</p>
           </div>
         </div>
         <div className="max-w-xl">
-          <p className="text-4xl font-semibold tracking-normal">Launch and manage tenant chatbots without touching backend code.</p>
-          <p className="mt-4 text-white/80">
-            Configure tenant branding, AI behavior, knowledge, leads, analytics, and widget embeds from one clean operations console.
-          </p>
+          <p className="text-4xl font-semibold tracking-normal">Operate tenants, approvals, limits, analytics, and support workflows.</p>
+          <p className="mt-4 text-white/80">This console is restricted to Myra internal admins. Business owners use the separate tenant admin app.</p>
         </div>
-        <p className="text-sm text-white/80">VITE_API_BASE_URL powered gateway integration</p>
+        <div className="flex items-center gap-2 text-sm text-white/80">
+          <ShieldCheck className="h-4 w-4" />
+          Permission checked by backend admin APIs
+        </div>
       </section>
 
       <section className="flex items-center justify-center p-4">
@@ -88,12 +88,8 @@ export function LoginPage() {
             <div className="mb-2 flex h-11 w-11 items-center justify-center rounded-md bg-primary text-white lg:hidden">
               <Bot className="h-6 w-6" />
             </div>
-            <CardTitle>Sign in</CardTitle>
-            <CardDescription>
-              {isCustomerLogin
-                ? "Use your business owner account. If the backend is offline, demo fallback login is used."
-                : "Use your admin account. If the backend is offline, demo fallback login is used."}
-            </CardDescription>
+            <CardTitle>Myra Admin Login</CardTitle>
+            <CardDescription>Use a MYRA_SUPER_ADMIN or MYRA_SUPPORT_ADMIN account.</CardDescription>
           </CardHeader>
           <CardContent>
             <form className="space-y-4" onSubmit={form.handleSubmit((values) => loginMutation.mutate(values))}>
@@ -107,15 +103,10 @@ export function LoginPage() {
                     type="email"
                     autoComplete="email"
                     aria-invalid={Boolean(form.formState.errors.email)}
-                    aria-describedby={form.formState.errors.email ? "email-error" : undefined}
                     {...form.register("email")}
                   />
                 </div>
-                {form.formState.errors.email ? (
-                  <p id="email-error" className="text-sm text-destructive">
-                    {form.formState.errors.email.message}
-                  </p>
-                ) : null}
+                {form.formState.errors.email ? <p className="text-sm text-destructive">{form.formState.errors.email.message}</p> : null}
               </div>
 
               <div className="space-y-2">
@@ -128,15 +119,10 @@ export function LoginPage() {
                     type="password"
                     autoComplete="current-password"
                     aria-invalid={Boolean(form.formState.errors.password)}
-                    aria-describedby={form.formState.errors.password ? "password-error" : undefined}
                     {...form.register("password")}
                   />
                 </div>
-                {form.formState.errors.password ? (
-                  <p id="password-error" className="text-sm text-destructive">
-                    {form.formState.errors.password.message}
-                  </p>
-                ) : null}
+                {form.formState.errors.password ? <p className="text-sm text-destructive">{form.formState.errors.password.message}</p> : null}
               </div>
 
               <Button className="w-full" type="submit" disabled={loginMutation.isPending}>

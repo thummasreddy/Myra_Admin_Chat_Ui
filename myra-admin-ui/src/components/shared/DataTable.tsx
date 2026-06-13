@@ -13,6 +13,7 @@ export function DataTable<T>({
   columns,
   data,
   getRowKey,
+  onRowClick,
   isLoading,
   emptyTitle = "No data found",
   emptyDescription
@@ -20,6 +21,7 @@ export function DataTable<T>({
   columns: DataTableColumn<T>[];
   data: T[];
   getRowKey: (row: T) => string;
+  onRowClick?: (row: T) => void;
   isLoading?: boolean;
   emptyTitle?: string;
   emptyDescription?: string;
@@ -52,7 +54,11 @@ export function DataTable<T>({
         </TableHeader>
         <TableBody>
           {data.map((row) => (
-            <TableRow key={getRowKey(row)}>
+            <TableRow
+              key={getRowKey(row)}
+              className={onRowClick ? "cursor-pointer" : undefined}
+              onClick={onRowClick ? () => onRowClick(row) : undefined}
+            >
               {columns.map((column) => (
                 <TableCell key={column.header} className={column.className}>
                   {typeof column.accessor === "function" ? column.accessor(row) : (row[column.accessor] as ReactNode)}

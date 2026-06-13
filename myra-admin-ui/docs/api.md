@@ -1,6 +1,6 @@
 # API Reference
 
-The admin app calls `VITE_API_BASE_URL`, which should point to the gateway `/api/v1` prefix.
+The admin app calls `VITE_API_BASE_URL` and normalizes admin traffic to `/api/v1/admin`.
 
 ## Admin Endpoints
 

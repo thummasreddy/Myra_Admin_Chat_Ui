@@ -1,199 +1,185 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Eye, Plus, PowerOff, Send, ShieldCheck, XCircle } from "lucide-react";
+import { Eye, Flag, Lock, PauseCircle, RotateCcw, ShieldCheck, XCircle } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { toast } from "@/components/ui/toast";
+import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
 import { DataTable, type DataTableColumn } from "@/components/shared/DataTable";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { StatusBadge } from "@/components/shared/StatusBadge";
-import { approveTenant, rejectTenant, triggerEmbedCodeEmail } from "@/features/onboarding/onboarding.api";
-import { getSubscriptionPlan } from "@/features/onboarding/onboarding.data";
-import { listTenants, updateTenant } from "@/features/tenants/tenant.api";
-import type { PaymentStatus, SubscriptionPlanId, Tenant, TenantStatus } from "@/features/tenants/tenant.types";
+import {
+  platformTenants,
+  type PlatformTenant,
+  type PlatformTenantStatus
+} from "@/features/admin/platformAdmin.data";
+import { useAuthStore } from "@/features/auth/auth.store";
+import { isSuperAdmin } from "@/features/admin/admin.permissions";
 import { formatDate } from "@/lib/utils";
 
+type PendingAction =
+  | { type: "approve" | "reject" | "suspend" | "reactivate" | "plan" | "flags"; tenant: PlatformTenant }
+  | null;
+
 export function TenantListPage() {
+  const user = useAuthStore((state) => state.user);
+  const superAdmin = isSuperAdmin(user);
   const [search, setSearch] = useState("");
-  const [status, setStatus] = useState<TenantStatus | "ALL">("ALL");
-  const [plan, setPlan] = useState<SubscriptionPlanId | "ALL">("ALL");
-  const [payment, setPayment] = useState<PaymentStatus | "ALL">("ALL");
-  const [industry, setIndustry] = useState("ALL");
+  const [status, setStatus] = useState<PlatformTenantStatus | "ALL">("ALL");
+  const [plan, setPlan] = useState<PlatformTenant["plan"] | "ALL">("ALL");
+  const [category, setCategory] = useState("ALL");
   const [createdDate, setCreatedDate] = useState("");
-  const queryClient = useQueryClient();
-  const tenantsQuery = useQuery({
-    queryKey: ["tenants", "management"],
-    queryFn: () => listTenants()
-  });
+  const [page, setPage] = useState(1);
+  const [pendingAction, setPendingAction] = useState<PendingAction>(null);
 
-  function refreshTenants() {
-    queryClient.invalidateQueries({ queryKey: ["tenants"] });
-    queryClient.invalidateQueries({ queryKey: ["approval-tenants"] });
-  }
-
-  const approveMutation = useMutation({
-    mutationFn: approveTenant,
-    onSuccess: () => {
-      refreshTenants();
-      toast({ title: "Tenant approved", variant: "success" });
-    }
-  });
-  const rejectMutation = useMutation({
-    mutationFn: (tenantId: string) => rejectTenant(tenantId, { reason: "Rejected from tenant management." }),
-    onSuccess: () => {
-      refreshTenants();
-      toast({ title: "Tenant rejected", variant: "success" });
-    }
-  });
-  const deactivateMutation = useMutation({
-    mutationFn: (tenantId: string) => updateTenant(tenantId, { status: "INACTIVE" }),
-    onSuccess: () => {
-      refreshTenants();
-      toast({ title: "Tenant deactivated", variant: "success" });
-    }
-  });
-  const emailMutation = useMutation({
-    mutationFn: triggerEmbedCodeEmail,
-    onSuccess: () => toast({ title: "Embed code email queued", variant: "success" })
-  });
-
-  const industries = useMemo(() => {
-    return Array.from(new Set((tenantsQuery.data ?? []).map((tenant) => tenant.industry).filter(Boolean))).sort();
-  }, [tenantsQuery.data]);
-
+  const categories = useMemo(() => Array.from(new Set(platformTenants.map((tenant) => tenant.category))), []);
   const filteredTenants = useMemo(() => {
-    const searchTerm = search.trim().toLowerCase();
-    return (tenantsQuery.data ?? []).filter((tenant) => {
-      const createdMatches = !createdDate || tenant.createdAt.slice(0, 10) === createdDate;
-      const searchMatches =
-        !searchTerm ||
-        tenant.tenantName.toLowerCase().includes(searchTerm) ||
-        tenant.websiteUrl.toLowerCase().includes(searchTerm) ||
-        (tenant.businessEmail ?? tenant.supportEmail).toLowerCase().includes(searchTerm);
-
+    const term = search.trim().toLowerCase();
+    return platformTenants.filter((tenant) => {
+      const matchesSearch =
+        !term ||
+        tenant.name.toLowerCase().includes(term) ||
+        tenant.website.toLowerCase().includes(term) ||
+        tenant.ownerEmail.toLowerCase().includes(term);
+      const matchesDate = !createdDate || tenant.createdAt.startsWith(createdDate);
       return (
-        searchMatches &&
+        matchesSearch &&
         (status === "ALL" || tenant.status === status) &&
-        (plan === "ALL" || tenant.selectedSubscriptionPlan === plan) &&
-        (payment === "ALL" || tenant.paymentStatus === payment) &&
-        (industry === "ALL" || tenant.industry === industry) &&
-        createdMatches
+        (plan === "ALL" || tenant.plan === plan) &&
+        (category === "ALL" || tenant.category === category) &&
+        matchesDate
       );
     });
-  }, [createdDate, industry, payment, plan, search, status, tenantsQuery.data]);
+  }, [category, createdDate, plan, search, status]);
 
-  const columns = useMemo<DataTableColumn<Tenant>[]>(
+  const pageSize = 10;
+  const pageCount = Math.max(Math.ceil(filteredTenants.length / pageSize), 1);
+  const visibleTenants = filteredTenants.slice((page - 1) * pageSize, page * pageSize);
+
+  function confirmAction() {
+    if (!pendingAction) return;
+    toast({
+      title: "Action submitted",
+      description: `${pendingAction.type} request for ${pendingAction.tenant.name} will be permission checked by the backend.`,
+      variant: "success"
+    });
+    setPendingAction(null);
+  }
+
+  const columns = useMemo<DataTableColumn<PlatformTenant>[]>(
     () => [
-      {
-        header: "Tenant name",
-        accessor: (tenant) => (
-          <div>
-            <p className="font-medium text-[var(--color-text-main)]">{tenant.tenantName}</p>
-            <p className="text-sm text-muted-foreground">{tenant.businessEmail ?? tenant.supportEmail}</p>
-          </div>
-        )
-      },
-      { header: "Website", accessor: (tenant) => <span className="break-all text-sm">{tenant.websiteUrl}</span> },
-      { header: "Plan", accessor: (tenant) => getSubscriptionPlan(tenant.selectedSubscriptionPlan).name },
+      { header: "Tenant name", accessor: (tenant) => <span className="font-medium text-[var(--color-text-main)]">{tenant.name}</span> },
+      { header: "Category", accessor: "category" },
+      { header: "Website", accessor: (tenant) => <span className="break-all text-sm">{tenant.website}</span> },
+      { header: "Owner email", accessor: "ownerEmail" },
+      { header: "Plan", accessor: "plan" },
       { header: "Status", accessor: (tenant) => <StatusBadge status={tenant.status} /> },
-      { header: "Payment", accessor: (tenant) => <StatusBadge status={tenant.paymentStatus ?? "PENDING"} /> },
-      { header: "Documents", accessor: (tenant) => <StatusBadge status={tenant.documentProcessingStatus ?? "NOT_UPLOADED"} /> },
       { header: "Created", accessor: (tenant) => formatDate(tenant.createdAt) },
+      { header: "Last active", accessor: (tenant) => formatDate(tenant.lastActiveAt) },
       {
         header: "Actions",
-        className: "text-right",
+        className: "min-w-80",
         accessor: (tenant) => (
-          <div className="flex flex-wrap justify-end gap-1">
+          <div className="flex flex-wrap gap-1">
             <Button asChild variant="outline" size="sm">
-              <Link to={`/tenants/${tenant.tenantId}`}>
+              <Link to={`/myra-admin/tenants/${tenant.id}`}>
                 <Eye className="h-4 w-4" />
                 View
               </Link>
             </Button>
-            <Button asChild variant="outline" size="sm">
-              <Link to={`/tenant-review/${tenant.tenantId}`}>Review</Link>
+            <Button variant="outline" size="sm" onClick={() => setPendingAction({ type: "approve", tenant })}>
+              <ShieldCheck className="h-4 w-4" />
+              Approve
             </Button>
-            <Button variant="ghost" size="icon" onClick={() => approveMutation.mutate(tenant.tenantId)} aria-label={`Approve ${tenant.tenantName}`}>
-              <ShieldCheck className="h-4 w-4 text-[var(--color-success)]" />
+            <Button variant="outline" size="sm" onClick={() => setPendingAction({ type: "reject", tenant })}>
+              <XCircle className="h-4 w-4" />
+              Reject
             </Button>
-            <Button variant="ghost" size="icon" onClick={() => rejectMutation.mutate(tenant.tenantId)} aria-label={`Reject ${tenant.tenantName}`}>
-              <XCircle className="h-4 w-4 text-destructive" />
+            <Button variant="outline" size="sm" onClick={() => setPendingAction({ type: "suspend", tenant })}>
+              <PauseCircle className="h-4 w-4" />
+              Suspend
             </Button>
-            <Button variant="ghost" size="icon" onClick={() => deactivateMutation.mutate(tenant.tenantId)} aria-label={`Deactivate ${tenant.tenantName}`}>
-              <PowerOff className="h-4 w-4 text-muted-foreground" />
+            <Button variant="outline" size="sm" onClick={() => setPendingAction({ type: "reactivate", tenant })}>
+              <RotateCcw className="h-4 w-4" />
+              Reactivate
             </Button>
-            <Button variant="ghost" size="icon" onClick={() => emailMutation.mutate(tenant.tenantId)} disabled={!tenant.embedCode} aria-label={`Resend embed code for ${tenant.tenantName}`}>
-              <Send className="h-4 w-4 text-primary" />
+            <Button variant="outline" size="sm" onClick={() => setPendingAction({ type: "plan", tenant })} disabled={!superAdmin}>
+              {!superAdmin && <Lock className="h-4 w-4" />}
+              Change Plan
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => setPendingAction({ type: "flags", tenant })}>
+              <Flag className="h-4 w-4" />
+              Feature Flags
             </Button>
           </div>
         )
       }
     ],
-    [approveMutation, deactivateMutation, emailMutation, rejectMutation]
+    [superAdmin]
   );
 
   return (
     <>
       <PageHeader
         title="Tenant Management"
-        description="Search, filter, approve, reject, deactivate, and inspect business tenants from one operations workspace."
-        actions={
-          <Button asChild>
-            <Link to="/tenants/new">
-              <Plus className="h-4 w-4" />
-              Create Tenant
-            </Link>
-          </Button>
-        }
+        description="Search, filter, approve, reject, suspend, reactivate, change plans, and manage feature flags for tenant accounts."
       />
 
-      <div className="mb-4 grid gap-3 md:grid-cols-2 xl:grid-cols-6">
-        <Input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search tenant, website, email" />
-        <Select value={status} onChange={(event) => setStatus(event.target.value as TenantStatus | "ALL")}>
+      <div className="mb-4 grid gap-3 md:grid-cols-5">
+        <Input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search name, website, owner email" className="md:col-span-2" />
+        <Select value={status} onChange={(event) => setStatus(event.target.value as PlatformTenantStatus | "ALL")}>
           <option value="ALL">All statuses</option>
-          <option value="DRAFT">Draft</option>
-          <option value="PAYMENT_PENDING">Payment pending</option>
-          <option value="PAYMENT_COMPLETED">Payment completed</option>
-          <option value="PENDING_ADMIN_APPROVAL">Pending admin approval</option>
+          <option value="PENDING_APPROVAL">Pending approval</option>
           <option value="ACTIVE">Active</option>
-          <option value="INACTIVE">Inactive</option>
-          <option value="SUSPENDED">Suspended</option>
           <option value="REJECTED">Rejected</option>
+          <option value="SUSPENDED">Suspended</option>
         </Select>
-        <Select value={plan} onChange={(event) => setPlan(event.target.value as SubscriptionPlanId | "ALL")}>
+        <Select value={plan} onChange={(event) => setPlan(event.target.value as PlatformTenant["plan"] | "ALL")}>
           <option value="ALL">All plans</option>
-          <option value="MONTHLY">Starter</option>
-          <option value="THREE_MONTHS">Growth</option>
-          <option value="SIX_MONTHS">Pro</option>
-          <option value="TWELVE_MONTHS">Enterprise</option>
+          <option value="Starter">Starter</option>
+          <option value="Growth">Growth</option>
+          <option value="Scale">Scale</option>
         </Select>
-        <Select value={payment} onChange={(event) => setPayment(event.target.value as PaymentStatus | "ALL")}>
-          <option value="ALL">All payments</option>
-          <option value="PENDING">Pending</option>
-          <option value="PAID">Paid</option>
-          <option value="SUCCESS">Success</option>
-          <option value="FAILED">Failed</option>
-        </Select>
-        <Select value={industry} onChange={(event) => setIndustry(event.target.value)}>
-          <option value="ALL">All industries</option>
-          {industries.map((item) => (
+        <Input type="date" value={createdDate} onChange={(event) => setCreatedDate(event.target.value)} aria-label="Created date" />
+        <Select value={category} onChange={(event) => setCategory(event.target.value)}>
+          <option value="ALL">All categories</option>
+          {categories.map((item) => (
             <option key={item} value={item}>
               {item}
             </option>
           ))}
         </Select>
-        <Input type="date" value={createdDate} onChange={(event) => setCreatedDate(event.target.value)} aria-label="Created date" />
       </div>
 
       <DataTable
         columns={columns}
-        data={filteredTenants}
-        getRowKey={(tenant) => tenant.tenantId}
-        isLoading={tenantsQuery.isLoading}
+        data={visibleTenants}
+        getRowKey={(tenant) => tenant.id}
         emptyTitle="No tenants found"
-        emptyDescription="Create a tenant or adjust filters to inspect business configuration, approval status, and embed delivery."
+        emptyDescription="Adjust search or filters to review tenant records."
+      />
+
+      <div className="mt-4 flex items-center justify-end gap-2">
+        <Button variant="outline" disabled={page === 1} onClick={() => setPage((current) => Math.max(current - 1, 1))}>
+          Previous
+        </Button>
+        <span className="text-sm text-muted-foreground">
+          Page {page} of {pageCount}
+        </span>
+        <Button variant="outline" disabled={page >= pageCount} onClick={() => setPage((current) => Math.min(current + 1, pageCount))}>
+          Next
+        </Button>
+      </div>
+
+      <ConfirmDialog
+        open={Boolean(pendingAction)}
+        title={pendingAction ? `${pendingAction.type.replace("-", " ")} ${pendingAction.tenant.name}?` : "Confirm action"}
+        description="This critical action will be sent to a backend permission-checked admin API and recorded in audit logs."
+        confirmLabel="Confirm"
+        destructive={pendingAction?.type === "reject" || pendingAction?.type === "suspend"}
+        onCancel={() => setPendingAction(null)}
+        onConfirm={confirmAction}
       />
     </>
   );

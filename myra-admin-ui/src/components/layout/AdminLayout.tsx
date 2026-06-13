@@ -12,9 +12,9 @@ export function AdminLayout() {
   }, []);
 
   return (
-    <div className="admin-shell min-h-screen lg:grid lg:grid-cols-[18rem_1fr]">
+    <div className="admin-shell min-h-screen">
       <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
-      <div className="admin-main min-w-0">
+      <div className="admin-main min-w-0 pt-14 lg:pl-[240px]">
         <Header onMenuClick={() => setSidebarOpen(true)} />
         <main className="mx-auto w-full max-w-7xl px-4 py-7 sm:px-6 lg:px-8">
           <Outlet />

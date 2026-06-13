@@ -1,6 +1,13 @@
 import { appConfig } from "@/lib/config";
 
-export const API_BASE_URL = appConfig.VITE_API_BASE_URL;
+function adminGatewayUrl(baseUrl: string) {
+  const normalized = baseUrl.replace(/\/+$/, "");
+  if (normalized.endsWith("/api/v1/admin")) return normalized;
+  if (normalized.endsWith("/api/v1")) return `${normalized}/admin`;
+  return `${normalized}/api/v1/admin`;
+}
+
+export const API_BASE_URL = adminGatewayUrl(appConfig.VITE_API_BASE_URL);
 
 export const TENANT_STATUSES = [
   "DRAFT",

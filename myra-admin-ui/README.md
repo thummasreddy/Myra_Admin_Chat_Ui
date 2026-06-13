@@ -27,7 +27,7 @@ npm run dev
 The app defaults to:
 
 ```bash
-VITE_API_BASE_URL=http://localhost:8000/api/v1
+VITE_API_BASE_URL=http://localhost:8000
 VITE_TENANT_API_URL=http://localhost:8000/api/v1
 VITE_KNOWLEDGE_API_URL=http://localhost:8002/api/knowledge
 VITE_CHAT_API_URL=http://localhost:8003/api/chat
@@ -58,19 +58,36 @@ password123
 - `/tenants/new`
 - `/tenants/:tenantId`
 - `/knowledge`
+- `/knowledge/:tenantId`
+- `/widget`
 - `/widget/:tenantId`
+- `/embed`
+- `/embed/:tenantId`
+- `/qr`
+- `/qr/:tenantId`
 - `/conversations`
+- `/conversations/:tenantId`
 - `/leads`
+- `/leads/:tenantId`
 - `/analytics`
+- `/analytics/:tenantId`
+- `/admin-users`
+- `/audit-logs`
 - `/settings`
 
 ## API Behavior
 
-Production can use either a backend gateway or service-specific URLs. The admin portal validates these variables through `src/config/env.ts`:
+Admin pages call the backend gateway under `{VITE_API_BASE_URL}/api/v1/admin`. The app normalizes these common local values to that gateway:
 
 ```bash
+VITE_API_BASE_URL=https://YOUR-GATEWAY
 VITE_API_BASE_URL=https://YOUR-GATEWAY/api/v1
-VITE_TENANT_API_URL=https://YOUR-GATEWAY/api/v1
+VITE_API_BASE_URL=https://YOUR-GATEWAY/api/v1/admin
+```
+
+The admin portal also validates optional split-service variables through `src/config/env.ts`:
+
+```bash
 VITE_KNOWLEDGE_API_URL=https://YOUR-KNOWLEDGE-SERVICE/api/knowledge
 VITE_CHAT_API_URL=https://YOUR-CHAT-SERVICE/api/chat
 VITE_LEAD_API_URL=https://YOUR-LEAD-SERVICE/api/leads
@@ -79,15 +96,15 @@ VITE_ADMIN_API_URL=https://YOUR-ADMIN-SERVICE/api/admin
 VITE_ADMIN_SECRET=your-admin-secret
 ```
 
-Direct service access is useful for local development and split-service deployments. Leave the service URLs pointed at the gateway when everything is served behind one domain.
+Direct service access remains available for older public/onboarding flows and split-service development, but the admin feature pages use the gateway base.
 
 All admin backend calls go through `src/lib/apiClient.ts`, which:
 
-- Reads `VITE_API_BASE_URL`
+- Reads `VITE_API_BASE_URL` and targets `/api/v1/admin`
 - Uses configurable request timeout and retry values
 - Retries transient network, rate-limit, and server failures with exponential backoff
 - Attaches JWT, optional widget API key, and CSRF headers
-- Attempts token refresh on `401` before logging out
+- Attempts token refresh with `/auth/refresh-token` on `401` before logging out
 - Normalizes network, timeout, validation, auth, rate-limit, and server errors
 - Adds structured API request/response logging
 - Lets feature APIs fall back to local demo data when the backend is unavailable
@@ -126,7 +143,7 @@ cp .env.production.example .env
 
 Key variables:
 
-- `VITE_API_BASE_URL`: gateway `/api/v1` base URL
+- `VITE_API_BASE_URL`: backend origin or gateway URL; admin calls normalize to `/api/v1/admin`
 - `VITE_TENANT_API_URL`: tenant API base URL
 - `VITE_KNOWLEDGE_API_URL`: knowledge API base URL
 - `VITE_CHAT_API_URL`: chat API base URL
@@ -190,17 +207,17 @@ In Netlify, create a new site from this repository and use these settings:
 Add this environment variable in Netlify:
 
 ```bash
-VITE_API_BASE_URL=https://YOUR-RENDER-SERVICE.onrender.com/api/v1
+VITE_API_BASE_URL=https://YOUR-RENDER-SERVICE.onrender.com
 ```
 
 Replace `YOUR-RENDER-SERVICE` with the deployed Render backend service name. Vite reads this value at build time, so redeploy the Netlify site after changing it.
 
 ## Render Backend Notes
 
-Your Render backend should expose the API under `/api/v1`, matching:
+Your Render backend should expose the admin API under `/api/v1/admin`, matching:
 
 ```text
-https://YOUR-RENDER-SERVICE.onrender.com/api/v1
+https://YOUR-RENDER-SERVICE.onrender.com/api/v1/admin
 ```
 
 Also configure CORS on the backend to allow your Netlify origin:

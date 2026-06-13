@@ -18,7 +18,7 @@ Use `.env.staging.example` as the source of required variables. Staging should u
 Use `.env.production.example` as the source of required variables:
 
 ```bash
-VITE_API_BASE_URL=https://YOUR-GATEWAY-SERVICE.onrender.com/api/v1
+VITE_API_BASE_URL=https://YOUR-GATEWAY-SERVICE.onrender.com
 VITE_ENABLE_DEMO_FALLBACKS=false
 VITE_REQUIRE_ENV_VALIDATION=true
 ```

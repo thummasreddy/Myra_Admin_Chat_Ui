@@ -45,7 +45,7 @@ async function refreshToken(client: AxiosInstance) {
   const { token, setSession, logout, user } = useAuthStore.getState();
   if (!token || !user) return false;
   try {
-    const { data } = await client.post<{ token: string }>("/auth/refresh", undefined, {
+    const { data } = await client.post<{ token: string }>("/auth/refresh-token", { refresh_token: token }, {
       headers: { Authorization: `Bearer ${token}` }
     });
     if (!data.token) return false;
@@ -73,9 +73,6 @@ export function createApiClient(baseURL = API_BASE_URL): AxiosInstance {
 
     const token = useAuthStore.getState().token;
     if (token) config.headers.Authorization = `Bearer ${token}`;
-
-    const apiKey = import.meta.env.VITE_PUBLIC_WIDGET_KEY;
-    if (apiKey) config.headers["X-Api-Key"] = apiKey;
 
     const method = config.method?.toLowerCase();
     const csrf = csrfToken();
@@ -131,7 +128,7 @@ export function createApiClient(baseURL = API_BASE_URL): AxiosInstance {
 
       if (normalized.kind === "auth") {
         useAuthStore.getState().logout();
-        if (window.location.pathname !== "/login") window.location.assign("/login");
+        if (window.location.pathname !== "/myra-admin/login") window.location.assign("/myra-admin/login");
       }
 
       return Promise.reject(normalized);

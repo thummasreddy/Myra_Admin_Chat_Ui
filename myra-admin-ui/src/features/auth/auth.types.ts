@@ -7,10 +7,11 @@ export type AdminUser = {
   id: string;
   name: string;
   email: string;
-  role: "ADMIN" | "SUPPORT_ENGINEER" | "BILLING_ADMIN" | "TENANT_OWNER";
+  role: "MYRA_SUPER_ADMIN" | "MYRA_SUPPORT_ADMIN";
 };
 
 export type LoginResponse = {
   token: string;
+  refreshToken?: string;
   user: AdminUser;
 };

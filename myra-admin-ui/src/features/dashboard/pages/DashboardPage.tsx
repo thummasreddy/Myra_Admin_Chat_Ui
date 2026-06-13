@@ -1,218 +1,249 @@
-import { useQuery } from "@tanstack/react-query";
+import { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import {
   Activity,
   AlertTriangle,
   Building2,
-  Clock,
   DollarSign,
-  FileWarning,
+  FileX,
   MessageSquare,
   ShieldCheck,
-  Users
+  UserPlus
 } from "lucide-react";
-import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
-import { PageHeader } from "@/components/shared/PageHeader";
-import { StatusBadge } from "@/components/shared/StatusBadge";
-import { getAnalyticsSummary } from "@/features/analytics/analytics.api";
-import { getDashboardSummary } from "@/features/dashboard/dashboard.api";
-import { listKnowledgeSources } from "@/features/knowledge/knowledge.api";
-import { listAdminPayments, listApprovalTenants } from "@/features/onboarding/onboarding.api";
-import { getSubscriptionPlan } from "@/features/onboarding/onboarding.data";
-import { listTenants } from "@/features/tenants/tenant.api";
+import { MetricCard } from "@/components/ui/MetricCard";
+import { ProgressBar } from "@/components/ui/ProgressBar";
+import { SectionCard } from "@/components/ui/SectionCard";
+import { StatusBadge, type DashboardStatus } from "@/components/ui/StatusBadge";
+import { getMyraAdminDashboard, type MyraAdminDashboard, type SystemHealthStatus } from "@/features/dashboard/dashboard.api";
+import { formatDate } from "@/lib/utils";
 
 export function DashboardPage() {
-  const summaryQuery = useQuery({ queryKey: ["dashboard-summary"], queryFn: getDashboardSummary });
-  const tenantsQuery = useQuery({ queryKey: ["tenants", "admin-dashboard"], queryFn: () => listTenants() });
-  const approvalsQuery = useQuery({ queryKey: ["approval-tenants", "dashboard"], queryFn: listApprovalTenants });
-  const paymentsQuery = useQuery({ queryKey: ["payments", "dashboard"], queryFn: listAdminPayments });
-  const knowledgeQuery = useQuery({ queryKey: ["knowledge", "dashboard"], queryFn: () => listKnowledgeSources() });
-  const analyticsQuery = useQuery({ queryKey: ["analytics", "dashboard"], queryFn: getAnalyticsSummary });
+  const [dashboard, setDashboard] = useState<MyraAdminDashboard | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
-  const tenants = tenantsQuery.data ?? [];
-  const pendingApprovals = (approvalsQuery.data ?? tenants).filter((tenant) => tenant.status === "PENDING_ADMIN_APPROVAL" || tenant.approvalStatus === "PENDING_REVIEW");
-  const inactiveTenants = tenants.filter((tenant) => tenant.status === "INACTIVE").length;
-  const failedUploads = (knowledgeQuery.data ?? []).filter((source) => source.status === "FAILED").length;
-  const revenueEstimate = (paymentsQuery.data ?? []).reduce((sum, payment) => sum + (payment.status === "SUCCESS" ? payment.amountUsd : 0), 0);
-  const planDistribution = tenants.reduce<Record<string, number>>((acc, tenant) => {
-    const plan = getSubscriptionPlan(tenant.selectedSubscriptionPlan).name;
-    acc[plan] = (acc[plan] ?? 0) + 1;
-    return acc;
-  }, {});
+  useEffect(() => {
+    let mounted = true;
+    setLoading(true);
+    setError(false);
 
-  const metrics = [
-    { label: "Total tenants", value: tenantsQuery.isLoading ? undefined : tenants.length, icon: Building2 },
-    { label: "Pending approvals", value: pendingApprovals.length, icon: ShieldCheck },
-    { label: "Active tenants", value: summaryQuery.data?.activeTenants, icon: Activity },
-    { label: "Inactive tenants", value: inactiveTenants, icon: AlertTriangle },
-    { label: "Total conversations", value: summaryQuery.data?.totalConversations, icon: MessageSquare },
-    { label: "Total leads", value: summaryQuery.data?.leadsCaptured, icon: Users },
-    { label: "Revenue estimate", value: revenueEstimate, icon: DollarSign, currency: true },
-    { label: "Failed uploads", value: failedUploads, icon: FileWarning }
-  ];
+    getMyraAdminDashboard()
+      .then((data) => {
+        if (!mounted) return;
+        setDashboard(data);
+      })
+      .catch(() => {
+        if (!mounted) return;
+        setError(true);
+      })
+      .finally(() => {
+        if (mounted) setLoading(false);
+      });
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  if (loading) return <DashboardLoading />;
+
+  if (error || !dashboard) {
+    return (
+      <div className="rounded-xl border border-[#1f2937] bg-[#1a2235] p-6 text-sm text-gray-400">
+        Failed to load dashboard data. Please refresh.
+      </div>
+    );
+  }
+
+  return <DashboardContent dashboard={dashboard} />;
+}
+
+function DashboardContent({ dashboard }: { dashboard: MyraAdminDashboard }) {
+  const maxPlanCount = useMemo(() => Math.max(0, ...dashboard.plan_distribution.map((plan) => plan.count)), [dashboard.plan_distribution]);
+  const maxConversations = useMemo(() => Math.max(0, ...dashboard.platform_usage.map((tenant) => tenant.conversation_count)), [dashboard.platform_usage]);
 
   return (
-    <>
-      <PageHeader
-        title="Admin Dashboard"
-        description="Platform control center for tenant approvals, usage health, revenue signals, leads, and knowledge processing."
-        actions={
-          <Button asChild>
-            <Link to="/approvals">
-              <ShieldCheck className="h-4 w-4" />
-              Review Queue
-            </Link>
-          </Button>
-        }
-      />
+    <div className="space-y-6">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <h1 className="text-3xl font-bold tracking-normal text-white">Admin Dashboard</h1>
+          <p className="mt-2 max-w-3xl text-sm leading-6 text-gray-400">
+            Platform control center for tenant approvals, usage health, revenue signals, leads, and knowledge processing.
+          </p>
+        </div>
+        <Button asChild className="bg-[#3b82f6] hover:bg-[#2563eb]">
+          <Link to="/myra-admin/approvals">
+            <ShieldCheck className="h-4 w-4" />
+            Review Queue
+          </Link>
+        </Button>
+      </div>
 
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        {metrics.map((metric) => (
-          <MetricCard key={metric.label} {...metric} loading={summaryQuery.isLoading && metric.value === undefined} />
-        ))}
+        <MetricCard label="Total tenants" value={dashboard.total_tenants} icon={Building2} />
+        <MetricCard label="Pending approvals" value={dashboard.pending_approvals} icon={ShieldCheck} />
+        <MetricCard label="Active tenants" value={dashboard.active_tenants} icon={Activity} />
+        <MetricCard label="Inactive tenants" value={dashboard.inactive_tenants} icon={AlertTriangle} />
       </section>
 
-      <section className="mt-6 grid gap-4 xl:grid-cols-3">
-        <Card>
-          <CardHeader>
-            <CardTitle>Pending Business Approvals</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {pendingApprovals.slice(0, 5).map((tenant) => (
-              <div key={tenant.tenantId} className="flex items-center justify-between gap-3 rounded-md border bg-[var(--color-bg-muted)] p-3">
-                <div className="min-w-0">
-                  <p className="truncate text-sm font-semibold text-[var(--color-text-main)]">{tenant.tenantName}</p>
-                  <p className="truncate text-xs text-muted-foreground">{tenant.websiteUrl}</p>
-                </div>
-                <div className="flex shrink-0 items-center gap-2">
-                  <StatusBadge status={tenant.status} />
-                  <Button asChild variant="outline" size="sm">
-                    <Link to={`/tenant-review/${tenant.tenantId}`}>Review</Link>
-                  </Button>
-                </div>
-              </div>
-            ))}
-            {!pendingApprovals.length ? <p className="text-sm text-muted-foreground">No businesses are waiting for approval.</p> : null}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Plan Distribution</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {Object.entries(planDistribution).map(([plan, count]) => {
-              const width = tenants.length ? Math.max((count / tenants.length) * 100, 8) : 0;
-              return (
-                <div key={plan}>
-                  <div className="mb-1 flex items-center justify-between text-sm">
-                    <span className="font-medium text-[var(--color-text-secondary)]">{plan}</span>
-                    <span className="text-muted-foreground">{count}</span>
-                  </div>
-                  <div className="h-2 rounded-full bg-[var(--color-bg-muted)]">
-                    <div className="h-2 rounded-full bg-[#1591DC]" style={{ width: `${width}%` }} />
-                  </div>
-                </div>
-              );
-            })}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Recent Tenants</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {tenants.slice(0, 5).map((tenant) => (
-              <div key={tenant.tenantId} className="flex items-center justify-between gap-3 rounded-md border bg-[var(--color-bg-muted)] p-3">
-                <div className="min-w-0">
-                  <p className="truncate text-sm font-semibold text-[var(--color-text-main)]">{tenant.tenantName}</p>
-                  <p className="truncate text-xs text-muted-foreground">{tenant.industry}</p>
-                </div>
-                <StatusBadge status={tenant.status} />
-              </div>
-            ))}
-          </CardContent>
-        </Card>
+      <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <MetricCard label="Total conversations" value={dashboard.total_conversations} icon={MessageSquare} />
+        <MetricCard label="Total leads" value={dashboard.total_leads} icon={UserPlus} />
+        <MetricCard label="Revenue estimate" value={dashboard.revenue_estimate} icon={DollarSign} formatAsCurrency />
+        <MetricCard label="Failed uploads" value={dashboard.failed_uploads} icon={FileX} />
       </section>
 
-      <section className="mt-6 grid gap-4 xl:grid-cols-3">
-        <Card className="xl:col-span-2">
-          <CardHeader>
-            <CardTitle>Platform Usage Analytics</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid gap-3 md:grid-cols-2">
-              {(analyticsQuery.data?.tenantUsage ?? []).map((tenant) => (
-                <div key={tenant.tenantName} className="rounded-md border bg-[var(--color-bg-muted)] p-3">
+      <section className="grid gap-4 xl:grid-cols-3">
+        <SectionCard title="Pending Business Approvals">
+          {dashboard.pending_businesses.length ? (
+            <div className="space-y-3">
+              {dashboard.pending_businesses.map((tenant) => (
+                <article key={tenant.id} className="rounded-lg border border-[#1f2937] bg-[#111827] p-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="font-semibold text-white">{tenant.business_name}</p>
+                      <p className="mt-1 text-sm text-gray-400">{tenant.category}</p>
+                      <p className="mt-2 text-xs text-gray-400">{formatDate(tenant.registration_date)}</p>
+                    </div>
+                    <Button asChild size="sm" className="bg-[#3b82f6] hover:bg-[#2563eb]">
+                      <Link to="/myra-admin/approvals">Review</Link>
+                    </Button>
+                  </div>
+                </article>
+              ))}
+            </div>
+          ) : (
+            <p className="py-10 text-center text-sm text-gray-400">No businesses are waiting for approval.</p>
+          )}
+        </SectionCard>
+
+        <SectionCard title="Plan Distribution">
+          {dashboard.plan_distribution.length ? (
+            <div className="space-y-4">
+              {dashboard.plan_distribution.map((plan) => (
+                <div key={plan.plan_name}>
                   <div className="mb-2 flex items-center justify-between gap-3 text-sm">
-                    <span className="font-medium text-[var(--color-text-main)]">{tenant.tenantName}</span>
-                    <span className="text-muted-foreground">{tenant.conversations.toLocaleString()}</span>
+                    <span className="font-medium text-white">{plan.plan_name}</span>
+                    <span className="text-gray-400">{plan.count.toLocaleString()}</span>
                   </div>
-                  <div className="h-2 rounded-full bg-[var(--color-bg-card)]">
-                    <div className="h-2 rounded-full bg-[#22C55E]" style={{ width: `${Math.min(tenant.conversations / 6, 100)}%` }} />
-                  </div>
+                  <ProgressBar value={plan.count} max={maxPlanCount} color="blue" />
                 </div>
               ))}
             </div>
-          </CardContent>
-        </Card>
+          ) : (
+            <p className="py-10 text-center text-sm text-gray-400">No plan data available.</p>
+          )}
+        </SectionCard>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>System Health</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <HealthRow label="Tenant service" status="ACTIVE" />
-            <HealthRow label="Knowledge service" status={failedUploads ? "FAILED" : "ACTIVE"} />
-            <HealthRow label="Chat service" status="ACTIVE" />
-            <HealthRow label="Lead service" status="ACTIVE" />
-            <div className="flex items-center gap-2 rounded-md border bg-[var(--color-bg-muted)] p-3 text-sm text-muted-foreground">
-              <Clock className="h-4 w-4 text-primary" />
-              Avg response time: {summaryQuery.data?.averageResponseTimeMs ?? 0} ms
+        <SectionCard title="Recent Tenants">
+          {dashboard.recent_tenants.length ? (
+            <div className="space-y-3">
+              {dashboard.recent_tenants.map((tenant) => (
+                <div key={tenant.id} className="flex items-center justify-between gap-3 rounded-lg border border-[#1f2937] bg-[#111827] p-3">
+                  <div className="min-w-0">
+                    <p className="truncate font-semibold text-white">{tenant.tenant_name}</p>
+                    <p className="mt-1 truncate text-sm text-gray-400">{tenant.category}</p>
+                  </div>
+                  <StatusBadge status={tenant.status as DashboardStatus} />
+                </div>
+              ))}
             </div>
-          </CardContent>
-        </Card>
+          ) : (
+            <p className="py-10 text-center text-sm text-gray-400">No tenants registered yet.</p>
+          )}
+        </SectionCard>
       </section>
-    </>
-  );
-}
 
-function MetricCard({
-  label,
-  value,
-  icon: Icon,
-  loading,
-  currency
-}: {
-  label: string;
-  value?: number;
-  icon: typeof Building2;
-  loading?: boolean;
-  currency?: boolean;
-}) {
-  const formatted = currency
-    ? new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(value ?? 0)
-    : (value ?? 0).toLocaleString();
+      <section className="grid gap-4 xl:grid-cols-2">
+        <SectionCard title="Platform Usage Analytics">
+          {dashboard.platform_usage.length ? (
+            <div className="space-y-4">
+              {dashboard.platform_usage.map((tenant) => (
+                <div key={tenant.tenant_name}>
+                  <div className="mb-2 flex items-center justify-between gap-3 text-sm">
+                    <span className="font-medium text-white">{tenant.tenant_name}</span>
+                    <span className="text-gray-400">{tenant.conversation_count.toLocaleString()}</span>
+                  </div>
+                  <ProgressBar value={tenant.conversation_count} max={maxConversations} color="green" />
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="py-10 text-center text-sm text-gray-400">No usage data available.</p>
+          )}
+        </SectionCard>
 
-  return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium text-muted-foreground">{label}</CardTitle>
-        <Icon className="h-4 w-4 text-primary" />
-      </CardHeader>
-      <CardContent>{loading ? <Skeleton className="h-8 w-24" /> : <div className="text-2xl font-semibold text-[var(--color-text-main)]">{formatted}</div>}</CardContent>
-    </Card>
-  );
-}
-
-function HealthRow({ label, status }: { label: string; status: string }) {
-  return (
-    <div className="flex items-center justify-between gap-3 rounded-md border bg-[var(--color-bg-muted)] p-3 text-sm">
-      <span className="font-medium text-[var(--color-text-secondary)]">{label}</span>
-      <StatusBadge status={status} />
+        <SectionCard title="System Health">
+          {dashboard.system_health.length ? (
+            <div className="space-y-3">
+              {dashboard.system_health.map((service) => (
+                <div key={service.service_name} className="flex items-center justify-between gap-3 rounded-lg border border-[#1f2937] bg-[#111827] p-3">
+                  <p className="font-medium text-white">{service.service_name}</p>
+                  <StatusBadge status={service.status as SystemHealthStatus} />
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="py-10 text-center text-sm text-gray-400">Health data unavailable.</p>
+          )}
+        </SectionCard>
+      </section>
     </div>
   );
+}
+
+function DashboardLoading() {
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className="space-y-3">
+          <SkeletonBlock className="h-9 w-64" />
+          <SkeletonBlock className="h-5 w-[min(42rem,80vw)]" />
+        </div>
+        <SkeletonBlock className="h-10 w-36" />
+      </div>
+
+      <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        {Array.from({ length: 8 }).map((_, index) => (
+          <div key={index} className="rounded-xl border border-[#1f2937] bg-[#1a2235] p-5">
+            <div className="flex items-center justify-between">
+              <SkeletonBlock className="h-4 w-28" />
+              <SkeletonBlock className="h-5 w-5 rounded-md" />
+            </div>
+            <SkeletonBlock className="mt-5 h-9 w-20" />
+          </div>
+        ))}
+      </section>
+
+      <section className="grid gap-4 xl:grid-cols-3">
+        {Array.from({ length: 3 }).map((_, index) => (
+          <SectionSkeleton key={index} />
+        ))}
+      </section>
+
+      <section className="grid gap-4 xl:grid-cols-2">
+        {Array.from({ length: 2 }).map((_, index) => (
+          <SectionSkeleton key={index} />
+        ))}
+      </section>
+    </div>
+  );
+}
+
+function SectionSkeleton() {
+  return (
+    <div className="rounded-xl border border-[#1f2937] bg-[#1a2235] p-5">
+      <SkeletonBlock className="h-6 w-48" />
+      <div className="mt-5 space-y-3">
+        {Array.from({ length: 4 }).map((_, index) => (
+          <SkeletonBlock key={index} className="h-12 w-full" />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function SkeletonBlock({ className }: { className: string }) {
+  return <div className={`animate-pulse rounded-md bg-gray-700/70 ${className}`} />;
 }

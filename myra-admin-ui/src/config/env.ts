@@ -15,15 +15,9 @@ const numberFromEnv = (fallback: number) =>
     });
 
 const envSchema = z.object({
-  VITE_API_BASE_URL: z.string().url().default("http://localhost:8000/api/v1"),
-  VITE_TENANT_API_URL: z.string().url().default("http://localhost:8000/api/v1"),
-  VITE_KNOWLEDGE_API_URL: z.string().url().default("http://localhost:8002/api/knowledge"),
-  VITE_KNOWLEDGE_SERVICE_URL: z.string().url().optional(),
-  VITE_CHAT_API_URL: z.string().url().default("http://localhost:8003/api/chat"),
-  VITE_LEAD_API_URL: z.string().url().default("http://localhost:8004/api/leads"),
+  VITE_API_BASE_URL: z.string().url().default("http://localhost:8000"),
   VITE_ANALYTICS_API_URL: z.string().url().default("http://localhost:8005/api/analytics"),
   VITE_ADMIN_API_URL: z.string().url().default("http://localhost:8006/api/admin"),
-  VITE_ADMIN_SECRET: z.string().min(1).default("local-dev-admin-secret"),
   VITE_API_TIMEOUT_MS: numberFromEnv(12_000),
   VITE_API_RETRY_ATTEMPTS: numberFromEnv(2),
   VITE_API_RETRY_BASE_DELAY_MS: numberFromEnv(300),
@@ -54,10 +48,6 @@ const shouldFailFast = import.meta.env.PROD || import.meta.env.VITE_REQUIRE_ENV_
 export const appConfig = parseEnvConfig(import.meta.env, shouldFailFast);
 
 export const serviceBaseUrls = {
-  tenant: appConfig.VITE_TENANT_API_URL,
   admin: appConfig.VITE_ADMIN_API_URL,
-  knowledge: appConfig.VITE_KNOWLEDGE_SERVICE_URL ?? appConfig.VITE_KNOWLEDGE_API_URL,
-  analytics: appConfig.VITE_ANALYTICS_API_URL,
-  lead: appConfig.VITE_LEAD_API_URL,
-  chat: appConfig.VITE_CHAT_API_URL
+  analytics: appConfig.VITE_ANALYTICS_API_URL
 };

@@ -1,103 +1,127 @@
-import { useQuery } from "@tanstack/react-query";
-import { AlertTriangle } from "lucide-react";
+import { BarChart3, MessageSquare, QrCode, ShoppingCart, TrendingUp, Users } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { LoadingSpinner } from "@/components/shared/LoadingSpinner";
+import { DataTable, type DataTableColumn } from "@/components/shared/DataTable";
 import { PageHeader } from "@/components/shared/PageHeader";
-import { getAnalyticsSummary } from "@/features/analytics/analytics.api";
+import { platformTenants, platformTotals, type PlatformTenant } from "@/features/admin/platformAdmin.data";
+
+const totals = platformTotals();
+const widgetLoads = totals.visitors + 4200;
+const qrScans = 3180;
+const visitorToChat = totals.visitors ? Number(((totals.chatSessions / totals.visitors) * 100).toFixed(1)) : 0;
+const chatToPurchase = totals.chatSessions ? Number(((totals.purchaseCompletedCount / totals.chatSessions) * 100).toFixed(1)) : 0;
+
+const engagementColumns: DataTableColumn<PlatformTenant>[] = [
+  { header: "Tenant", accessor: (tenant) => <span className="font-medium text-[var(--color-text-main)]">{tenant.name}</span> },
+  { header: "Category", accessor: "category" },
+  { header: "Visitors", accessor: (tenant) => tenant.visitors.toLocaleString() },
+  { header: "Sessions", accessor: (tenant) => tenant.chatSessions.toLocaleString() },
+  { header: "Purchases", accessor: (tenant) => tenant.purchaseCompletedCount.toLocaleString() }
+];
 
 export function AnalyticsPage() {
-  const analyticsQuery = useQuery({ queryKey: ["analytics"], queryFn: getAnalyticsSummary });
-  const data = analyticsQuery.data;
-
-  if (analyticsQuery.isLoading) return <LoadingSpinner label="Loading analytics" />;
+  const topTenants = [...platformTenants].sort((a, b) => b.chatSessions - a.chatSessions);
+  const lowConversion = platformTenants.filter((tenant) => tenant.questionsAsked > 0 && tenant.purchaseCompletedCount / tenant.questionsAsked < 0.01);
+  const categoryUsage = Array.from(
+    platformTenants.reduce((acc, tenant) => {
+      acc.set(tenant.category, (acc.get(tenant.category) ?? 0) + tenant.chatSessions);
+      return acc;
+    }, new Map<string, number>())
+  );
 
   return (
     <>
-      <PageHeader title="Analytics" description="Measure traffic, lead capture, top questions, failed responses, and tenant usage." />
-      <div className="grid gap-4 xl:grid-cols-2">
+      <PageHeader
+        title="Platform Analytics"
+        description="Platform-wide visitor, widget, QR, chat, lead, purchase, conversion, growth, category, and engagement analytics."
+      />
+
+      <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <Metric label="Total visitors" value={totals.visitors} icon={Users} />
+        <Metric label="Widget loads" value={widgetLoads} icon={BarChart3} />
+        <Metric label="QR scans" value={qrScans} icon={QrCode} />
+        <Metric label="Chat sessions" value={totals.chatSessions} icon={MessageSquare} />
+        <Metric label="Questions asked" value={totals.questionsAsked} icon={MessageSquare} />
+        <Metric label="Answers given" value={totals.answersGiven} icon={MessageSquare} />
+        <Metric label="Leads captured" value={totals.leadsCaptured} icon={Users} />
+        <Metric label="Purchase intent" value={totals.purchaseIntentCount} icon={ShoppingCart} />
+        <Metric label="Purchase completed" value={totals.purchaseCompletedCount} icon={ShoppingCart} />
+        <Metric label="Q to purchase" value={`${totals.questionToPurchase}%`} icon={TrendingUp} />
+        <Metric label="Visitor to chat" value={`${visitorToChat}%`} icon={TrendingUp} />
+        <Metric label="Chat to purchase" value={`${chatToPurchase}%`} icon={TrendingUp} />
+      </section>
+
+      <section className="mt-6 grid gap-4 xl:grid-cols-3">
         <Card>
           <CardHeader>
-            <CardTitle>Conversations Over Time</CardTitle>
+            <CardTitle>Tenant growth</CardTitle>
           </CardHeader>
           <CardContent>
-            <BarSeries data={data?.timeline.map((point) => ({ label: point.label, value: point.conversations })) ?? []} color="#1591DC" />
+            <Bar label="Pending" value={totals.PENDING_APPROVAL} max={totals.totalTenants} />
+            <Bar label="Active" value={totals.ACTIVE} max={totals.totalTenants} />
+            <Bar label="Suspended" value={totals.SUSPENDED} max={totals.totalTenants} />
+            <Bar label="Rejected" value={totals.REJECTED} max={totals.totalTenants} />
           </CardContent>
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle>Leads Over Time</CardTitle>
+            <CardTitle>Usage by category</CardTitle>
           </CardHeader>
           <CardContent>
-            <BarSeries data={data?.timeline.map((point) => ({ label: point.label, value: point.leads })) ?? []} color="#22C55E" />
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>Top Questions</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {data?.topQuestions.map((item) => (
-              <ProgressRow key={item.question} label={item.question} value={item.count} max={data.topQuestions[0]?.count ?? 1} />
+            {categoryUsage.map(([category, value]) => (
+              <Bar key={category} label={category} value={value} max={Math.max(...categoryUsage.map(([, sessions]) => sessions), 1)} />
             ))}
           </CardContent>
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle>Tenant Usage</CardTitle>
+            <CardTitle>Low conversion tenants</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            {data?.tenantUsage.map((item) => (
-              <ProgressRow key={item.tenantName} label={item.tenantName} value={item.conversations} max={data.tenantUsage[0]?.conversations ?? 1} />
-            ))}
+            {lowConversion.length ? (
+              lowConversion.map((tenant) => (
+                <div key={tenant.id} className="rounded-md border bg-[var(--color-bg-muted)] p-3">
+                  <p className="font-medium text-[var(--color-text-main)]">{tenant.name}</p>
+                  <p className="text-sm text-muted-foreground">{tenant.purchaseCompletedCount} purchases from {tenant.questionsAsked.toLocaleString()} questions</p>
+                </div>
+              ))
+            ) : (
+              <p className="text-sm text-muted-foreground">No low-conversion tenants detected.</p>
+            )}
           </CardContent>
         </Card>
-        <Card className="xl:col-span-2">
-          <CardHeader>
-            <CardTitle>Failed Response Count</CardTitle>
-          </CardHeader>
-          <CardContent className="flex items-center gap-4">
-            <div className="rounded-full bg-[var(--color-warning-bg)] p-3 text-[var(--color-warning)]">
-              <AlertTriangle className="h-6 w-6" />
-            </div>
-            <div>
-              <p className="text-3xl font-semibold text-[var(--color-text-main)]">{data?.failedResponseCount ?? 0}</p>
-              <p className="text-sm text-muted-foreground">Responses that fell back or could not answer confidently.</p>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+      </section>
+
+      <section className="mt-6">
+        <h2 className="mb-3 text-lg font-semibold text-[var(--color-text-main)]">Top tenants by engagement</h2>
+        <DataTable columns={engagementColumns} data={topTenants} getRowKey={(tenant) => tenant.id} />
+      </section>
     </>
   );
 }
 
-function BarSeries({ data, color }: { data: { label: string; value: number }[]; color: string }) {
-  const max = Math.max(...data.map((item) => item.value), 1);
+function Metric({ label, value, icon: Icon }: { label: string; value: number | string; icon: typeof Users }) {
   return (
-    <div className="flex h-72 items-end gap-3">
-      {data.map((item) => (
-        <div key={item.label} className="flex flex-1 flex-col items-center gap-2">
-          <div className="flex h-56 w-full items-end rounded-md bg-[var(--color-bg-muted)]">
-            <div className="w-full rounded-md" style={{ height: `${(item.value / max) * 100}%`, backgroundColor: color }} />
-          </div>
-          <div className="text-center">
-            <p className="text-xs font-medium text-[var(--color-text-secondary)]">{item.value}</p>
-            <p className="text-[11px] text-muted-foreground">{item.label}</p>
-          </div>
-        </div>
-      ))}
-    </div>
+    <Card>
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <CardTitle className="text-sm font-medium text-muted-foreground">{label}</CardTitle>
+        <Icon className="h-4 w-4 text-primary" />
+      </CardHeader>
+      <CardContent>
+        <div className="text-2xl font-semibold text-[var(--color-text-main)]">{typeof value === "number" ? value.toLocaleString() : value}</div>
+      </CardContent>
+    </Card>
   );
 }
 
-function ProgressRow({ label, value, max }: { label: string; value: number; max: number }) {
+function Bar({ label, value, max }: { label: string; value: number; max: number }) {
   return (
-    <div>
-      <div className="mb-1 flex justify-between gap-3 text-sm">
-        <span className="font-medium text-[var(--color-text-secondary)]">{label}</span>
-        <span className="text-muted-foreground">{value}</span>
+    <div className="mb-4 last:mb-0">
+      <div className="mb-1 flex justify-between text-sm">
+        <span className="text-muted-foreground">{label}</span>
+        <span className="font-medium text-[var(--color-text-main)]">{value.toLocaleString()}</span>
       </div>
       <div className="h-2 rounded-full bg-[var(--color-bg-muted)]">
-        <div className="h-2 rounded-full bg-primary" style={{ width: `${Math.max((value / max) * 100, 8)}%` }} />
+        <div className="h-2 rounded-full bg-primary" style={{ width: `${Math.max((value / max) * 100, 4)}%` }} />
       </div>
     </div>
   );

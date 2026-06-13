@@ -1,45 +1,19 @@
 import { type ReactNode, useEffect } from "react";
 import { Navigate, createBrowserRouter, useLocation } from "react-router-dom";
 import { AdminLayout } from "@/components/layout/AdminLayout";
-import { CustomerLayout } from "@/components/layout/CustomerLayout";
 import { useAuthStore } from "@/features/auth/auth.store";
 import { LoginPage } from "@/features/auth/pages/LoginPage";
+import { AuditLogsPage } from "@/features/admin/pages/AuditLogsPage";
+import { FeatureFlagsPage } from "@/features/admin/pages/FeatureFlagsPage";
+import { PlansPage } from "@/features/admin/pages/PlansPage";
+import { SupportDebugPage } from "@/features/admin/pages/SupportDebugPage";
 import { AnalyticsPage } from "@/features/analytics/pages/AnalyticsPage";
-import { ConversationsPage } from "@/features/conversations/pages/ConversationsPage";
-import { CustomerAssistantSettingsPage } from "@/features/customer/pages/CustomerAssistantSettingsPage";
-import { CustomerAnalyticsPage } from "@/features/customer/pages/CustomerAnalyticsPage";
-import { CustomerDashboardPage } from "@/features/customer/pages/CustomerDashboardPage";
-import { CustomerEmbedPage } from "@/features/customer/pages/CustomerEmbedPage";
-import { CustomerKnowledgePage } from "@/features/customer/pages/CustomerKnowledgePage";
-import { CustomerLeadsPage } from "@/features/customer/pages/CustomerLeadsPage";
-import { CustomerSubscriptionPage } from "@/features/customer/pages/CustomerSubscriptionPage";
-import { CustomerSupportPage } from "@/features/customer/pages/CustomerSupportPage";
 import { DashboardPage } from "@/features/dashboard/pages/DashboardPage";
-import { ApprovalPage } from "@/features/knowledge/pages/ApprovalPage";
-import { ComparisonPage } from "@/features/knowledge/pages/ComparisonPage";
-import { DocumentUploadPage } from "@/features/knowledge/pages/DocumentUploadPage";
-import { KnowledgeBasePage } from "@/features/knowledge/pages/KnowledgeBasePage";
-import { KnowledgeOverviewPage } from "@/features/knowledge/pages/KnowledgeOverviewPage";
-import { WebsiteScanPage } from "@/features/knowledge/pages/WebsiteScanPage";
-import { LeadsPage } from "@/features/leads/pages/LeadsPage";
 import { AdminApprovalsPage } from "@/features/onboarding/pages/AdminApprovalsPage";
-import { EmailNotificationsPage } from "@/features/onboarding/pages/EmailNotificationsPage";
-import { KnowledgeDocumentsReviewPage } from "@/features/onboarding/pages/KnowledgeDocumentsReviewPage";
-import { PaymentsPage } from "@/features/onboarding/pages/PaymentsPage";
-import { SubscriptionsPage } from "@/features/onboarding/pages/SubscriptionsPage";
-import { TenantReviewIndexPage } from "@/features/onboarding/pages/TenantReviewIndexPage";
-import { TenantReviewPage } from "@/features/onboarding/pages/TenantReviewPage";
-import { MockPaymentPage } from "@/features/public/pages/MockPaymentPage";
-import { OnboardingSuccessPage } from "@/features/public/pages/OnboardingSuccessPage";
-import { PricingPage } from "@/features/public/pages/PricingPage";
-import { PublicLandingPage } from "@/features/public/pages/PublicLandingPage";
-import { RegisterBusinessPage } from "@/features/public/pages/RegisterBusinessPage";
-import { TenantPublicPage } from "@/features/public/pages/TenantPublicPage";
 import { SettingsPage } from "@/features/settings/pages/SettingsPage";
-import { TenantCreateWizardPage } from "@/features/tenants/pages/TenantCreateWizardPage";
 import { TenantDetailPage } from "@/features/tenants/pages/TenantDetailPage";
 import { TenantListPage } from "@/features/tenants/pages/TenantListPage";
-import { WidgetConfigPage } from "@/features/widget/pages/WidgetConfigPage";
+import { isMyraAdmin, isSuperAdmin } from "@/features/admin/admin.permissions";
 
 function ThemeRoute({ theme, children, useStoredTheme }: { theme: "light" | "dark"; children: ReactNode; useStoredTheme?: boolean }) {
   useEffect(() => {
@@ -65,83 +39,55 @@ function ProtectedAdminRoutes() {
   const location = useLocation();
 
   if (!token) {
-    return <Navigate to="/login" state={{ from: location }} replace />;
+    return <Navigate to="/myra-admin/login" state={{ from: location }} replace />;
   }
 
-  if (user?.role === "TENANT_OWNER") {
-    return <Navigate to="/customer/dashboard" replace />;
+  if (!isMyraAdmin(user)) {
+    return <Navigate to="/myra-admin/login" replace />;
   }
 
   return <AdminLayout />;
 }
 
-function ProtectedCustomerRoutes() {
-  const token = useAuthStore((state) => state.token);
+function RequireSuperAdmin({ children }: { children: ReactNode }) {
   const user = useAuthStore((state) => state.user);
-  const location = useLocation();
-
-  if (!token) {
-    return <Navigate to="/login" state={{ from: location }} replace />;
-  }
-
-  if (user && user.role !== "TENANT_OWNER") {
-    return <Navigate to="/dashboard" replace />;
-  }
-
-  return <CustomerLayout />;
+  if (!isSuperAdmin(user)) return <Navigate to="/myra-admin/dashboard" replace />;
+  return <>{children}</>;
 }
 
 export const router = createBrowserRouter([
-  { path: "/", element: withTheme("dark", <PublicLandingPage />, true) },
-  { path: "/pricing", element: withTheme("dark", <PricingPage />, true) },
-  { path: "/register", element: withTheme("dark", <RegisterBusinessPage />, true) },
-  { path: "/mock-payment/:registrationId", element: withTheme("dark", <MockPaymentPage />, true) },
-  { path: "/onboarding-success/:registrationId", element: withTheme("dark", <OnboardingSuccessPage />, true) },
-  { path: "/pending-approval/:registrationId", element: withTheme("dark", <OnboardingSuccessPage />, true) },
-  { path: "/login", element: withTheme("dark", <LoginPage />, true) },
+  { path: "/", element: <Navigate to="/myra-admin/login" replace /> },
+  { path: "/myra-admin", element: <Navigate to="/myra-admin/dashboard" replace /> },
+  { path: "/myra-admin/login", element: withTheme("dark", <LoginPage />, true) },
   {
+    path: "/myra-admin",
     element: <ProtectedAdminRoutes />,
     children: [
       { path: "dashboard", element: <DashboardPage /> },
-      { path: "approvals", element: <AdminApprovalsPage /> },
-      { path: "tenant-review", element: <TenantReviewIndexPage /> },
-      { path: "tenant-review/:tenantId", element: <TenantReviewPage /> },
-      { path: "payments", element: <PaymentsPage /> },
-      { path: "knowledge-documents", element: <KnowledgeDocumentsReviewPage /> },
-      { path: "subscriptions", element: <SubscriptionsPage /> },
-      { path: "email-notifications", element: <EmailNotificationsPage /> },
       { path: "tenants", element: <TenantListPage /> },
-      { path: "tenants/new", element: <TenantCreateWizardPage /> },
       { path: "tenants/:tenantId", element: <TenantDetailPage /> },
-      { path: "knowledge", element: <KnowledgeOverviewPage /> },
-      { path: "knowledge/website-scan", element: <WebsiteScanPage /> },
-      { path: "knowledge/documents", element: <DocumentUploadPage /> },
-      { path: "knowledge/comparison", element: <ComparisonPage /> },
-      { path: "knowledge/differences/:comparisonId", element: <ComparisonPage /> },
-      { path: "knowledge/approval", element: <ApprovalPage /> },
-      { path: "knowledge/base", element: <KnowledgeBasePage /> },
-      { path: "widget/:tenantId", element: <WidgetConfigPage /> },
-      { path: "conversations", element: <ConversationsPage /> },
-      { path: "leads", element: <LeadsPage /> },
+      { path: "approvals", element: <AdminApprovalsPage /> },
+      {
+        path: "plans",
+        element: (
+          <RequireSuperAdmin>
+            <PlansPage />
+          </RequireSuperAdmin>
+        )
+      },
+      { path: "feature-flags", element: <FeatureFlagsPage /> },
       { path: "analytics", element: <AnalyticsPage /> },
-      { path: "settings", element: <SettingsPage /> }
+      { path: "audit-logs", element: <AuditLogsPage /> },
+      { path: "support", element: <SupportDebugPage /> },
+      {
+        path: "settings",
+        element: (
+          <RequireSuperAdmin>
+            <SettingsPage />
+          </RequireSuperAdmin>
+        )
+      }
     ]
   },
-  {
-    path: "/customer",
-    element: <ProtectedCustomerRoutes />,
-    children: [
-      { index: true, element: <Navigate to="/customer/dashboard" replace /> },
-      { path: "dashboard", element: <CustomerDashboardPage /> },
-      { path: "knowledge", element: <CustomerKnowledgePage /> },
-      { path: "leads", element: <CustomerLeadsPage /> },
-      { path: "analytics", element: <CustomerAnalyticsPage /> },
-      { path: "subscription", element: <CustomerSubscriptionPage /> },
-      { path: "embed", element: <CustomerEmbedPage /> },
-      { path: "settings", element: <CustomerAssistantSettingsPage /> },
-      { path: "support", element: <CustomerSupportPage /> }
-    ]
-  },
-  { path: "/t/:tenantId", element: <TenantPublicPage /> },
-  { path: "*", element: <Navigate to="/" replace /> }
+  { path: "*", element: <Navigate to="/myra-admin/login" replace /> }
 ]);

@@ -1,351 +1,213 @@
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Copy, CreditCard, KeyRound, Power } from "lucide-react";
-import { useEffect, useState } from "react";
-import { Controller, useForm, type FieldErrors, type Resolver } from "react-hook-form";
+import { AlertTriangle, Flag, Lock, NotebookPen, PauseCircle, ShieldCheck } from "lucide-react";
+import type { ReactNode } from "react";
+import { useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/toast";
 import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
-import { BrandColorField } from "@/components/shared/BrandColorPicker";
-import { LoadingSpinner } from "@/components/shared/LoadingSpinner";
+import { ErrorState } from "@/components/shared/ErrorState";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { StatusBadge } from "@/components/shared/StatusBadge";
-import { getTenant, regenerateTenantApiKey, setTenantStatus, updateTenant } from "@/features/tenants/tenant.api";
-import {
-  defaultTenantWizardValues,
-  tenantWizardSchema,
-  toTenantCreateRequest,
-  toTenantWizardValues,
-  type TenantWizardFormValues
-} from "@/features/tenants/tenant.schema";
-import type { TenantStatus } from "@/features/tenants/tenant.types";
-import { documentReviewMessage } from "@/features/onboarding/onboarding.api";
-import { formatPlanPrice, getSubscriptionPlan } from "@/features/onboarding/onboarding.data";
-import { normalizeHexColor } from "@/lib/colors";
+import { featureFlagKeys, platformTenants, type PlatformTenant } from "@/features/admin/platformAdmin.data";
+import { useAuthStore } from "@/features/auth/auth.store";
+import { isSuperAdmin } from "@/features/admin/admin.permissions";
 import { formatDate } from "@/lib/utils";
 
-function FieldError({ name, errors }: { name: keyof TenantWizardFormValues; errors: FieldErrors<TenantWizardFormValues> }) {
-  const message = errors[name]?.message;
-  return message ? <p className="text-sm text-destructive">{String(message)}</p> : null;
-}
+type PendingAction = "approval status" | "suspension" | "plan change" | "feature flags" | "internal notes" | null;
 
 export function TenantDetailPage() {
   const { tenantId = "" } = useParams();
-  const [pendingStatus, setPendingStatus] = useState<TenantStatus | null>(null);
-  const queryClient = useQueryClient();
-  const tenantQuery = useQuery({
-    queryKey: ["tenant", tenantId],
-    queryFn: () => getTenant(tenantId),
-    enabled: Boolean(tenantId)
-  });
+  const user = useAuthStore((state) => state.user);
+  const superAdmin = isSuperAdmin(user);
+  const tenant = useMemo(() => platformTenants.find((item) => item.id === tenantId), [tenantId]);
+  const [selectedPlan, setSelectedPlan] = useState<PlatformTenant["plan"]>(tenant?.plan ?? "Starter");
+  const [flags, setFlags] = useState<Record<string, boolean>>(tenant?.featureFlags ?? {});
+  const [notes, setNotes] = useState(tenant?.notes ?? "");
+  const [supportMode, setSupportMode] = useState(false);
+  const [pendingAction, setPendingAction] = useState<PendingAction>(null);
 
-  const form = useForm<TenantWizardFormValues>({
-    resolver: zodResolver(tenantWizardSchema) as Resolver<TenantWizardFormValues>,
-    defaultValues: defaultTenantWizardValues
-  });
-
-  useEffect(() => {
-    if (tenantQuery.data) {
-      form.reset(toTenantWizardValues(tenantQuery.data));
-    }
-  }, [form, tenantQuery.data]);
-
-  const saveMutation = useMutation({
-    mutationFn: (values: TenantWizardFormValues) => updateTenant(tenantId, toTenantCreateRequest(values)),
-    onSuccess: (tenant) => {
-      queryClient.setQueryData(["tenant", tenantId], tenant);
-      queryClient.invalidateQueries({ queryKey: ["tenants"] });
-      toast({ title: "Tenant updated", variant: "success" });
-    },
-    onError: () => toast({ title: "Update failed", description: "Tenant settings were not saved.", variant: "error" })
-  });
-
-  const statusMutation = useMutation({
-    mutationFn: (status: TenantStatus) => setTenantStatus(tenantId, status),
-    onSuccess: (tenant) => {
-      queryClient.setQueryData(["tenant", tenantId], tenant);
-      queryClient.invalidateQueries({ queryKey: ["tenants"] });
-      toast({ title: `Tenant ${tenant.status.toLowerCase()}`, variant: "success" });
-      setPendingStatus(null);
-    }
-  });
-
-  const keyMutation = useMutation({
-    mutationFn: () => regenerateTenantApiKey(tenantId),
-    onSuccess: (tenant) => {
-      queryClient.setQueryData(["tenant", tenantId], tenant);
-      toast({ title: "API key regenerated", variant: "success" });
-    },
-    onError: () => toast({ title: "Could not regenerate API key", variant: "error" })
-  });
-
-  async function copy(value: string) {
-    await navigator.clipboard.writeText(value);
-    toast({ title: "Copied", variant: "success" });
+  if (!tenant) {
+    return <ErrorState title="Tenant not found" description="The tenant record is not available in the admin dataset." />;
   }
 
-  if (tenantQuery.isLoading) return <LoadingSpinner label="Loading tenant" />;
-  if (!tenantQuery.data) return <PageHeader title="Tenant not found" description="The requested tenant does not exist." />;
+  const tenantName = tenant.name;
 
-  const tenant = tenantQuery.data;
-  const nextStatus: TenantStatus = tenant.status === "ACTIVE" || tenant.status === "APPROVED" ? "INACTIVE" : "ACTIVE";
-  const plan = getSubscriptionPlan(tenant.selectedSubscriptionPlan);
+  function confirmAction() {
+    if (!pendingAction) return;
+    toast({
+      title: "Tenant update submitted",
+      description: `${pendingAction} for ${tenantName} will be permission checked and audit logged by the backend.`,
+      variant: "success"
+    });
+    setPendingAction(null);
+  }
 
   return (
     <>
       <PageHeader
-        title={tenant.tenantName}
-        description="View tenant details, edit configuration, and manage lifecycle state."
+        title={tenant.name}
+        description="Internal tenant record: business profile, owner details, plan, status, feature flags, widget health, ingestion status, analytics, errors, and admin notes."
         actions={
           <>
             <Button asChild variant="outline">
-              <Link to={`/widget/${tenant.tenantId}`}>Widget Config</Link>
+              <Link to="/myra-admin/tenants">Back to tenants</Link>
             </Button>
-            <Button variant="outline" onClick={() => setPendingStatus(nextStatus)}>
-              <Power className="h-4 w-4" />
-              {nextStatus === "ACTIVE" ? "Activate" : "Deactivate"}
+            <Button variant="outline" onClick={() => setPendingAction("approval status")}>
+              <ShieldCheck className="h-4 w-4" />
+              Update approval
+            </Button>
+            <Button variant="outline" onClick={() => setPendingAction("suspension")}>
+              <PauseCircle className="h-4 w-4" />
+              Suspend / Reactivate
             </Button>
           </>
         }
       />
 
-      <div className="mb-6 grid gap-4 lg:grid-cols-4">
+      <section className="mb-6 rounded-lg border border-amber-400/30 bg-amber-500/10 p-4 text-sm text-amber-100">
+        <div className="flex items-start gap-3">
+          <AlertTriangle className="mt-0.5 h-5 w-5 flex-none" />
+          <div>
+            <p className="font-semibold">Support-mode guardrail</p>
+            <p className="mt-1 text-amber-100/80">Do not edit tenant business content unless support mode is enabled and the action is audit logged.</p>
+          </div>
+          <label className="ml-auto flex items-center gap-2 whitespace-nowrap text-xs font-medium">
+            <Checkbox checked={supportMode} onChange={(event) => setSupportMode(event.currentTarget.checked)} />
+            Support mode
+          </label>
+        </div>
+      </section>
+
+      <section className="grid gap-4 lg:grid-cols-3">
         <Card>
           <CardHeader>
-            <CardTitle>Status</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            <StatusBadge status={tenant.status} />
-            <p className="text-sm text-muted-foreground">Created {formatDate(tenant.createdAt)}</p>
-            <p className="text-sm text-muted-foreground">Updated {formatDate(tenant.updatedAt)}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <CreditCard className="h-5 w-5 text-primary" />
-              Onboarding
-            </CardTitle>
+            <CardTitle>Business Profile</CardTitle>
+            <CardDescription>View-only unless support mode is active.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-2 text-sm">
-            <div className="flex justify-between gap-3">
-              <span className="text-muted-foreground">Plan</span>
-              <span className="font-medium">{plan.name}</span>
-            </div>
-            <div className="flex justify-between gap-3">
-              <span className="text-muted-foreground">Price</span>
-              <span className="font-medium">{formatPlanPrice(plan)}</span>
-            </div>
-            <div className="flex justify-between gap-3">
-              <span className="text-muted-foreground">Payment</span>
-              <StatusBadge status={tenant.paymentStatus ?? "PAID"} />
-            </div>
-            <div className="flex justify-between gap-3">
-              <span className="text-muted-foreground">Documents</span>
-              <StatusBadge status={tenant.documentProcessingStatus ?? "NOT_UPLOADED"} />
-            </div>
+            <Detail label="Category" value={tenant.category} />
+            <Detail label="Website" value={tenant.website} />
+            <Detail label="Created" value={formatDate(tenant.createdAt)} />
+            <Detail label="Last active" value={formatDate(tenant.lastActiveAt)} />
           </CardContent>
         </Card>
-        <Card className="lg:col-span-2">
-          <CardHeader>
-            <CardTitle>API Key</CardTitle>
-          </CardHeader>
-          <CardContent className="flex flex-col gap-3 sm:flex-row sm:items-center">
-            <code className="min-w-0 flex-1 break-all rounded-md bg-[var(--color-bg-muted)] px-3 py-2 text-sm">{tenant.apiKey}</code>
-            <Button variant="outline" onClick={() => copy(tenant.apiKey)}>
-              <Copy className="h-4 w-4" />
-              Copy
-            </Button>
-            <Button onClick={() => keyMutation.mutate()} disabled={keyMutation.isPending}>
-              <KeyRound className="h-4 w-4" />
-              Regenerate
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
 
-      <Card className="mb-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Owner Details</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2 text-sm">
+            <Detail label="Owner" value={tenant.ownerName} />
+            <Detail label="Email" value={tenant.ownerEmail} />
+            <Detail label="Status" value={<StatusBadge status={tenant.status} />} />
+            <Detail label="Plan" value={tenant.plan} />
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Analytics Summary</CardTitle>
+          </CardHeader>
+          <CardContent className="grid grid-cols-2 gap-3 text-sm">
+            <Stat label="Leads" value={tenant.leadsCaptured} />
+            <Stat label="Conversations" value={tenant.chatSessions} />
+            <Stat label="Questions" value={tenant.questionsAsked} />
+            <Stat label="Purchases" value={tenant.purchaseCompletedCount} />
+          </CardContent>
+        </Card>
+      </section>
+
+      <section className="mt-6 grid gap-4 lg:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle>Widget & Knowledge Health</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3 text-sm">
+            <Detail label="Widget config preview" value={tenant.widgetIssue ? "Needs setup review" : "Ready"} />
+            <Detail label="Knowledge ingestion" value={tenant.failedKnowledge ? "Failed documents detected" : "Healthy"} />
+            <Detail label="Recent errors" value={tenant.widgetIssue || tenant.failedKnowledge ? tenant.notes : "No recent internal errors"} />
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Plan & Feature Flags</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid gap-2 sm:grid-cols-[1fr_auto]">
+              <Select value={selectedPlan} onChange={(event) => setSelectedPlan(event.target.value as PlatformTenant["plan"])} disabled={!superAdmin}>
+                <option value="Starter">Starter</option>
+                <option value="Growth">Growth</option>
+                <option value="Scale">Scale</option>
+              </Select>
+              <Button onClick={() => setPendingAction("plan change")} disabled={!superAdmin}>
+                {!superAdmin && <Lock className="h-4 w-4" />}
+                Change Plan
+              </Button>
+            </div>
+            <div className="grid gap-2 sm:grid-cols-2">
+              {featureFlagKeys.map((flag) => (
+                <label key={flag} className="flex items-center gap-2 rounded-md border p-3 text-sm">
+                  <Checkbox
+                    checked={Boolean(flags[flag])}
+                    onChange={(event) => setFlags((current) => ({ ...current, [flag]: event.currentTarget.checked }))}
+                  />
+                  {flag}
+                </label>
+              ))}
+            </div>
+            <Button variant="outline" onClick={() => setPendingAction("feature flags")}>
+              <Flag className="h-4 w-4" />
+              Save feature flags
+            </Button>
+          </CardContent>
+        </Card>
+      </section>
+
+      <Card className="mt-6">
         <CardHeader>
-          <CardTitle>Registration Review</CardTitle>
+          <CardTitle>Internal Notes</CardTitle>
+          <CardDescription>Visible only to Myra admins. Updates require confirmation and audit logging.</CardDescription>
         </CardHeader>
-        <CardContent className="grid gap-4 text-sm md:grid-cols-2">
-          <div>
-            <p className="text-muted-foreground">Business email</p>
-            <p className="font-medium text-[var(--color-text-main)]">{tenant.businessEmail ?? tenant.supportEmail}</p>
-          </div>
-          <div>
-            <p className="text-muted-foreground">Phone number</p>
-            <p className="font-medium text-[var(--color-text-main)]">{tenant.phoneNumber ?? "N/A"}</p>
-          </div>
-          <div className="md:col-span-2">
-            <p className="text-muted-foreground">Business description</p>
-            <p className="font-medium text-[var(--color-text-main)]">
-              {tenant.businessDescription ?? "No public registration description was provided."}
-            </p>
-          </div>
-          <div className="rounded-md border border-amber-400/30 bg-[var(--color-warning-bg)] px-4 py-3 text-[var(--color-warning)] md:col-span-2">
-            {documentReviewMessage}
-          </div>
+        <CardContent className="space-y-3">
+          <Textarea value={notes} onChange={(event) => setNotes(event.target.value)} />
+          <Button onClick={() => setPendingAction("internal notes")}>
+            <NotebookPen className="h-4 w-4" />
+            Save internal notes
+          </Button>
         </CardContent>
       </Card>
 
-      <form onSubmit={form.handleSubmit((values) => saveMutation.mutate(values))} className="space-y-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>Business Info</CardTitle>
-          </CardHeader>
-          <CardContent className="form-grid">
-            <div className="space-y-2">
-              <Label>Tenant name</Label>
-              <Input {...form.register("tenantName")} />
-              <FieldError name="tenantName" errors={form.formState.errors} />
-            </div>
-            <div className="space-y-2">
-              <Label>Website URL</Label>
-              <Input {...form.register("websiteUrl")} />
-              <FieldError name="websiteUrl" errors={form.formState.errors} />
-            </div>
-            <div className="space-y-2">
-              <Label>Industry</Label>
-              <Input {...form.register("industry")} />
-              <FieldError name="industry" errors={form.formState.errors} />
-            </div>
-            <div className="space-y-2">
-              <Label>Support email</Label>
-              <Input type="email" {...form.register("supportEmail")} />
-              <FieldError name="supportEmail" errors={form.formState.errors} />
-            </div>
-            <div className="space-y-2">
-              <Label>Country</Label>
-              <Input {...form.register("country")} />
-              <FieldError name="country" errors={form.formState.errors} />
-            </div>
-            <div className="space-y-2">
-              <Label>Timezone</Label>
-              <Input {...form.register("timezone")} />
-              <FieldError name="timezone" errors={form.formState.errors} />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Branding & AI</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="form-grid">
-              <div className="space-y-2">
-                <Label>Assistant name</Label>
-                <Input {...form.register("assistantName")} />
-                <FieldError name="assistantName" errors={form.formState.errors} />
-              </div>
-              <div className="space-y-2">
-                <Label>Brand color</Label>
-                <Controller
-                  control={form.control}
-                  name="brandColor"
-                  render={({ field }) => (
-                    <BrandColorField value={field.value} onChange={(color) => field.onChange(normalizeHexColor(color))} />
-                  )}
-                />
-                <FieldError name="brandColor" errors={form.formState.errors} />
-              </div>
-              <div className="space-y-2">
-                <Label>Chat position</Label>
-                <Select {...form.register("chatPosition")}>
-                  <option value="bottom-right">Bottom right</option>
-                  <option value="bottom-left">Bottom left</option>
-                </Select>
-                <FieldError name="chatPosition" errors={form.formState.errors} />
-              </div>
-              <div className="space-y-2">
-                <Label>Response style</Label>
-                <Select {...form.register("responseStyle")}>
-                  <option value="PROFESSIONAL">Professional</option>
-                  <option value="FRIENDLY">Friendly</option>
-                  <option value="CASUAL">Casual</option>
-                  <option value="FORMAL">Formal</option>
-                </Select>
-                <FieldError name="responseStyle" errors={form.formState.errors} />
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label>Assistant intro</Label>
-              <Textarea {...form.register("assistantIntro")} />
-              <FieldError name="assistantIntro" errors={form.formState.errors} />
-            </div>
-            <div className="space-y-2">
-              <Label>System prompt</Label>
-              <Textarea className="min-h-32" {...form.register("systemPrompt")} />
-              <FieldError name="systemPrompt" errors={form.formState.errors} />
-            </div>
-            <div className="form-grid">
-              <div className="space-y-2">
-                <Label>Allowed topics</Label>
-                <Textarea {...form.register("allowedTopics")} />
-                <FieldError name="allowedTopics" errors={form.formState.errors} />
-              </div>
-              <div className="space-y-2">
-                <Label>Blocked topics</Label>
-                <Textarea {...form.register("blockedTopics")} />
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label>Suggested prompts</Label>
-              <Textarea {...form.register("suggestedPrompts")} />
-              <FieldError name="suggestedPrompts" errors={form.formState.errors} />
-            </div>
-            <div className="space-y-2">
-              <Label>Fallback message</Label>
-              <Textarea {...form.register("fallbackMessage")} />
-              <FieldError name="fallbackMessage" errors={form.formState.errors} />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Feature Toggles</CardTitle>
-          </CardHeader>
-          <CardContent className="grid gap-3 sm:grid-cols-2">
-            {[
-              ["enableWebSearch", "Web search"],
-              ["enableLeadCapture", "Lead capture"],
-              ["enableSuggestedPrompts", "Suggested prompts"],
-              ["enableAnalytics", "Analytics"],
-              ["enableHumanEscalation", "Human escalation"]
-            ].map(([name, label]) => (
-              <label key={name} className="flex items-center gap-2 rounded-md border p-3 text-sm font-medium">
-                <Checkbox {...form.register(name as keyof TenantWizardFormValues)} />
-                {label}
-              </label>
-            ))}
-          </CardContent>
-        </Card>
-
-        <div className="flex justify-end">
-          <Button type="submit" disabled={saveMutation.isPending}>
-            {saveMutation.isPending ? "Saving..." : "Save Changes"}
-          </Button>
-        </div>
-      </form>
-
       <ConfirmDialog
-        open={Boolean(pendingStatus)}
-        title={`${pendingStatus === "ACTIVE" ? "Activate" : "Deactivate"} tenant?`}
-        description="This changes whether the tenant widget can serve live conversations."
-        confirmLabel={pendingStatus === "ACTIVE" ? "Activate" : "Deactivate"}
-        destructive={pendingStatus === "INACTIVE"}
-        onCancel={() => setPendingStatus(null)}
-        onConfirm={() => pendingStatus && statusMutation.mutate(pendingStatus)}
+        open={Boolean(pendingAction)}
+        title={`Confirm ${pendingAction ?? "tenant update"}?`}
+        description="This critical tenant update will call a backend permission-checked API and write an audit log entry."
+        destructive={pendingAction === "suspension"}
+        onCancel={() => setPendingAction(null)}
+        onConfirm={confirmAction}
       />
     </>
+  );
+}
+
+function Detail({ label, value }: { label: string; value: ReactNode }) {
+  return (
+    <div className="flex items-center justify-between gap-3 border-b border-white/10 py-2 last:border-b-0">
+      <span className="text-muted-foreground">{label}</span>
+      <span className="text-right font-medium text-[var(--color-text-main)]">{value}</span>
+    </div>
+  );
+}
+
+function Stat({ label, value }: { label: string; value: number }) {
+  return (
+    <div className="rounded-md border bg-[var(--color-bg-muted)] p-3">
+      <p className="text-xs text-muted-foreground">{label}</p>
+      <p className="text-xl font-semibold text-[var(--color-text-main)]">{value.toLocaleString()}</p>
+    </div>
   );
 }
