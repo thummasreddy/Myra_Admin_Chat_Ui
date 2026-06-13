@@ -3,6 +3,8 @@ import { Navigate, createBrowserRouter, useLocation, useParams } from "react-rou
 import { AdminLayout } from "@/components/layout/AdminLayout";
 import { useAuthStore } from "@/features/auth/auth.store";
 import { LoginPage } from "@/features/auth/pages/LoginPage";
+import { LandingPage } from "@/features/public/pages/LandingPage";
+import { RegisterPage } from "@/features/public/pages/RegisterPage";
 import { AnalyticsPage } from "@/features/analytics/pages/AnalyticsPage";
 import { DashboardPage } from "@/features/dashboard/pages/DashboardPage";
 import { AdminApprovalsPage } from "@/features/onboarding/pages/AdminApprovalsPage";
@@ -61,7 +63,13 @@ function RedirectTenantDetailAlias() {
 }
 
 export const router = createBrowserRouter([
-  { path: "/", element: <Navigate to="/dashboard" replace /> },
+  /* Public routes */
+  { path: "/", element: <LandingPage /> },
+  { path: "/pricing", element: <LandingPage /> },
+  { path: "/register", element: withTheme("dark", <RegisterPage />) },
+  { path: "/login", element: withTheme("dark", <LoginPage />, true) },
+
+  /* Admin legacy redirects */
   { path: "/myra-admin", element: <Navigate to="/dashboard" replace /> },
   { path: "/myra-admin/dashboard", element: <Navigate to="/dashboard" replace /> },
   { path: "/myra-admin/approvals", element: <Navigate to="/approvals" replace /> },
@@ -70,6 +78,8 @@ export const router = createBrowserRouter([
   { path: "/myra-admin/analytics", element: <Navigate to="/analytics" replace /> },
   { path: "/myra-admin/settings", element: <Navigate to="/settings" replace /> },
   { path: "/myra-admin/login", element: withTheme("dark", <LoginPage />, true) },
+
+  /* Protected admin routes */
   {
     element: <ProtectedAdminRoutes />,
     children: [
@@ -89,5 +99,5 @@ export const router = createBrowserRouter([
       { path: "settings", element: <SettingsPage /> }
     ]
   },
-  { path: "*", element: <Navigate to="/myra-admin/login" replace /> }
+  { path: "*", element: <Navigate to="/" replace /> }
 ]);
