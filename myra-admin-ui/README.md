@@ -27,13 +27,13 @@ npm run dev
 The app defaults to:
 
 ```bash
-VITE_API_BASE_URL=http://localhost:8000
+VITE_API_BASE_URL=http://localhost:8000/api/v1
 VITE_TENANT_API_URL=http://localhost:8000/api/v1
 VITE_KNOWLEDGE_API_URL=http://localhost:8002/api/knowledge
 VITE_CHAT_API_URL=http://localhost:8003/api/chat
 VITE_LEAD_API_URL=http://localhost:8004/api/leads
 VITE_ANALYTICS_API_URL=http://localhost:8005/api/analytics
-VITE_ADMIN_API_URL=http://localhost:8006/api/admin
+VITE_ADMIN_API_URL=http://localhost:8010/api/v1/admin
 VITE_ADMIN_SECRET=local-dev-admin-secret
 ```
 
@@ -92,7 +92,7 @@ VITE_KNOWLEDGE_API_URL=https://YOUR-KNOWLEDGE-SERVICE/api/knowledge
 VITE_CHAT_API_URL=https://YOUR-CHAT-SERVICE/api/chat
 VITE_LEAD_API_URL=https://YOUR-LEAD-SERVICE/api/leads
 VITE_ANALYTICS_API_URL=https://YOUR-ANALYTICS-SERVICE/api/analytics
-VITE_ADMIN_API_URL=https://YOUR-ADMIN-SERVICE/api/admin
+VITE_ADMIN_API_URL=https://YOUR-ADMIN-SERVICE/api/v1/admin
 VITE_ADMIN_SECRET=your-admin-secret
 ```
 
