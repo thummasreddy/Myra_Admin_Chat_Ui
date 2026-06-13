@@ -1,6 +1,8 @@
 import { type ReactNode, useEffect } from "react";
 import { Navigate, createBrowserRouter, useLocation, useParams } from "react-router-dom";
 import { AdminLayout } from "@/components/layout/AdminLayout";
+import { LandingPage } from "@/features/public/pages/LandingPage";
+import { RegisterPage } from "@/features/public/pages/RegisterPage";
 import { useAuthStore } from "@/features/auth/auth.store";
 import { LoginPage } from "@/features/auth/pages/LoginPage";
 import { AnalyticsPage } from "@/features/analytics/pages/AnalyticsPage";
@@ -61,7 +63,9 @@ function RedirectTenantDetailAlias() {
 }
 
 export const router = createBrowserRouter([
-  { path: "/", element: <Navigate to="/dashboard" replace /> },
+  { path: "/", element: <LandingPage /> },
+  { path: "/pricing", element: <Navigate to="/#pricing" replace /> },
+  { path: "/register", element: <RegisterPage /> },
   { path: "/myra-admin", element: <Navigate to="/dashboard" replace /> },
   { path: "/myra-admin/dashboard", element: <Navigate to="/dashboard" replace /> },
   { path: "/myra-admin/approvals", element: <Navigate to="/approvals" replace /> },
@@ -89,5 +93,5 @@ export const router = createBrowserRouter([
       { path: "settings", element: <SettingsPage /> }
     ]
   },
-  { path: "*", element: <Navigate to="/myra-admin/login" replace /> }
+  { path: "*", element: <Navigate to="/" replace /> }
 ]);
