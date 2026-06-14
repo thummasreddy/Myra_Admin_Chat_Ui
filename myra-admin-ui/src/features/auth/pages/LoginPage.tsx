@@ -30,7 +30,7 @@ export function LoginPage() {
     resolver: zodResolver(loginSchema),
     defaultValues: {
       email: "admin@myra.ai",
-      password: "password123"
+      password: "Admin@2026!"
     }
   });
 

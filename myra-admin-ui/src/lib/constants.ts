@@ -1,12 +1,6 @@
 import { appConfig } from "@/lib/config";
 
-function myraApiUrl(baseUrl: string) {
-  const normalized = baseUrl.replace(/\/+$/, "");
-  if (normalized.endsWith("/api/myra")) return normalized;
-  return `${normalized}/api/myra`;
-}
-
-export const API_BASE_URL = myraApiUrl(appConfig.VITE_API_BASE_URL);
+export const API_BASE_URL = appConfig.VITE_API_BASE_URL.replace(/\/+$/, "") + "/myra-admin";
 
 export const TENANT_STATUSES = [
   "DRAFT",

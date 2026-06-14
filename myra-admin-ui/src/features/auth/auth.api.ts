@@ -4,6 +4,21 @@ import { isBackendUnavailable } from "@/lib/apiClient";
 import type { LoginRequest, LoginResponse } from "@/features/auth/auth.types";
 
 type BackendLoginResponse = {
+  success?: boolean;
+  data?: {
+    token?: string;
+    access_token?: string;
+    refresh_token?: string;
+    user?: {
+      id?: string;
+      email?: string;
+      full_name?: string;
+      role?: string;
+      user_type?: string;
+      is_active?: boolean;
+      status?: string;
+    };
+  };
   token?: string;
   access_token?: string;
   refresh_token?: string;
@@ -18,16 +33,11 @@ type BackendLoginResponse = {
   user?: LoginResponse["user"];
 };
 
-function myraApiUrl(baseUrl: string) {
-  const normalized = baseUrl.replace(/\/+$/, "");
-  if (normalized.endsWith("/api/myra")) return normalized;
-  return `${normalized}/api/myra`;
-}
-
 export async function login(payload: LoginRequest): Promise<LoginResponse> {
   try {
+    const baseUrl = appConfig.VITE_API_BASE_URL.replace(/\/+$/, "");
     const { data } = await axios.post<BackendLoginResponse>(
-      `${myraApiUrl(appConfig.VITE_API_BASE_URL)}/auth/admin/login`,
+      `${baseUrl}/auth/myra-admin/login`,
       payload,
       { withCredentials: true }
     );
@@ -43,27 +53,39 @@ export async function login(payload: LoginRequest): Promise<LoginResponse> {
   }
 }
 
-function normalizeLoginResponse(data: BackendLoginResponse, fallbackEmail: string): LoginResponse {
-  if (data.user && (data.token || data.access_token)) {
+function normalizeLoginResponse(raw: BackendLoginResponse, fallbackEmail: string): LoginResponse {
+  // Handle wrapped response { success, data: { access_token, user } }
+  const data = raw.success && raw.data ? raw.data : raw;
+
+  const token = (data as { access_token?: string; token?: string }).access_token
+    ?? (data as { token?: string }).token ?? "";
+  const refreshToken = (data as { refresh_token?: string }).refresh_token;
+
+  const user = (data as { user?: BackendLoginResponse["data"] extends { user?: infer U } ? U : never }).user
+    ?? (raw as { admin_user?: BackendLoginResponse["admin_user"] }).admin_user;
+
+  if (user) {
+    const role = (user.role === "MYRA_SUPPORT_ADMIN" ? "MYRA_SUPPORT_ADMIN" : "MYRA_SUPER_ADMIN") as LoginResponse["user"]["role"];
     return {
-      token: data.token ?? data.access_token ?? "",
-      refreshToken: data.refresh_token,
+      token,
+      refreshToken,
       user: {
-        ...data.user,
-        role: data.user.role === "MYRA_SUPPORT_ADMIN" ? "MYRA_SUPPORT_ADMIN" : "MYRA_SUPER_ADMIN"
+        id: user.id ?? user.email ?? fallbackEmail,
+        name: ("full_name" in user ? user.full_name : undefined) ?? ("name" in user ? (user as { name?: string }).name : undefined) ?? fallbackEmail,
+        email: user.email ?? fallbackEmail,
+        role
       }
     };
   }
 
-  const adminUser = data.admin_user ?? {};
   return {
-    token: data.token ?? data.access_token ?? "",
-    refreshToken: data.refresh_token,
+    token,
+    refreshToken,
     user: {
-      id: adminUser.id ?? adminUser.admin_user_id ?? adminUser.email ?? fallbackEmail,
-      name: adminUser.name ?? adminUser.full_name ?? adminUser.email ?? "Myra Admin",
-      email: adminUser.email ?? fallbackEmail,
-      role: adminUser.role === "MYRA_SUPPORT_ADMIN" ? "MYRA_SUPPORT_ADMIN" : "MYRA_SUPER_ADMIN"
+      id: fallbackEmail,
+      name: "Myra Admin",
+      email: fallbackEmail,
+      role: "MYRA_SUPER_ADMIN"
     }
   };
 }

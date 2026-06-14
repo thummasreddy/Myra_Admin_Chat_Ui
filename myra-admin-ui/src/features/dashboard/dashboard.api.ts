@@ -26,16 +26,10 @@ export type MyraAdminDashboard = {
   system_health: { service_name: string; status: SystemHealthStatus }[];
 };
 
-function myraApiUrl(baseUrl: string) {
-  const normalized = baseUrl.replace(/\/+$/, "");
-  if (normalized.endsWith("/api/myra")) return normalized;
-  return `${normalized}/api/myra`;
-}
-
-const dashboardClient = createApiClient(myraApiUrl(appConfig.VITE_API_BASE_URL));
+const dashboardClient = createApiClient(appConfig.VITE_API_BASE_URL.replace(/\/+$/, "") + "/myra-admin");
 
 export async function getMyraAdminDashboard(): Promise<MyraAdminDashboard> {
-  const { data } = await dashboardClient.get<MyraAdminDashboard>("/admin/dashboard");
+  const { data } = await dashboardClient.get<MyraAdminDashboard>("/platform-analytics");
   return normalizeDashboard(data);
 }
 
