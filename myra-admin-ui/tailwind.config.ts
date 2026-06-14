@@ -2,38 +2,38 @@ import type { Config } from "tailwindcss";
 import animate from "tailwindcss-animate";
 
 const config = {
-  darkMode: ["selector", '[data-theme="dark"]'],
+  darkMode: ["class"],
   content: ["./index.html", "./src/**/*.{ts,tsx}"],
   theme: {
     extend: {
       colors: {
-        brand: {
-          primary: "#1591DC",
-          primaryHover: "#0F75B8",
-          primarySoft: "#EAF5FF",
-          primaryBorder: "#B4D4FF",
-          accent: "#6A5CFF",
-          secondary: "#37353E",
-          secondaryHover: "#2B2932",
-          secondarySoft: "#F3F4F6",
-          background: "#080616",
-          surface: "#1E1B2E",
-          card: "#1E1B2E",
-          muted: "#252236",
-          sidebar: "#080616",
+        myra: {
+          primary: "#2563EB",
+          primaryHover: "#1D4ED8",
+          primarySoft: "#EFF6FF",
+          primaryBorder: "#93C5FD",
+          accent: "#7C3AED",
+          secondary: "#1E1B2E",
+          secondaryHover: "#16132A",
+          secondarySoft: "#F8FAFC",
+          background: "#0A0118",
+          surface: "#140F26",
+          card: "#1A1530",
+          muted: "#1E1840",
+          sidebar: "#0A0118",
           text: {
-            primary: "#080616",
-            secondary: "#4B5563",
-            muted: "#8A8F98",
-            inverse: "#FFFFFF"
+            primary: "#F8FAFC",
+            secondary: "#A1A1AA",
+            muted: "#6B7280",
+            inverse: "#0A0118"
           },
-          border: "#343044",
-          borderStrong: "#CBD5E1",
-          divider: "#E5E7EB",
-          success: "#22C55E",
-          warning: "#FBBF24",
-          error: "#F87171",
-          info: "#38BDF8"
+          border: "#2D2654",
+          borderStrong: "#4338CA",
+          divider: "#1E1840",
+          success: "#10B981",
+          warning: "#F59E0B",
+          error: "#EF4444",
+          info: "#3B82F6"
         },
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",

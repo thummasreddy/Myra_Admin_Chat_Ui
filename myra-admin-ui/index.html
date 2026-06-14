@@ -3,17 +3,24 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#1591DC" />
+    <meta name="theme-color" content="#2563EB" />
     <title>Myra Admin UI</title>
     <script>
       (function () {
-        var t = localStorage.getItem("myra-theme") || "dark";
-        document.documentElement.setAttribute("data-theme", t);
+        var theme = "dark";
+        try {
+          theme = localStorage.getItem("myra-theme") === "light" ? "light" : "dark";
+        } catch (error) {
+          theme = "dark";
+        }
+        document.documentElement.classList.toggle("dark", theme === "dark");
+        document.documentElement.setAttribute("data-theme", theme);
+        document.documentElement.style.colorScheme = theme;
       })();
     </script>
   </head>
-  <body>
-    <div id="root"></div>
+  <body class="min-h-screen bg-white text-slate-950 dark:bg-myra-background dark:text-myra-text-primary">
+    <div id="root" class="min-h-screen bg-white text-slate-950 dark:bg-myra-background dark:text-myra-text-primary"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

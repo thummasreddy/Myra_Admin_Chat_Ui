@@ -50,7 +50,7 @@ export function DashboardPage() {
 
   if (error || !dashboard) {
     return (
-      <div className="rounded-xl border border-[#1f2937] bg-[#1a2235] p-6 text-sm text-gray-400">
+      <div className="rounded-xl border border-slate-200 bg-white p-6 text-sm text-slate-600 dark:border-myra-border dark:bg-myra-card dark:text-myra-text-secondary">
         Failed to load dashboard data. Please refresh.
       </div>
     );
@@ -67,12 +67,12 @@ function DashboardContent({ dashboard }: { dashboard: MyraAdminDashboard }) {
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-normal text-white">Admin Dashboard</h1>
-          <p className="mt-2 max-w-3xl text-sm leading-6 text-gray-400">
+          <h1 className="text-3xl font-bold tracking-normal text-slate-950 dark:text-myra-text-primary">Admin Dashboard</h1>
+          <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600 dark:text-myra-text-secondary">
             Platform control center for tenant approvals, usage health, revenue signals, leads, and knowledge processing.
           </p>
         </div>
-        <Button asChild className="bg-[#3b82f6] hover:bg-[#2563eb]">
+        <Button asChild>
           <Link to="/approvals">
             <ShieldCheck className="h-4 w-4" />
             Review Queue
@@ -99,14 +99,14 @@ function DashboardContent({ dashboard }: { dashboard: MyraAdminDashboard }) {
           {dashboard.pending_businesses.length ? (
             <div className="space-y-3">
               {dashboard.pending_businesses.map((tenant) => (
-                <article key={tenant.id} className="rounded-lg border border-[#1f2937] bg-[#111827] p-4">
+                <article key={tenant.id} className="rounded-lg border border-slate-200 bg-slate-50 p-4 dark:border-myra-border dark:bg-myra-surface">
                   <div className="flex items-start justify-between gap-3">
                     <div>
-                      <p className="font-semibold text-white">{tenant.business_name}</p>
-                      <p className="mt-1 text-sm text-gray-400">{tenant.category}</p>
-                      <p className="mt-2 text-xs text-gray-400">{formatDate(tenant.registration_date)}</p>
+                      <p className="font-semibold text-slate-950 dark:text-myra-text-primary">{tenant.business_name}</p>
+                      <p className="mt-1 text-sm text-slate-600 dark:text-myra-text-secondary">{tenant.category}</p>
+                      <p className="mt-2 text-xs text-slate-500 dark:text-myra-text-muted">{formatDate(tenant.registration_date)}</p>
                     </div>
-                    <Button asChild size="sm" className="bg-[#3b82f6] hover:bg-[#2563eb]">
+                    <Button asChild size="sm">
                       <Link to="/approvals">Review</Link>
                     </Button>
                   </div>
@@ -114,7 +114,7 @@ function DashboardContent({ dashboard }: { dashboard: MyraAdminDashboard }) {
               ))}
             </div>
           ) : (
-            <p className="py-10 text-center text-sm text-gray-400">No businesses are waiting for approval.</p>
+            <p className="py-10 text-center text-sm text-slate-500 dark:text-myra-text-secondary">No businesses are waiting for approval.</p>
           )}
         </SectionCard>
 
@@ -124,15 +124,15 @@ function DashboardContent({ dashboard }: { dashboard: MyraAdminDashboard }) {
               {dashboard.plan_distribution.map((plan) => (
                 <div key={plan.plan_name}>
                   <div className="mb-2 flex items-center justify-between gap-3 text-sm">
-                    <span className="font-medium text-white">{plan.plan_name}</span>
-                    <span className="text-gray-400">{plan.count.toLocaleString()}</span>
+                    <span className="font-medium text-slate-950 dark:text-myra-text-primary">{plan.plan_name}</span>
+                    <span className="text-slate-500 dark:text-myra-text-secondary">{plan.count.toLocaleString()}</span>
                   </div>
                   <ProgressBar value={plan.count} max={maxPlanCount} color="blue" />
                 </div>
               ))}
             </div>
           ) : (
-            <p className="py-10 text-center text-sm text-gray-400">No plan data available.</p>
+            <p className="py-10 text-center text-sm text-slate-500 dark:text-myra-text-secondary">No plan data available.</p>
           )}
         </SectionCard>
 
@@ -140,17 +140,17 @@ function DashboardContent({ dashboard }: { dashboard: MyraAdminDashboard }) {
           {dashboard.recent_tenants.length ? (
             <div className="space-y-3">
               {dashboard.recent_tenants.map((tenant) => (
-                <div key={tenant.id} className="flex items-center justify-between gap-3 rounded-lg border border-[#1f2937] bg-[#111827] p-3">
+                <div key={tenant.id} className="flex items-center justify-between gap-3 rounded-lg border border-slate-200 bg-slate-50 p-3 dark:border-myra-border dark:bg-myra-surface">
                   <div className="min-w-0">
-                    <p className="truncate font-semibold text-white">{tenant.tenant_name}</p>
-                    <p className="mt-1 truncate text-sm text-gray-400">{tenant.category}</p>
+                    <p className="truncate font-semibold text-slate-950 dark:text-myra-text-primary">{tenant.tenant_name}</p>
+                    <p className="mt-1 truncate text-sm text-slate-600 dark:text-myra-text-secondary">{tenant.category}</p>
                   </div>
                   <StatusBadge status={tenant.status as DashboardStatus} />
                 </div>
               ))}
             </div>
           ) : (
-            <p className="py-10 text-center text-sm text-gray-400">No tenants registered yet.</p>
+            <p className="py-10 text-center text-sm text-slate-500 dark:text-myra-text-secondary">No tenants registered yet.</p>
           )}
         </SectionCard>
       </section>
@@ -162,15 +162,15 @@ function DashboardContent({ dashboard }: { dashboard: MyraAdminDashboard }) {
               {dashboard.platform_usage.map((tenant) => (
                 <div key={tenant.tenant_name}>
                   <div className="mb-2 flex items-center justify-between gap-3 text-sm">
-                    <span className="font-medium text-white">{tenant.tenant_name}</span>
-                    <span className="text-gray-400">{tenant.conversation_count.toLocaleString()}</span>
+                    <span className="font-medium text-slate-950 dark:text-myra-text-primary">{tenant.tenant_name}</span>
+                    <span className="text-slate-500 dark:text-myra-text-secondary">{tenant.conversation_count.toLocaleString()}</span>
                   </div>
                   <ProgressBar value={tenant.conversation_count} max={maxConversations} color="green" />
                 </div>
               ))}
             </div>
           ) : (
-            <p className="py-10 text-center text-sm text-gray-400">No usage data available.</p>
+            <p className="py-10 text-center text-sm text-slate-500 dark:text-myra-text-secondary">No usage data available.</p>
           )}
         </SectionCard>
 
@@ -178,14 +178,14 @@ function DashboardContent({ dashboard }: { dashboard: MyraAdminDashboard }) {
           {dashboard.system_health.length ? (
             <div className="space-y-3">
               {dashboard.system_health.map((service) => (
-                <div key={service.service_name} className="flex items-center justify-between gap-3 rounded-lg border border-[#1f2937] bg-[#111827] p-3">
-                  <p className="font-medium text-white">{service.service_name}</p>
+                <div key={service.service_name} className="flex items-center justify-between gap-3 rounded-lg border border-slate-200 bg-slate-50 p-3 dark:border-myra-border dark:bg-myra-surface">
+                  <p className="font-medium text-slate-950 dark:text-myra-text-primary">{service.service_name}</p>
                   <StatusBadge status={service.status as SystemHealthStatus} />
                 </div>
               ))}
             </div>
           ) : (
-            <p className="py-10 text-center text-sm text-gray-400">Health data unavailable.</p>
+            <p className="py-10 text-center text-sm text-slate-500 dark:text-myra-text-secondary">Health data unavailable.</p>
           )}
         </SectionCard>
       </section>
@@ -206,7 +206,7 @@ function DashboardLoading() {
 
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {Array.from({ length: 8 }).map((_, index) => (
-          <div key={index} className="rounded-xl border border-[#1f2937] bg-[#1a2235] p-5">
+          <div key={index} className="rounded-xl border border-slate-200 bg-white p-5 dark:border-myra-border dark:bg-myra-card">
             <div className="flex items-center justify-between">
               <SkeletonBlock className="h-4 w-28" />
               <SkeletonBlock className="h-5 w-5 rounded-md" />
@@ -233,7 +233,7 @@ function DashboardLoading() {
 
 function SectionSkeleton() {
   return (
-    <div className="rounded-xl border border-[#1f2937] bg-[#1a2235] p-5">
+    <div className="rounded-xl border border-slate-200 bg-white p-5 dark:border-myra-border dark:bg-myra-card">
       <SkeletonBlock className="h-6 w-48" />
       <div className="mt-5 space-y-3">
         {Array.from({ length: 4 }).map((_, index) => (
@@ -245,5 +245,5 @@ function SectionSkeleton() {
 }
 
 function SkeletonBlock({ className }: { className: string }) {
-  return <div className={`animate-pulse rounded-md bg-gray-700/70 ${className}`} />;
+  return <div className={`animate-pulse rounded-md bg-slate-200 dark:bg-myra-muted ${className}`} />;
 }

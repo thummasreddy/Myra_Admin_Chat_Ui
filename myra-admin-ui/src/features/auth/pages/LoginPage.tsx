@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label";
 import { toast } from "@/components/ui/toast";
 import { login } from "@/features/auth/auth.api";
 import { useAuthStore } from "@/features/auth/auth.store";
+import { ThemeToggle } from "@/shared/theme/ThemeToggle";
 
 const loginSchema = z.object({
   email: z.string().email("Enter a valid email"),
@@ -61,8 +62,11 @@ export function LoginPage() {
   if (token) return <Navigate to="/dashboard" replace />;
 
   return (
-    <main className="grid min-h-screen bg-[var(--color-bg-main)] lg:grid-cols-[1.05fr_0.95fr]">
-      <section className="hidden bg-primary px-10 py-12 text-white lg:flex lg:flex-col lg:justify-between">
+    <main className="relative grid min-h-screen bg-slate-50 text-slate-950 dark:bg-myra-background dark:text-myra-text-primary lg:grid-cols-[1.05fr_0.95fr]">
+      <div className="absolute right-4 top-4 z-10">
+        <ThemeToggle />
+      </div>
+      <section className="hidden bg-gradient-to-br from-myra-background via-myra-surface to-myra-card px-10 py-12 text-white lg:flex lg:flex-col lg:justify-between">
         <div className="flex items-center gap-3">
           <div className="flex h-11 w-11 items-center justify-center rounded-md bg-white/15">
             <Bot className="h-6 w-6" />
@@ -85,7 +89,7 @@ export function LoginPage() {
       <section className="flex items-center justify-center p-4">
         <Card className="w-full max-w-md">
           <CardHeader>
-            <div className="mb-2 flex h-11 w-11 items-center justify-center rounded-md bg-primary text-white lg:hidden">
+            <div className="mb-2 flex h-11 w-11 items-center justify-center rounded-md bg-myra-primary text-white lg:hidden">
               <Bot className="h-6 w-6" />
             </div>
             <CardTitle>Myra Admin Login</CardTitle>

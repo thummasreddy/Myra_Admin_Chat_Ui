@@ -3,6 +3,7 @@ import type { PropsWithChildren } from "react";
 import { Toaster } from "@/components/ui/toast";
 import { I18nProvider } from "@/i18n";
 import { appConfig } from "@/lib/config";
+import { ThemeProvider } from "@/shared/theme/ThemeProvider";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -16,11 +17,13 @@ const queryClient = new QueryClient({
 
 export function AppProviders({ children }: PropsWithChildren) {
   return (
-    <QueryClientProvider client={queryClient}>
-      <I18nProvider>
-        {children}
-        <Toaster />
-      </I18nProvider>
-    </QueryClientProvider>
+    <ThemeProvider>
+      <QueryClientProvider client={queryClient}>
+        <I18nProvider>
+          {children}
+          <Toaster />
+        </I18nProvider>
+      </QueryClientProvider>
+    </ThemeProvider>
   );
 }

@@ -43,13 +43,13 @@ export function Sidebar({ open, onClose }: { open: boolean; onClose: () => void 
       />
       <aside
         className={cn(
-          "fixed bottom-0 left-0 top-14 z-40 flex w-[240px] flex-col border-r border-[#1f2937] bg-[#111827] transition-transform lg:translate-x-0",
+          "admin-sidebar fixed bottom-0 left-0 top-14 z-40 flex w-[240px] flex-col border-r border-slate-200 bg-white text-slate-900 transition-transform dark:border-myra-border dark:bg-myra-sidebar dark:text-myra-text-primary lg:translate-x-0",
           open ? "translate-x-0" : "-translate-x-full"
         )}
       >
-        <div className="flex h-12 items-center justify-between border-b border-[#1f2937] px-3 lg:hidden">
-          <p className="text-sm font-semibold text-white">Navigation</p>
-          <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-300 hover:bg-[#1e3a5f] hover:text-white" onClick={onClose} aria-label="Close navigation">
+        <div className="flex h-12 items-center justify-between border-b border-border px-3 lg:hidden">
+          <p className="text-sm font-semibold text-foreground">Navigation</p>
+          <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:bg-muted hover:text-foreground" onClick={onClose} aria-label="Close navigation">
             <X className="h-4 w-4" />
           </Button>
         </div>
@@ -64,8 +64,8 @@ export function Sidebar({ open, onClose }: { open: boolean; onClose: () => void 
                 cn(
                   "flex items-center gap-3 rounded-md border-l-[3px] px-3 py-2.5 text-sm font-medium transition-colors",
                   isActive
-                    ? "border-[#3b82f6] bg-[#1e3a5f] text-white"
-                    : "border-transparent bg-transparent text-[#9ca3af] hover:bg-white/[0.05] hover:text-white"
+                    ? "border-myra-primary bg-myra-primarySoft text-myra-primary dark:bg-myra-muted dark:text-myra-primaryBorder"
+                    : "border-transparent bg-transparent text-muted-foreground hover:bg-muted hover:text-foreground"
                 )
               }
             >

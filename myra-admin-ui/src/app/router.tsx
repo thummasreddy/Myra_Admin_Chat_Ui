@@ -1,6 +1,7 @@
-import { type ReactNode, useEffect } from "react";
 import { Navigate, createBrowserRouter, useLocation, useParams } from "react-router-dom";
 import { AdminLayout } from "@/components/layout/AdminLayout";
+import { LandingPage } from "@/features/public/pages/LandingPage";
+import { RegisterPage } from "@/features/public/pages/RegisterPage";
 import { useAuthStore } from "@/features/auth/auth.store";
 import { LoginPage } from "@/features/auth/pages/LoginPage";
 import { AnalyticsPage } from "@/features/analytics/pages/AnalyticsPage";
@@ -20,24 +21,6 @@ import {
   TenantReviewPage
 } from "@/features/admin/pages/MyraAdminOperationsPages";
 import { isMyraAdmin } from "@/features/admin/admin.permissions";
-
-function ThemeRoute({ theme, children, useStoredTheme }: { theme: "light" | "dark"; children: ReactNode; useStoredTheme?: boolean }) {
-  useEffect(() => {
-    const storedTheme = useStoredTheme ? localStorage.getItem("myra-theme") : null;
-    const nextTheme = storedTheme === "dark" || storedTheme === "light" ? storedTheme : theme;
-    document.documentElement.setAttribute("data-theme", nextTheme);
-  }, [theme, useStoredTheme]);
-
-  return <>{children}</>;
-}
-
-function withTheme(theme: "light" | "dark", element: ReactNode, useStoredTheme = false) {
-  return (
-    <ThemeRoute theme={theme} useStoredTheme={useStoredTheme}>
-      {element}
-    </ThemeRoute>
-  );
-}
 
 function ProtectedAdminRoutes() {
   const token = useAuthStore((state) => state.token);
@@ -61,7 +44,10 @@ function RedirectTenantDetailAlias() {
 }
 
 export const router = createBrowserRouter([
-  { path: "/", element: <Navigate to="/dashboard" replace /> },
+  { path: "/", element: <LandingPage /> },
+  { path: "/pricing", element: <Navigate to="/#pricing" replace /> },
+  { path: "/register", element: <RegisterPage /> },
+  { path: "/login", element: <LoginPage /> },
   { path: "/myra-admin", element: <Navigate to="/dashboard" replace /> },
   { path: "/myra-admin/dashboard", element: <Navigate to="/dashboard" replace /> },
   { path: "/myra-admin/approvals", element: <Navigate to="/approvals" replace /> },
@@ -69,7 +55,7 @@ export const router = createBrowserRouter([
   { path: "/myra-admin/tenants/:tenantId", element: <RedirectTenantDetailAlias /> },
   { path: "/myra-admin/analytics", element: <Navigate to="/analytics" replace /> },
   { path: "/myra-admin/settings", element: <Navigate to="/settings" replace /> },
-  { path: "/myra-admin/login", element: withTheme("dark", <LoginPage />, true) },
+  { path: "/myra-admin/login", element: <LoginPage /> },
   {
     element: <ProtectedAdminRoutes />,
     children: [

@@ -9,7 +9,7 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          "border border-transparent bg-[#1591DC] text-white shadow-[0_12px_28px_rgba(21,145,220,0.24)] hover:-translate-y-0.5 hover:shadow-[0_16px_36px_rgba(21,145,220,0.28)]",
+          "border border-transparent bg-myra-primary text-white shadow-[0_12px_28px_rgba(37,99,235,0.24)] hover:-translate-y-0.5 hover:bg-myra-primaryHover hover:shadow-[0_16px_36px_rgba(37,99,235,0.28)]",
         destructive: "bg-destructive text-destructive-foreground hover:bg-destructive/90 focus-visible:ring-destructive",
         outline: "border border-input bg-card text-card-foreground hover:border-secondary/50 hover:bg-muted",
         secondary: "border border-input bg-card text-card-foreground hover:border-secondary/50 hover:bg-muted",

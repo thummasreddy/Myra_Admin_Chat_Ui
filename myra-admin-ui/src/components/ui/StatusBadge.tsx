@@ -3,12 +3,12 @@ import { cn } from "@/lib/utils";
 export type DashboardStatus = "ACTIVE" | "INACTIVE" | "PENDING_APPROVAL" | "SUSPENDED" | "DEGRADED" | "DOWN";
 
 const badgeStyles: Record<DashboardStatus, string> = {
-  ACTIVE: "bg-[#166534] text-[#4ade80]",
-  INACTIVE: "bg-[#374151] text-[#9ca3af]",
-  PENDING_APPROVAL: "bg-[#78350f] text-[#fbbf24]",
-  SUSPENDED: "bg-red-950/80 text-red-300",
-  DEGRADED: "bg-[#78350f] text-[#fbbf24]",
-  DOWN: "bg-red-950/80 text-red-300"
+  ACTIVE: "bg-emerald-50 text-myra-success dark:bg-myra-success/15",
+  INACTIVE: "bg-slate-100 text-slate-500 dark:bg-myra-muted dark:text-myra-text-secondary",
+  PENDING_APPROVAL: "bg-amber-50 text-amber-700 dark:bg-myra-warning/15 dark:text-myra-warning",
+  SUSPENDED: "bg-red-50 text-myra-error dark:bg-myra-error/15",
+  DEGRADED: "bg-amber-50 text-amber-700 dark:bg-myra-warning/15 dark:text-myra-warning",
+  DOWN: "bg-red-50 text-myra-error dark:bg-myra-error/15"
 };
 
 const labels: Record<DashboardStatus, string> = {

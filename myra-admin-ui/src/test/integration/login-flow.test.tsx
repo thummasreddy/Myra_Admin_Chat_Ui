@@ -4,6 +4,7 @@ import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { describe, expect, it, vi } from "vitest";
 import { LoginPage } from "@/features/auth/pages/LoginPage";
+import { ThemeProvider } from "@/shared/theme/ThemeProvider";
 import { useAuthStore } from "@/features/auth/auth.store";
 
 vi.mock("@/features/auth/auth.api", () => ({
@@ -24,7 +25,14 @@ function renderLoginFlow() {
     <QueryClientProvider client={queryClient}>
       <MemoryRouter initialEntries={["/login"]}>
         <Routes>
-          <Route path="/login" element={<LoginPage />} />
+          <Route
+            path="/login"
+            element={
+              <ThemeProvider>
+                <LoginPage />
+              </ThemeProvider>
+            }
+          />
           <Route path="/dashboard" element={<div>Dashboard ready</div>} />
         </Routes>
       </MemoryRouter>
