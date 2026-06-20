@@ -72,7 +72,7 @@ function DashboardContent({ dashboard }: { dashboard: MyraAdminDashboard }) {
             Platform control center for tenant approvals, usage health, revenue signals, leads, and knowledge processing.
           </p>
         </div>
-        <Button asChild className="bg-[#3b82f6] hover:bg-[#2563eb]">
+        <Button asChild className="bg-[#001B5A] hover:bg-[#234D9A]">
           <Link to="/approvals">
             <ShieldCheck className="h-4 w-4" />
             Review Queue
@@ -106,7 +106,7 @@ function DashboardContent({ dashboard }: { dashboard: MyraAdminDashboard }) {
                       <p className="mt-1 text-sm text-gray-400">{tenant.category}</p>
                       <p className="mt-2 text-xs text-gray-400">{formatDate(tenant.registration_date)}</p>
                     </div>
-                    <Button asChild size="sm" className="bg-[#3b82f6] hover:bg-[#2563eb]">
+                    <Button asChild size="sm" className="bg-[#001B5A] hover:bg-[#234D9A]">
                       <Link to="/approvals">Review</Link>
                     </Button>
                   </div>

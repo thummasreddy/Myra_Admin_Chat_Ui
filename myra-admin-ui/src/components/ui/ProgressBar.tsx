@@ -5,7 +5,7 @@ export function ProgressBar({ value, max, color }: { value: number; max: number;
 
   return (
     <div className="h-2 overflow-hidden rounded-full bg-[#0d1117]" aria-hidden="true">
-      <div className={cn("h-full rounded-full", color === "blue" ? "bg-[#3b82f6]" : "bg-[#22c55e]")} style={{ width: `${width}%` }} />
+      <div className={cn("h-full rounded-full", color === "blue" ? "bg-[#001B5A]" : "bg-[#22c55e]")} style={{ width: `${width}%` }} />
     </div>
   );
 }

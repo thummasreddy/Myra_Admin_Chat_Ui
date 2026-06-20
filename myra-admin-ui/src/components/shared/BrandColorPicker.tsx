@@ -15,7 +15,7 @@ const colorGrid = [
   ["#A5F3FC", "#BFDBFE", "#C4B5FD", "#E9D5FF", "#FBCFE8", "#FEE2E2", "#FFEDD5", "#FEF3C7", "#FEF9C3", "#D9F99D"]
 ];
 
-const presetColors = ["#1591DC", "#111827", "#2563EB", "#22C55E", "#FACC15", "#EF4444", "#6B7280"];
+const presetColors = ["#001B5A", "#234D9A", "#C89A4B", "#D8B06A", "#22C55E", "#EF4444", "#6B7280"];
 
 type ColorPickerTab = "grid" | "spectrum" | "sliders";
 

@@ -64,7 +64,7 @@ export function Sidebar({ open, onClose }: { open: boolean; onClose: () => void 
                 cn(
                   "flex items-center gap-3 rounded-md border-l-[3px] px-3 py-2.5 text-sm font-medium transition-colors",
                   isActive
-                    ? "border-[#3b82f6] bg-[#1e3a5f] text-white"
+                    ? "border-[#C89A4B] bg-[#0A2A6B] text-white"
                     : "border-transparent bg-transparent text-[#9ca3af] hover:bg-white/[0.05] hover:text-white"
                 )
               }

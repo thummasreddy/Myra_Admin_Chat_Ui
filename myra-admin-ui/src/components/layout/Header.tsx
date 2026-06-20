@@ -56,7 +56,7 @@ export function Header({ onMenuClick }: { onMenuClick: () => void }) {
         </Button>
 
         <div className="flex min-w-[180px] items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-md bg-[#3b82f6] text-white shadow-sm shadow-blue-500/20">
+          <div className="flex h-9 w-9 items-center justify-center rounded-md bg-[#001B5A] text-white shadow-sm shadow-[rgba(0,27,90,0.2)]">
             <Grid3X3 className="h-4 w-4" aria-hidden="true" />
           </div>
           <div className="leading-tight">
@@ -85,7 +85,7 @@ export function Header({ onMenuClick }: { onMenuClick: () => void }) {
           </Button>
 
           <select
-            className="hidden h-9 rounded-md border border-[#1f2937] bg-[#0d1117] px-3 text-sm text-gray-200 outline-none focus:border-[#3b82f6] lg:block"
+            className="hidden h-9 rounded-md border border-[#1f2937] bg-[#0d1117] px-3 text-sm text-gray-200 outline-none focus:border-[#C89A4B] lg:block"
             defaultValue="all"
             aria-label="Tenant filter"
           >
@@ -107,7 +107,7 @@ export function Header({ onMenuClick }: { onMenuClick: () => void }) {
           <ThemeToggle />
 
           <div className="hidden items-center gap-3 sm:flex">
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#3b82f6] text-xs font-bold text-white">MA</div>
+            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#001B5A] text-xs font-bold text-white">MA</div>
             <div className="hidden leading-tight xl:block">
               <p className="text-sm font-semibold text-white">Myra Admin</p>
               <p className="text-xs text-gray-400">ADMIN</p>
