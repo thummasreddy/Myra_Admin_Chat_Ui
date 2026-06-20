@@ -50,7 +50,7 @@ export function DashboardPage() {
 
   if (error || !dashboard) {
     return (
-      <div className="rounded-xl border border-[#1f2937] bg-[#1a2235] p-6 text-sm text-gray-400">
+      <div className="rounded-xl border border-[#0A2A6B] bg-[#001B5A] p-6 text-sm text-gray-400">
         Failed to load dashboard data. Please refresh.
       </div>
     );
@@ -99,7 +99,7 @@ function DashboardContent({ dashboard }: { dashboard: MyraAdminDashboard }) {
           {dashboard.pending_businesses.length ? (
             <div className="space-y-3">
               {dashboard.pending_businesses.map((tenant) => (
-                <article key={tenant.id} className="rounded-lg border border-[#1f2937] bg-[#111827] p-4">
+                <article key={tenant.id} className="rounded-lg border border-[#0A2A6B] bg-[#001235] p-4">
                   <div className="flex items-start justify-between gap-3">
                     <div>
                       <p className="font-semibold text-white">{tenant.business_name}</p>
@@ -140,7 +140,7 @@ function DashboardContent({ dashboard }: { dashboard: MyraAdminDashboard }) {
           {dashboard.recent_tenants.length ? (
             <div className="space-y-3">
               {dashboard.recent_tenants.map((tenant) => (
-                <div key={tenant.id} className="flex items-center justify-between gap-3 rounded-lg border border-[#1f2937] bg-[#111827] p-3">
+                <div key={tenant.id} className="flex items-center justify-between gap-3 rounded-lg border border-[#0A2A6B] bg-[#001235] p-3">
                   <div className="min-w-0">
                     <p className="truncate font-semibold text-white">{tenant.tenant_name}</p>
                     <p className="mt-1 truncate text-sm text-gray-400">{tenant.category}</p>
@@ -178,7 +178,7 @@ function DashboardContent({ dashboard }: { dashboard: MyraAdminDashboard }) {
           {dashboard.system_health.length ? (
             <div className="space-y-3">
               {dashboard.system_health.map((service) => (
-                <div key={service.service_name} className="flex items-center justify-between gap-3 rounded-lg border border-[#1f2937] bg-[#111827] p-3">
+                <div key={service.service_name} className="flex items-center justify-between gap-3 rounded-lg border border-[#0A2A6B] bg-[#001235] p-3">
                   <p className="font-medium text-white">{service.service_name}</p>
                   <StatusBadge status={service.status as SystemHealthStatus} />
                 </div>
@@ -206,7 +206,7 @@ function DashboardLoading() {
 
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {Array.from({ length: 8 }).map((_, index) => (
-          <div key={index} className="rounded-xl border border-[#1f2937] bg-[#1a2235] p-5">
+          <div key={index} className="rounded-xl border border-[#0A2A6B] bg-[#001B5A] p-5">
             <div className="flex items-center justify-between">
               <SkeletonBlock className="h-4 w-28" />
               <SkeletonBlock className="h-5 w-5 rounded-md" />
@@ -233,7 +233,7 @@ function DashboardLoading() {
 
 function SectionSkeleton() {
   return (
-    <div className="rounded-xl border border-[#1f2937] bg-[#1a2235] p-5">
+    <div className="rounded-xl border border-[#0A2A6B] bg-[#001B5A] p-5">
       <SkeletonBlock className="h-6 w-48" />
       <div className="mt-5 space-y-3">
         {Array.from({ length: 4 }).map((_, index) => (

@@ -23,7 +23,7 @@ function ThemeToggle() {
     <Button
       variant="ghost"
       size="icon"
-      className="h-9 w-9 border border-[#1f2937] bg-[#0d1117] text-gray-300 shadow-none hover:bg-[#1e3a5f] hover:text-white"
+      className="h-9 w-9 border border-[#0A2A6B] bg-[#00102E] text-gray-300 shadow-none hover:bg-[#0A2A6B] hover:text-white"
       onClick={() => setTheme((currentTheme) => (currentTheme === "dark" ? "light" : "dark"))}
       aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
       type="button"
@@ -43,12 +43,12 @@ export function Header({ onMenuClick }: { onMenuClick: () => void }) {
   }
 
   return (
-    <header className="fixed inset-x-0 top-0 z-50 h-14 border-b border-[#1f2937] bg-[#111827] text-white">
+    <header className="fixed inset-x-0 top-0 z-50 h-14 border-b border-[#0A2A6B] bg-[#001235] text-white">
       <div className="flex h-full items-center gap-3 px-3 sm:px-4">
         <Button
           variant="ghost"
           size="icon"
-          className="h-9 w-9 border border-[#1f2937] bg-[#0d1117] text-gray-300 shadow-none hover:bg-[#1e3a5f] hover:text-white lg:hidden"
+          className="h-9 w-9 border border-[#0A2A6B] bg-[#00102E] text-gray-300 shadow-none hover:bg-[#0A2A6B] hover:text-white lg:hidden"
           onClick={onMenuClick}
           aria-label="Open navigation"
         >
@@ -65,7 +65,7 @@ export function Header({ onMenuClick }: { onMenuClick: () => void }) {
           </div>
         </div>
 
-        <div className="mx-auto hidden w-full max-w-[500px] items-center gap-2 rounded-md border border-[#1f2937] bg-[#0d1117] px-3 md:flex">
+        <div className="mx-auto hidden w-full max-w-[500px] items-center gap-2 rounded-md border border-[#0A2A6B] bg-[#00102E] px-3 md:flex">
           <Search className="h-4 w-4 text-gray-400" aria-hidden="true" />
           <input
             className="h-9 min-w-0 flex-1 bg-transparent text-sm text-white outline-none placeholder:text-gray-500"
@@ -78,14 +78,14 @@ export function Header({ onMenuClick }: { onMenuClick: () => void }) {
           <Button
             variant="outline"
             size="sm"
-            className="hidden h-9 border-[#1f2937] bg-[#111827] text-gray-200 shadow-none hover:bg-[#1e3a5f] hover:text-white xl:inline-flex"
+            className="hidden h-9 border-[#0A2A6B] bg-[#001235] text-gray-200 shadow-none hover:bg-[#0A2A6B] hover:text-white xl:inline-flex"
           >
             <Cpu className="h-4 w-4" />
             AI Ops
           </Button>
 
           <select
-            className="hidden h-9 rounded-md border border-[#1f2937] bg-[#0d1117] px-3 text-sm text-gray-200 outline-none focus:border-[#C89A4B] lg:block"
+            className="hidden h-9 rounded-md border border-[#0A2A6B] bg-[#00102E] px-3 text-sm text-gray-200 outline-none focus:border-[#C89A4B] lg:block"
             defaultValue="all"
             aria-label="Tenant filter"
           >
@@ -98,7 +98,7 @@ export function Header({ onMenuClick }: { onMenuClick: () => void }) {
           <Button
             variant="ghost"
             size="icon"
-            className="h-9 w-9 border border-[#1f2937] bg-[#0d1117] text-gray-300 shadow-none hover:bg-[#1e3a5f] hover:text-white"
+            className="h-9 w-9 border border-[#0A2A6B] bg-[#00102E] text-gray-300 shadow-none hover:bg-[#0A2A6B] hover:text-white"
             aria-label="Notifications"
           >
             <Bell className="h-4 w-4" />
@@ -117,7 +117,7 @@ export function Header({ onMenuClick }: { onMenuClick: () => void }) {
           <Button
             variant="ghost"
             size="icon"
-            className="h-9 w-9 border border-[#1f2937] bg-[#0d1117] text-gray-300 shadow-none hover:bg-red-950/50 hover:text-red-300"
+            className="h-9 w-9 border border-[#0A2A6B] bg-[#00102E] text-gray-300 shadow-none hover:bg-red-950/50 hover:text-red-300"
             onClick={handleLogout}
             aria-label="Log out"
           >

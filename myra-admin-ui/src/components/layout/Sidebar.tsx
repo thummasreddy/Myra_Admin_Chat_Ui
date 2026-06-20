@@ -43,13 +43,13 @@ export function Sidebar({ open, onClose }: { open: boolean; onClose: () => void 
       />
       <aside
         className={cn(
-          "fixed bottom-0 left-0 top-14 z-40 flex w-[240px] flex-col border-r border-[#1f2937] bg-[#111827] transition-transform lg:translate-x-0",
+          "fixed bottom-0 left-0 top-14 z-40 flex w-[240px] flex-col border-r border-[#0A2A6B] bg-[#001235] transition-transform lg:translate-x-0",
           open ? "translate-x-0" : "-translate-x-full"
         )}
       >
-        <div className="flex h-12 items-center justify-between border-b border-[#1f2937] px-3 lg:hidden">
+        <div className="flex h-12 items-center justify-between border-b border-[#0A2A6B] px-3 lg:hidden">
           <p className="text-sm font-semibold text-white">Navigation</p>
-          <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-300 hover:bg-[#1e3a5f] hover:text-white" onClick={onClose} aria-label="Close navigation">
+          <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-300 hover:bg-[#0A2A6B] hover:text-white" onClick={onClose} aria-label="Close navigation">
             <X className="h-4 w-4" />
           </Button>
         </div>
