@@ -42,7 +42,7 @@ export function SettingsPage() {
             <div className="grid gap-3 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label>Default brand color</Label>
-                <Input defaultValue="#1591DC" />
+                <Input defaultValue="#001B5A" />
               </div>
               <div className="space-y-2">
                 <Label>Default widget position</Label>
