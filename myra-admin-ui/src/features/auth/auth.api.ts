@@ -1,6 +1,5 @@
 import axios from "axios";
 import { appConfig } from "@/lib/config";
-import { isBackendUnavailable } from "@/lib/apiClient";
 import type { LoginRequest, LoginResponse } from "@/features/auth/auth.types";
 
 type BackendLoginResponse = {
@@ -25,10 +24,6 @@ function apiV1Url(baseUrl: string) {
   return `${normalized}/api/v1`;
 }
 
-function fallbackRole(email?: string): LoginResponse["user"]["role"] {
-  return email?.toLowerCase().includes("support") ? "MYRA_SUPPORT_ADMIN" : "MYRA_SUPER_ADMIN";
-}
-
 export async function login(payload: LoginRequest): Promise<LoginResponse> {
   try {
     const { data } = await axios.post<BackendLoginResponse>(
@@ -42,18 +37,7 @@ export async function login(payload: LoginRequest): Promise<LoginResponse> {
       throw new Error("You do not have permission to access this.");
     }
 
-    if (!isBackendUnavailable(error)) throw error;
-
-    const role = fallbackRole(payload.email);
-    return {
-      token: `demo-myra-admin-token-${Date.now()}`,
-      user: {
-        id: role === "MYRA_SUPPORT_ADMIN" ? "support-demo" : "super-admin-demo",
-        name: role === "MYRA_SUPPORT_ADMIN" ? "Myra Support" : "Myra Super Admin",
-        email: payload.email,
-        role
-      }
-    };
+    throw error;
   }
 }
 

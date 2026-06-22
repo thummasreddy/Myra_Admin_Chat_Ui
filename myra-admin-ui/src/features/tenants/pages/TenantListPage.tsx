@@ -1,5 +1,5 @@
 import { Eye, Flag, Lock, PauseCircle, RotateCcw, ShieldCheck, XCircle } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,73 +10,103 @@ import { DataTable, type DataTableColumn } from "@/components/shared/DataTable";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import {
-  platformTenants,
-  type PlatformTenant,
-  type PlatformTenantStatus
-} from "@/features/admin/platformAdmin.data";
+  listTenants,
+  approveTenant,
+  rejectTenant,
+  suspendTenant,
+  reactivateTenant,
+  type TenantAdminRead,
+  type TenantAdminStatus
+} from "@/features/tenants/tenants.api";
 import { useAuthStore } from "@/features/auth/auth.store";
 import { isSuperAdmin } from "@/features/admin/admin.permissions";
 import { formatDate } from "@/lib/utils";
 
-type PendingAction =
-  | { type: "approve" | "reject" | "suspend" | "reactivate" | "plan" | "flags"; tenant: PlatformTenant }
-  | null;
+type ActionType = "approve" | "reject" | "suspend" | "reactivate" | "plan" | "flags";
+type PendingAction = { type: ActionType; tenant: TenantAdminRead } | null;
 
 export function TenantListPage() {
   const user = useAuthStore((state) => state.user);
   const superAdmin = isSuperAdmin(user);
   const [search, setSearch] = useState("");
-  const [status, setStatus] = useState<PlatformTenantStatus | "ALL">("ALL");
-  const [plan, setPlan] = useState<PlatformTenant["plan"] | "ALL">("ALL");
-  const [category, setCategory] = useState("ALL");
-  const [createdDate, setCreatedDate] = useState("");
+  const [statusFilter, setStatusFilter] = useState<TenantAdminStatus | "ALL">("ALL");
   const [page, setPage] = useState(1);
   const [pendingAction, setPendingAction] = useState<PendingAction>(null);
+  const [tenants, setTenants] = useState<TenantAdminRead[]>([]);
+  const [totalPages, setTotalPages] = useState(1);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [actionLoading, setActionLoading] = useState(false);
 
-  const categories = useMemo(() => Array.from(new Set(platformTenants.map((tenant) => tenant.category))), []);
+  const pageSize = 20;
+
+  const fetchTenants = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const result = await listTenants(page, pageSize);
+      setTenants(result.items);
+      setTotalPages(Math.max(Math.ceil(result.total / pageSize), 1));
+    } catch {
+      setError("Failed to load tenants. Please check your connection and try again.");
+    } finally {
+      setLoading(false);
+    }
+  }, [page]);
+
+  useEffect(() => {
+    fetchTenants();
+  }, [fetchTenants]);
+
   const filteredTenants = useMemo(() => {
     const term = search.trim().toLowerCase();
-    return platformTenants.filter((tenant) => {
+    return tenants.filter((tenant) => {
       const matchesSearch =
         !term ||
-        tenant.name.toLowerCase().includes(term) ||
-        tenant.website.toLowerCase().includes(term) ||
-        tenant.ownerEmail.toLowerCase().includes(term);
-      const matchesDate = !createdDate || tenant.createdAt.startsWith(createdDate);
-      return (
-        matchesSearch &&
-        (status === "ALL" || tenant.status === status) &&
-        (plan === "ALL" || tenant.plan === plan) &&
-        (category === "ALL" || tenant.category === category) &&
-        matchesDate
-      );
+        tenant.business_name.toLowerCase().includes(term) ||
+        tenant.website_url.toLowerCase().includes(term) ||
+        tenant.business_email.toLowerCase().includes(term);
+      return matchesSearch && (statusFilter === "ALL" || tenant.status === statusFilter);
     });
-  }, [category, createdDate, plan, search, status]);
+  }, [search, statusFilter, tenants]);
 
-  const pageSize = 10;
-  const pageCount = Math.max(Math.ceil(filteredTenants.length / pageSize), 1);
-  const visibleTenants = filteredTenants.slice((page - 1) * pageSize, page * pageSize);
-
-  function confirmAction() {
+  async function confirmAction() {
     if (!pendingAction) return;
-    toast({
-      title: "Action submitted",
-      description: `${pendingAction.type} request for ${pendingAction.tenant.name} will be permission checked by the backend.`,
-      variant: "success"
-    });
-    setPendingAction(null);
+    setActionLoading(true);
+    try {
+      const { type, tenant } = pendingAction;
+      if (type === "approve") await approveTenant(tenant.id);
+      else if (type === "reject") await rejectTenant(tenant.id, "Rejected by admin");
+      else if (type === "suspend") await suspendTenant(tenant.id);
+      else if (type === "reactivate") await reactivateTenant(tenant.id);
+
+      toast({
+        title: "Action completed",
+        description: `${type} for ${tenant.business_name} was successful.`,
+        variant: "success"
+      });
+      setPendingAction(null);
+      fetchTenants();
+    } catch {
+      toast({
+        title: "Action failed",
+        description: `Could not ${pendingAction.type} ${pendingAction.tenant.business_name}. Please try again.`,
+        variant: "error"
+      });
+    } finally {
+      setActionLoading(false);
+    }
   }
 
-  const columns = useMemo<DataTableColumn<PlatformTenant>[]>(
+  const columns = useMemo<DataTableColumn<TenantAdminRead>[]>(
     () => [
-      { header: "Tenant name", accessor: (tenant) => <span className="font-medium text-[var(--color-text-main)]">{tenant.name}</span> },
-      { header: "Category", accessor: "category" },
-      { header: "Website", accessor: (tenant) => <span className="break-all text-sm">{tenant.website}</span> },
-      { header: "Owner email", accessor: "ownerEmail" },
-      { header: "Plan", accessor: "plan" },
+      { header: "Tenant name", accessor: (tenant) => <span className="font-medium text-[var(--color-text-main)]">{tenant.business_name}</span> },
+      { header: "Category", accessor: (tenant) => tenant.category ?? "—" },
+      { header: "Website", accessor: (tenant) => <span className="break-all text-sm">{tenant.website_url}</span> },
+      { header: "Email", accessor: "business_email" },
       { header: "Status", accessor: (tenant) => <StatusBadge status={tenant.status} /> },
-      { header: "Created", accessor: (tenant) => formatDate(tenant.createdAt) },
-      { header: "Last active", accessor: (tenant) => formatDate(tenant.lastActiveAt) },
+      { header: "Approval", accessor: (tenant) => <StatusBadge status={tenant.approval_status} /> },
+      { header: "Created", accessor: (tenant) => formatDate(tenant.created_at) },
       {
         header: "Actions",
         className: "min-w-80",
@@ -126,38 +156,32 @@ export function TenantListPage() {
         description="Search, filter, approve, reject, suspend, reactivate, change plans, and manage feature flags for tenant accounts."
       />
 
-      <div className="mb-4 grid gap-3 md:grid-cols-5">
-        <Input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search name, website, owner email" className="md:col-span-2" />
-        <Select value={status} onChange={(event) => setStatus(event.target.value as PlatformTenantStatus | "ALL")}>
+      <div className="mb-4 grid gap-3 md:grid-cols-3">
+        <Input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search name, website, email" className="md:col-span-2" />
+        <Select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value as TenantAdminStatus | "ALL")}>
           <option value="ALL">All statuses</option>
-          <option value="PENDING_APPROVAL">Pending approval</option>
+          <option value="DRAFT">Draft</option>
           <option value="ACTIVE">Active</option>
           <option value="REJECTED">Rejected</option>
           <option value="SUSPENDED">Suspended</option>
         </Select>
-        <Select value={plan} onChange={(event) => setPlan(event.target.value as PlatformTenant["plan"] | "ALL")}>
-          <option value="ALL">All plans</option>
-          <option value="Starter">Starter</option>
-          <option value="Growth">Growth</option>
-          <option value="Scale">Scale</option>
-        </Select>
-        <Input type="date" value={createdDate} onChange={(event) => setCreatedDate(event.target.value)} aria-label="Created date" />
-        <Select value={category} onChange={(event) => setCategory(event.target.value)}>
-          <option value="ALL">All categories</option>
-          {categories.map((item) => (
-            <option key={item} value={item}>
-              {item}
-            </option>
-          ))}
-        </Select>
       </div>
+
+      {error ? (
+        <div className="rounded-lg border border-red-400/30 bg-red-500/10 p-4 text-sm text-red-200">
+          {error}
+          <Button variant="outline" size="sm" className="ml-3" onClick={fetchTenants}>
+            Retry
+          </Button>
+        </div>
+      ) : null}
 
       <DataTable
         columns={columns}
-        data={visibleTenants}
+        data={filteredTenants}
         getRowKey={(tenant) => tenant.id}
-        emptyTitle="No tenants found"
-        emptyDescription="Adjust search or filters to review tenant records."
+        emptyTitle={loading ? "Loading tenants..." : "No tenants found"}
+        emptyDescription={loading ? "Fetching tenant data from the backend." : "Adjust search or filters to review tenant records."}
       />
 
       <div className="mt-4 flex items-center justify-end gap-2">
@@ -165,18 +189,18 @@ export function TenantListPage() {
           Previous
         </Button>
         <span className="text-sm text-muted-foreground">
-          Page {page} of {pageCount}
+          Page {page} of {totalPages}
         </span>
-        <Button variant="outline" disabled={page >= pageCount} onClick={() => setPage((current) => Math.min(current + 1, pageCount))}>
+        <Button variant="outline" disabled={page >= totalPages} onClick={() => setPage((current) => Math.min(current + 1, totalPages))}>
           Next
         </Button>
       </div>
 
       <ConfirmDialog
         open={Boolean(pendingAction)}
-        title={pendingAction ? `${pendingAction.type.replace("-", " ")} ${pendingAction.tenant.name}?` : "Confirm action"}
-        description="This critical action will be sent to a backend permission-checked admin API and recorded in audit logs."
-        confirmLabel="Confirm"
+        title={pendingAction ? `${pendingAction.type.replace("-", " ")} ${pendingAction.tenant.business_name}?` : "Confirm action"}
+        description="This action will be sent to a backend permission-checked admin API and recorded in audit logs."
+        confirmLabel={actionLoading ? "Processing..." : "Confirm"}
         destructive={pendingAction?.type === "reject" || pendingAction?.type === "suspend"}
         onCancel={() => setPendingAction(null)}
         onConfirm={confirmAction}

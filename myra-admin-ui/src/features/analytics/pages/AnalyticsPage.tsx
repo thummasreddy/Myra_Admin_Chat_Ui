@@ -1,99 +1,110 @@
-import { BarChart3, MessageSquare, QrCode, ShoppingCart, TrendingUp, Users } from "lucide-react";
+import { Building2, MessageSquare, ShieldCheck, Users } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DataTable, type DataTableColumn } from "@/components/shared/DataTable";
 import { PageHeader } from "@/components/shared/PageHeader";
-import { platformTenants, platformTotals, type PlatformTenant } from "@/features/admin/platformAdmin.data";
+import { StatusBadge } from "@/components/shared/StatusBadge";
+import { getMyraAdminDashboard, type MyraAdminDashboard } from "@/features/dashboard/dashboard.api";
+import {
+  listTenants,
+  type TenantAdminRead
+} from "@/features/tenants/tenants.api";
+import { formatDate } from "@/lib/utils";
 
-const totals = platformTotals();
-const widgetLoads = totals.visitors + 4200;
-const qrScans = 3180;
-const visitorToChat = totals.visitors ? Number(((totals.chatSessions / totals.visitors) * 100).toFixed(1)) : 0;
-const chatToPurchase = totals.chatSessions ? Number(((totals.purchaseCompletedCount / totals.chatSessions) * 100).toFixed(1)) : 0;
-
-const engagementColumns: DataTableColumn<PlatformTenant>[] = [
-  { header: "Tenant", accessor: (tenant) => <span className="font-medium text-[var(--color-text-main)]">{tenant.name}</span> },
-  { header: "Category", accessor: "category" },
-  { header: "Visitors", accessor: (tenant) => tenant.visitors.toLocaleString() },
-  { header: "Sessions", accessor: (tenant) => tenant.chatSessions.toLocaleString() },
-  { header: "Purchases", accessor: (tenant) => tenant.purchaseCompletedCount.toLocaleString() }
+const tenantColumns: DataTableColumn<TenantAdminRead>[] = [
+  { header: "Tenant", accessor: (t) => <span className="font-medium text-[var(--color-text-main)]">{t.business_name}</span> },
+  { header: "Category", accessor: (t) => t.category ?? "—" },
+  { header: "Status", accessor: (t) => <StatusBadge status={t.status} /> },
+  { header: "Created", accessor: (t) => formatDate(t.created_at) }
 ];
 
 export function AnalyticsPage() {
-  const topTenants = [...platformTenants].sort((a, b) => b.chatSessions - a.chatSessions);
-  const lowConversion = platformTenants.filter((tenant) => tenant.questionsAsked > 0 && tenant.purchaseCompletedCount / tenant.questionsAsked < 0.01);
-  const categoryUsage = Array.from(
-    platformTenants.reduce((acc, tenant) => {
-      acc.set(tenant.category, (acc.get(tenant.category) ?? 0) + tenant.chatSessions);
-      return acc;
-    }, new Map<string, number>())
-  );
+  const [dashboard, setDashboard] = useState<MyraAdminDashboard | null>(null);
+  const [tenants, setTenants] = useState<TenantAdminRead[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const [dashboardData, tenantData] = await Promise.all([
+        getMyraAdminDashboard(),
+        listTenants(1, 100)
+      ]);
+      setDashboard(dashboardData);
+      setTenants(tenantData.items);
+    } catch {
+      setError("Failed to load analytics data.");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-16">
+        <p className="text-muted-foreground">Loading analytics...</p>
+      </div>
+    );
+  }
+
+  if (error || !dashboard) {
+    return (
+      <>
+        <PageHeader title="Platform Analytics" description="Platform-wide analytics." />
+        <div className="rounded-lg border border-red-400/30 bg-red-500/10 p-4 text-sm text-red-200">
+          {error ?? "Failed to load data."}
+          <Button variant="outline" size="sm" className="ml-3" onClick={fetchData}>
+            Retry
+          </Button>
+        </div>
+      </>
+    );
+  }
+
+  const activeCount = tenants.filter((t) => t.status === "ACTIVE").length;
+  const suspendedCount = tenants.filter((t) => t.status === "SUSPENDED").length;
+  const draftCount = tenants.filter((t) => t.status === "DRAFT").length;
 
   return (
     <>
       <PageHeader
         title="Platform Analytics"
-        description="Platform-wide visitor, widget, QR, chat, lead, purchase, conversion, growth, category, and engagement analytics."
+        description="Platform-wide tenant, conversation, lead, and user analytics."
       />
 
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <Metric label="Total visitors" value={totals.visitors} icon={Users} />
-        <Metric label="Widget loads" value={widgetLoads} icon={BarChart3} />
-        <Metric label="QR scans" value={qrScans} icon={QrCode} />
-        <Metric label="Chat sessions" value={totals.chatSessions} icon={MessageSquare} />
-        <Metric label="Questions asked" value={totals.questionsAsked} icon={MessageSquare} />
-        <Metric label="Answers given" value={totals.answersGiven} icon={MessageSquare} />
-        <Metric label="Leads captured" value={totals.leadsCaptured} icon={Users} />
-        <Metric label="Purchase intent" value={totals.purchaseIntentCount} icon={ShoppingCart} />
-        <Metric label="Purchase completed" value={totals.purchaseCompletedCount} icon={ShoppingCart} />
-        <Metric label="Q to purchase" value={`${totals.questionToPurchase}%`} icon={TrendingUp} />
-        <Metric label="Visitor to chat" value={`${visitorToChat}%`} icon={TrendingUp} />
-        <Metric label="Chat to purchase" value={`${chatToPurchase}%`} icon={TrendingUp} />
+        <Metric label="Total tenants" value={dashboard.total_tenants} icon={Building2} />
+        <Metric label="Active tenants" value={dashboard.active_tenants} icon={Building2} />
+        <Metric label="Pending approvals" value={dashboard.pending_approvals} icon={ShieldCheck} />
+        <Metric label="Total users" value={dashboard.total_users} icon={Users} />
+        <Metric label="Total conversations" value={dashboard.total_conversations} icon={MessageSquare} />
+        <Metric label="Total leads" value={dashboard.total_leads} icon={Users} />
+        <Metric label="Suspended" value={dashboard.suspended_tenants} icon={Building2} />
       </section>
 
       <section className="mt-6 grid gap-4 xl:grid-cols-3">
         <Card>
           <CardHeader>
-            <CardTitle>Tenant growth</CardTitle>
+            <CardTitle>Tenant status breakdown</CardTitle>
           </CardHeader>
           <CardContent>
-            <Bar label="Pending" value={totals.PENDING_APPROVAL} max={totals.totalTenants} />
-            <Bar label="Active" value={totals.ACTIVE} max={totals.totalTenants} />
-            <Bar label="Suspended" value={totals.SUSPENDED} max={totals.totalTenants} />
-            <Bar label="Rejected" value={totals.REJECTED} max={totals.totalTenants} />
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>Usage by category</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {categoryUsage.map(([category, value]) => (
-              <Bar key={category} label={category} value={value} max={Math.max(...categoryUsage.map(([, sessions]) => sessions), 1)} />
-            ))}
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>Low conversion tenants</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {lowConversion.length ? (
-              lowConversion.map((tenant) => (
-                <div key={tenant.id} className="rounded-md border bg-[var(--color-bg-muted)] p-3">
-                  <p className="font-medium text-[var(--color-text-main)]">{tenant.name}</p>
-                  <p className="text-sm text-muted-foreground">{tenant.purchaseCompletedCount} purchases from {tenant.questionsAsked.toLocaleString()} questions</p>
-                </div>
-              ))
-            ) : (
-              <p className="text-sm text-muted-foreground">No low-conversion tenants detected.</p>
-            )}
+            <Bar label="Active" value={activeCount} max={dashboard.total_tenants || 1} />
+            <Bar label="Suspended" value={suspendedCount} max={dashboard.total_tenants || 1} />
+            <Bar label="Draft" value={draftCount} max={dashboard.total_tenants || 1} />
           </CardContent>
         </Card>
       </section>
 
       <section className="mt-6">
-        <h2 className="mb-3 text-lg font-semibold text-[var(--color-text-main)]">Top tenants by engagement</h2>
-        <DataTable columns={engagementColumns} data={topTenants} getRowKey={(tenant) => tenant.id} />
+        <h2 className="mb-3 text-lg font-semibold text-[var(--color-text-main)]">All tenants</h2>
+        <DataTable columns={tenantColumns} data={tenants} getRowKey={(t) => t.id} />
       </section>
     </>
   );
