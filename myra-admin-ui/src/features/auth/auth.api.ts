@@ -26,11 +26,14 @@ function apiV1Url(baseUrl: string) {
 
 export async function login(payload: LoginRequest): Promise<LoginResponse> {
   try {
-    const { data } = await axios.post<BackendLoginResponse>(
+    const { data: raw } = await axios.post(
       `${apiV1Url(appConfig.VITE_API_BASE_URL)}/auth/myra-admin/login`,
       payload,
       { withCredentials: true }
     );
+    // Unwrap backend { success, data } response envelope
+    const data: BackendLoginResponse =
+      raw && typeof raw === "object" && "success" in raw && raw.data ? raw.data : raw;
     return normalizeLoginResponse(data, payload.email);
   } catch (error) {
     if (axios.isAxiosError(error) && error.response?.status === 403) {
