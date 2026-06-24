@@ -15,14 +15,14 @@ const numberFromEnv = (fallback: number) =>
     });
 
 const envSchema = z.object({
-  VITE_API_BASE_URL: z.string().url().default("http://localhost:8000"),
-  VITE_ANALYTICS_API_URL: z.string().url().default("http://localhost:8005/api/analytics"),
-  VITE_ADMIN_API_URL: z.string().url().default("http://localhost:8006/api/admin"),
+  VITE_API_BASE_URL: z.string().url().default("http://localhost:8080"),
+  VITE_ANALYTICS_API_URL: z.string().url().default("http://localhost:8080/api/v1/analytics"),
+  VITE_ADMIN_API_URL: z.string().url().default("http://localhost:8080/api/v1/tenants"),
   VITE_API_TIMEOUT_MS: numberFromEnv(12_000),
   VITE_API_RETRY_ATTEMPTS: numberFromEnv(2),
   VITE_API_RETRY_BASE_DELAY_MS: numberFromEnv(300),
   VITE_API_RATE_LIMIT_PER_MINUTE: numberFromEnv(120),
-  VITE_ENABLE_DEMO_FALLBACKS: booleanFromEnv.default("true"),
+  VITE_ENABLE_DEMO_FALLBACKS: booleanFromEnv.default("false"),
   VITE_ENABLE_API_LOGGING: booleanFromEnv.default("false"),
   VITE_SENTRY_DSN: z.string().url().optional(),
   VITE_REQUIRE_ENV_VALIDATION: booleanFromEnv.default("false")

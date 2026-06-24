@@ -1,255 +1,227 @@
 import { Bell, CreditCard, ShieldCheck } from "lucide-react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { DataTable, type DataTableColumn } from "@/components/shared/DataTable";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { StatusBadge } from "@/components/shared/StatusBadge";
-import { approvalQueue, platformPlans, platformTenants, type ApprovalTenant, type PlatformTenant } from "@/features/admin/platformAdmin.data";
+import {
+  listTenants,
+  type TenantAdminRead
+} from "@/features/tenants/tenants.api";
 import { formatDate } from "@/lib/utils";
 
-type PaymentRow = {
-  id: string;
-  tenant: string;
-  plan: string;
-  amount: string;
-  status: "PAID" | "PENDING" | "FAILED";
-  date: string;
-};
+function useTenants() {
+  const [tenants, setTenants] = useState<TenantAdminRead[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-type KnowledgeDocumentRow = {
-  id: string;
-  tenant: string;
-  document: string;
-  status: "COMPLETED" | "PROCESSING" | "FAILED";
-  updatedAt: string;
-};
+  const fetch = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const result = await listTenants(1, 100);
+      setTenants(result.items);
+    } catch {
+      setError("Failed to load data from the backend.");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
-type SubscriptionRow = {
-  id: string;
-  tenant: string;
-  plan: string;
-  status: "ACTIVE" | "SUSPENDED" | "PENDING";
-  usage: string;
-};
+  useEffect(() => {
+    fetch();
+  }, [fetch]);
 
-type NotificationRow = {
-  id: string;
-  tenant: string;
-  recipient: string;
-  status: "SENT" | "QUEUED" | "FAILED";
-  updatedAt: string;
-};
+  return { tenants, loading, error, refetch: fetch };
+}
 
-type ConversationRow = {
-  id: string;
-  tenant: string;
-  conversations: number;
-  purchaseIntent: number;
-  completed: number;
-};
+function ErrorBanner({ message, onRetry }: { message: string; onRetry: () => void }) {
+  return (
+    <div className="mb-4 rounded-lg border border-red-400/30 bg-red-500/10 p-4 text-sm text-red-200">
+      {message}
+      <Button variant="outline" size="sm" className="ml-3" onClick={onRetry}>
+        Retry
+      </Button>
+    </div>
+  );
+}
 
-type LeadRow = {
-  id: string;
-  tenant: string;
-  leads: number;
-  conversionRate: string;
-  status: "ACTIVE" | "INACTIVE";
-};
-
-const payments: PaymentRow[] = platformTenants.map((tenant, index) => {
-  const plan = platformPlans.find((candidate) => candidate.name === tenant.plan);
-  return {
-    id: `pay_${tenant.id}`,
-    tenant: tenant.name,
-    plan: tenant.plan,
-    amount: `$${plan?.monthlyPrice ?? 0}`,
-    status: tenant.status === "ACTIVE" ? "PAID" : tenant.status === "SUSPENDED" ? "FAILED" : "PENDING",
-    date: formatDate(new Date(Date.now() - index * 86_400_000).toISOString())
-  };
-});
-
-const knowledgeDocuments: KnowledgeDocumentRow[] = platformTenants.flatMap((tenant, index) => [
-  {
-    id: `doc_${tenant.id}_profile`,
-    tenant: tenant.name,
-    document: `${tenant.category.toLowerCase()}-profile.pdf`,
-    status: tenant.failedKnowledge ? "FAILED" : "COMPLETED",
-    updatedAt: formatDate(new Date(Date.now() - index * 120_000_000).toISOString())
-  },
-  {
-    id: `doc_${tenant.id}_faq`,
-    tenant: tenant.name,
-    document: "customer-faq.txt",
-    status: tenant.status === "PENDING_APPROVAL" ? "PROCESSING" : "COMPLETED",
-    updatedAt: formatDate(new Date(Date.now() - index * 98_000_000).toISOString())
-  }
-]);
-
-const notifications: NotificationRow[] = platformTenants.map((tenant, index) => ({
-  id: `notif_${tenant.id}`,
-  tenant: tenant.name,
-  recipient: tenant.ownerEmail,
-  status: tenant.widgetIssue ? "FAILED" : index % 2 ? "QUEUED" : "SENT",
-  updatedAt: formatDate(new Date(Date.now() - index * 32_000_000).toISOString())
-}));
-
-const tenantReviewColumns: DataTableColumn<ApprovalTenant>[] = [
-  { header: "Business", accessor: (tenant) => <span className="font-medium text-[var(--color-text-main)]">{tenant.businessName}</span> },
-  { header: "Category", accessor: "category" },
-  { header: "Owner contact", accessor: "ownerContact" },
-  { header: "Requested plan", accessor: "requestedPlan" },
-  { header: "Registered", accessor: (tenant) => formatDate(tenant.registrationDate) }
+const tenantReviewColumns: DataTableColumn<TenantAdminRead>[] = [
+  { header: "Business", accessor: (t) => <span className="font-medium text-[var(--color-text-main)]">{t.business_name}</span> },
+  { header: "Category", accessor: (t) => t.category ?? "—" },
+  { header: "Email", accessor: "business_email" },
+  { header: "Status", accessor: (t) => <StatusBadge status={t.approval_status} /> },
+  { header: "Registered", accessor: (t) => formatDate(t.created_at) }
 ];
 
-const paymentColumns: DataTableColumn<PaymentRow>[] = [
-  { header: "Tenant", accessor: "tenant" },
-  { header: "Plan", accessor: "plan" },
-  { header: "Amount", accessor: "amount" },
-  { header: "Status", accessor: (row) => <StatusBadge status={row.status} /> },
-  { header: "Date", accessor: "date" }
+const subscriptionColumns: DataTableColumn<TenantAdminRead>[] = [
+  { header: "Tenant", accessor: (t) => <span className="font-medium text-[var(--color-text-main)]">{t.business_name}</span> },
+  { header: "Status", accessor: (t) => <StatusBadge status={t.status} /> },
+  { header: "Approval", accessor: (t) => <StatusBadge status={t.approval_status} /> },
+  { header: "Created", accessor: (t) => formatDate(t.created_at) }
 ];
 
-const documentColumns: DataTableColumn<KnowledgeDocumentRow>[] = [
-  { header: "Tenant", accessor: "tenant" },
-  { header: "Document", accessor: "document" },
-  { header: "Status", accessor: (row) => <StatusBadge status={row.status} /> },
-  { header: "Last updated", accessor: "updatedAt" }
-];
-
-const subscriptionColumns: DataTableColumn<SubscriptionRow>[] = [
-  { header: "Tenant", accessor: "tenant" },
-  { header: "Plan", accessor: "plan" },
-  { header: "Status", accessor: (row) => <StatusBadge status={row.status} /> },
-  { header: "Usage", accessor: "usage" }
-];
-
-const notificationColumns: DataTableColumn<NotificationRow>[] = [
-  { header: "Tenant", accessor: "tenant" },
-  { header: "Recipient", accessor: "recipient" },
-  { header: "Status", accessor: (row) => <StatusBadge status={row.status} /> },
-  { header: "Last update", accessor: "updatedAt" }
-];
-
-const knowledgeColumns: DataTableColumn<PlatformTenant>[] = [
-  { header: "Tenant", accessor: (tenant) => <span className="font-medium text-[var(--color-text-main)]">{tenant.name}</span> },
-  { header: "Category", accessor: "category" },
-  { header: "Documents", accessor: (tenant) => (tenant.failedKnowledge ? "Needs review" : "Ready") },
-  { header: "Status", accessor: (tenant) => <StatusBadge status={tenant.failedKnowledge ? "FAILED" : "COMPLETED"} /> },
-  { header: "Notes", accessor: "notes" }
-];
-
-const conversationColumns: DataTableColumn<ConversationRow>[] = [
-  { header: "Tenant", accessor: "tenant" },
-  { header: "Conversations", accessor: (row) => row.conversations.toLocaleString() },
-  { header: "Purchase intent", accessor: (row) => row.purchaseIntent.toLocaleString() },
-  { header: "Completed", accessor: (row) => row.completed.toLocaleString() }
-];
-
-const leadColumns: DataTableColumn<LeadRow>[] = [
-  { header: "Tenant", accessor: "tenant" },
-  { header: "Leads", accessor: (row) => row.leads.toLocaleString() },
-  { header: "Conversion rate", accessor: "conversionRate" },
-  { header: "Status", accessor: (row) => <StatusBadge status={row.status} /> }
+const knowledgeColumns: DataTableColumn<TenantAdminRead>[] = [
+  { header: "Tenant", accessor: (t) => <span className="font-medium text-[var(--color-text-main)]">{t.business_name}</span> },
+  { header: "Category", accessor: (t) => t.category ?? "—" },
+  { header: "Status", accessor: (t) => <StatusBadge status={t.status} /> }
 ];
 
 export function TenantReviewPage() {
+  const { tenants, loading, error, refetch } = useTenants();
+  const pending = useMemo(
+    () => tenants.filter((t) => t.approval_status === "PENDING_REVIEW" || t.status === "DRAFT"),
+    [tenants]
+  );
+
   return (
     <>
-      <PageHeader title="Tenant Review" description="Review tenant registration details, owner information, submitted documents, and requested plans." />
-      <DataTable columns={tenantReviewColumns} data={approvalQueue} getRowKey={(tenant) => tenant.id} emptyTitle="No tenants awaiting review" />
+      <PageHeader title="Tenant Review" description="Review tenant registration details, owner information, and requested plans." />
+      {error ? <ErrorBanner message={error} onRetry={refetch} /> : null}
+      <DataTable
+        columns={tenantReviewColumns}
+        data={pending}
+        getRowKey={(t) => t.id}
+        emptyTitle={loading ? "Loading..." : "No tenants awaiting review"}
+        emptyDescription={loading ? "Fetching data." : "New registrations will appear here."}
+      />
     </>
   );
 }
 
 export function PaymentsPage() {
+  const { tenants, loading, error, refetch } = useTenants();
+  const activeCount = tenants.filter((t) => t.status === "ACTIVE").length;
+  const draftCount = tenants.filter((t) => t.status === "DRAFT").length;
+  const suspendedCount = tenants.filter((t) => t.status === "SUSPENDED").length;
+
   return (
     <>
-      <PageHeader title="Payments" description="Monitor tenant payment status, plan billing, failed charges, and payment activity." />
+      <PageHeader title="Payments" description="Monitor tenant payment status and plan billing." />
       <MetricStrip
         items={[
-          { label: "Paid invoices", value: payments.filter((payment) => payment.status === "PAID").length, icon: CreditCard },
-          { label: "Pending payments", value: payments.filter((payment) => payment.status === "PENDING").length, icon: Bell },
-          { label: "Failed payments", value: payments.filter((payment) => payment.status === "FAILED").length, icon: ShieldCheck }
+          { label: "Active subscriptions", value: activeCount, icon: CreditCard },
+          { label: "Pending", value: draftCount, icon: Bell },
+          { label: "Suspended", value: suspendedCount, icon: ShieldCheck }
         ]}
       />
-      <DataTable columns={paymentColumns} data={payments} getRowKey={(payment) => payment.id} />
+      {error ? <ErrorBanner message={error} onRetry={refetch} /> : null}
+      <DataTable
+        columns={subscriptionColumns}
+        data={tenants}
+        getRowKey={(t) => t.id}
+        emptyTitle={loading ? "Loading..." : "No payment data"}
+        emptyDescription={loading ? "Fetching data." : "Payment records will appear when tenants subscribe."}
+      />
     </>
   );
 }
 
 export function KnowledgeDocumentsPage() {
+  const { tenants, loading, error, refetch } = useTenants();
+
   return (
     <>
-      <PageHeader title="Knowledge Documents" description="Track uploaded tenant documents, ingestion status, failed uploads, and review readiness." />
-      <DataTable columns={documentColumns} data={knowledgeDocuments} getRowKey={(document) => document.id} />
+      <PageHeader title="Knowledge Documents" description="Track tenant knowledge ingestion status." />
+      {error ? <ErrorBanner message={error} onRetry={refetch} /> : null}
+      <DataTable
+        columns={knowledgeColumns}
+        data={tenants}
+        getRowKey={(t) => t.id}
+        emptyTitle={loading ? "Loading..." : "No knowledge data"}
+        emptyDescription={loading ? "Fetching data." : "Tenant knowledge data will appear here."}
+      />
     </>
   );
 }
 
 export function SubscriptionsPage() {
-  const rows: SubscriptionRow[] = platformTenants.map((tenant) => ({
-    id: tenant.id,
-    tenant: tenant.name,
-    plan: tenant.plan,
-    status: tenant.status === "ACTIVE" ? "ACTIVE" : tenant.status === "SUSPENDED" ? "SUSPENDED" : "PENDING",
-    usage: `${tenant.chatSessions.toLocaleString()} chats / ${tenant.questionsAsked.toLocaleString()} questions`
-  }));
+  const { tenants, loading, error, refetch } = useTenants();
 
   return (
     <>
-      <PageHeader title="Subscriptions" description="Manage tenant subscription plans, plan usage, limits, and subscription status." />
-      <DataTable columns={subscriptionColumns} data={rows} getRowKey={(row) => row.id} />
+      <PageHeader title="Subscriptions" description="Manage tenant subscription plans and status." />
+      {error ? <ErrorBanner message={error} onRetry={refetch} /> : null}
+      <DataTable
+        columns={subscriptionColumns}
+        data={tenants}
+        getRowKey={(t) => t.id}
+        emptyTitle={loading ? "Loading..." : "No subscriptions"}
+        emptyDescription={loading ? "Fetching data." : "Subscription records will appear as tenants sign up."}
+      />
     </>
   );
 }
 
 export function EmailNotificationsPage() {
+  const { tenants, loading, error, refetch } = useTenants();
+
   return (
     <>
-      <PageHeader title="Email Notifications" description="Monitor tenant notification delivery, queued emails, and failed notification attempts." />
-      <DataTable columns={notificationColumns} data={notifications} getRowKey={(notification) => notification.id} />
+      <PageHeader title="Email Notifications" description="Monitor tenant notification delivery." />
+      {error ? <ErrorBanner message={error} onRetry={refetch} /> : null}
+      <DataTable
+        columns={subscriptionColumns}
+        data={tenants}
+        getRowKey={(t) => t.id}
+        emptyTitle={loading ? "Loading..." : "No notifications"}
+        emptyDescription={loading ? "Fetching data." : "Notification records will appear here."}
+      />
     </>
   );
 }
 
 export function KnowledgePage() {
+  const { tenants, loading, error, refetch } = useTenants();
+
   return (
     <>
-      <PageHeader title="Knowledge" description="Myra Admin view of tenant knowledge readiness and ingestion health across the platform." />
-      <DataTable columns={knowledgeColumns} data={platformTenants} getRowKey={(tenant) => tenant.id} />
+      <PageHeader title="Knowledge" description="Myra Admin view of tenant knowledge readiness across the platform." />
+      {error ? <ErrorBanner message={error} onRetry={refetch} /> : null}
+      <DataTable
+        columns={knowledgeColumns}
+        data={tenants}
+        getRowKey={(t) => t.id}
+        emptyTitle={loading ? "Loading..." : "No knowledge data"}
+        emptyDescription={loading ? "Fetching data." : "Tenant knowledge will appear here."}
+      />
     </>
   );
 }
 
 export function ConversationsPage() {
-  const rows: ConversationRow[] = platformTenants.map((tenant) => ({
-    id: tenant.id,
-    tenant: tenant.name,
-    conversations: tenant.chatSessions,
-    purchaseIntent: tenant.purchaseIntentCount,
-    completed: tenant.purchaseCompletedCount
-  }));
+  const { tenants, loading, error, refetch } = useTenants();
 
   return (
     <>
-      <PageHeader title="Conversations" description="Review aggregate tenant conversation volume, purchase intent signals, and completed purchase events." />
-      <DataTable columns={conversationColumns} data={rows} getRowKey={(row) => row.id} />
+      <PageHeader title="Conversations" description="Review aggregate tenant conversation volume." />
+      {error ? <ErrorBanner message={error} onRetry={refetch} /> : null}
+      <DataTable
+        columns={subscriptionColumns}
+        data={tenants}
+        getRowKey={(t) => t.id}
+        emptyTitle={loading ? "Loading..." : "No conversation data"}
+        emptyDescription={loading ? "Fetching data." : "Conversation data will appear as tenants use the platform."}
+      />
     </>
   );
 }
 
 export function LeadsPage() {
-  const rows: LeadRow[] = platformTenants.map((tenant) => ({
-    id: tenant.id,
-    tenant: tenant.name,
-    leads: tenant.leadsCaptured,
-    conversionRate: tenant.questionsAsked ? `${((tenant.leadsCaptured / tenant.questionsAsked) * 100).toFixed(1)}%` : "0%",
-    status: tenant.status === "ACTIVE" ? "ACTIVE" : "INACTIVE"
-  }));
+  const { tenants, loading, error, refetch } = useTenants();
 
   return (
     <>
-      <PageHeader title="Leads" description="Monitor lead capture volume and conversion health across tenant widgets." />
-      <DataTable columns={leadColumns} data={rows} getRowKey={(row) => row.id} />
+      <PageHeader title="Leads" description="Monitor lead capture volume across tenant widgets." />
+      {error ? <ErrorBanner message={error} onRetry={refetch} /> : null}
+      <DataTable
+        columns={subscriptionColumns}
+        data={tenants}
+        getRowKey={(t) => t.id}
+        emptyTitle={loading ? "Loading..." : "No lead data"}
+        emptyDescription={loading ? "Fetching data." : "Lead capture data will appear here."}
+      />
     </>
   );
 }
