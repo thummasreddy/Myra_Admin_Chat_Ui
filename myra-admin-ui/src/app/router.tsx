@@ -66,11 +66,11 @@ function RedirectTenantDetailAlias() {
 }
 
 export const router = createBrowserRouter([
-  { path: "/", element: <PublicLandingPage /> },
-  { path: "/register", element: <RegisterBusinessPage /> },
-  { path: "/pricing", element: <PricingPage /> },
-  { path: "/mock-payment/:registrationId", element: <MockPaymentPage /> },
-  { path: "/onboarding-success/:registrationId", element: <OnboardingSuccessPage /> },
+  { path: "/", element: withTheme("dark", <PublicLandingPage />, true) },
+  { path: "/register", element: withTheme("dark", <RegisterBusinessPage />, true) },
+  { path: "/pricing", element: withTheme("dark", <PricingPage />, true) },
+  { path: "/mock-payment/:registrationId", element: withTheme("dark", <MockPaymentPage />, true) },
+  { path: "/onboarding-success/:registrationId", element: withTheme("dark", <OnboardingSuccessPage />, true) },
   { path: "/login", element: <Navigate to="/myra-admin/login" replace /> },
   { path: "/customer/dashboard", element: <Navigate to="/myra-admin/login" replace /> },
   { path: "/myra-admin", element: <Navigate to="/dashboard" replace /> },

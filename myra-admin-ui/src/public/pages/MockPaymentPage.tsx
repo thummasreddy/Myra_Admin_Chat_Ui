@@ -2,6 +2,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { CheckCircle2, CreditCard, LockKeyhole, ReceiptText } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "@/components/ui/toast";
 import { LoadingSpinner } from "@/components/shared/LoadingSpinner";
 import { StatusBadge } from "@/components/shared/StatusBadge";
@@ -40,12 +41,12 @@ export function MockPaymentPage() {
     return (
       <main className="min-h-screen bg-background">
         <PublicNav />
-        <section className="public-section">
-          <div className="public-container max-w-3xl px-4 py-12">
-            <div className="public-card p-6">
-              <h3 className="text-lg font-semibold leading-none tracking-normal">Registration not found</h3>
-            </div>
-          </div>
+        <section className="mx-auto max-w-3xl px-4 py-12">
+          <Card className="public-card">
+            <CardHeader>
+              <CardTitle>Registration not found</CardTitle>
+            </CardHeader>
+          </Card>
         </section>
       </main>
     );
@@ -57,22 +58,29 @@ export function MockPaymentPage() {
   return (
     <main className="min-h-screen bg-background text-foreground">
       <PublicNav />
-      <section className="public-section">
-        <div className="public-container grid max-w-5xl gap-6 px-4 py-10 sm:px-6 lg:grid-cols-[1fr_360px] lg:px-8">
-        <div>
-          <div className="mb-6 flex items-center gap-3">
-            <div className="public-icon-box h-11 w-11">
+      <section className="public-pricing-hero border-b px-4 py-12 text-white sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-7xl">
+          <div className="flex items-start gap-4">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-md bg-white/10">
               <CreditCard className="h-6 w-6" />
             </div>
             <div>
-              <h1 className="text-3xl font-semibold tracking-normal">Mock payment</h1>
-              <p className="text-sm text-muted-foreground">Temporary MVP checkout. No real payment provider is connected.</p>
+              <h1 className="text-4xl font-semibold tracking-normal sm:text-5xl">Complete your mock payment</h1>
+              <p className="mt-4 max-w-3xl text-base leading-7 text-slate-300">
+                This MVP step creates the subscription and payment records so your assistant can move into admin review.
+              </p>
             </div>
           </div>
+        </div>
+      </section>
 
-          <div className="public-card p-6">
-            <h3 className="text-lg font-semibold leading-none tracking-normal">Payment Summary</h3>
-            <div className="mt-4 space-y-4">
+      <section className="public-section mx-auto grid max-w-7xl gap-6 px-4 py-10 sm:px-6 lg:grid-cols-[1fr_360px] lg:px-8">
+        <div>
+          <Card className="public-card">
+            <CardHeader>
+              <CardTitle>Payment Summary</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
               <div className="grid gap-3 sm:grid-cols-2">
                 <SummaryItem label="Business" value={registration.businessName} />
                 <SummaryItem label="Business email" value={registration.businessEmail} />
@@ -81,9 +89,9 @@ export function MockPaymentPage() {
                 <SummaryItem label="Duration" value={`${plan.durationMonths} month${plan.durationMonths > 1 ? "s" : ""}`} />
               </div>
               <div className="rounded-md border border-[var(--color-warning)]/30 bg-[var(--color-warning-bg)] px-4 py-3 text-sm font-medium text-[var(--color-warning)]">
-                This is a temporary MVP payment flow. Real payment provider integration will be added later.
+                Payment integration is currently in test mode. This screen will later connect to Stripe, Razorpay, or another payment provider.
               </div>
-              <div className="rounded-md border border-[var(--color-border)] bg-muted p-4">
+              <div className="rounded-md border border-primary/15 bg-primary/5 p-4">
                 <div className="flex items-center justify-between gap-4">
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">Total due today</p>
@@ -92,20 +100,22 @@ export function MockPaymentPage() {
                   <StatusBadge status={registration.paymentStatus} />
                 </div>
               </div>
-              <Button className="w-full" size="lg" onClick={() => paymentMutation.mutate()} disabled={paymentMutation.isPending}>
-                {paymentMutation.isPending ? "Processing..." : "Complete Payment"}
+              <Button className="w-full bg-accent text-accent-foreground shadow-[0_12px_28px_rgba(200,154,75,0.24)] hover:bg-accent/90 hover:shadow-[0_16px_36px_rgba(200,154,75,0.28)]" size="lg" onClick={() => paymentMutation.mutate()} disabled={paymentMutation.isPending}>
+                {paymentMutation.isPending ? "Processing..." : "Test Payment Success"}
               </Button>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
         </div>
 
         <aside className="space-y-4">
-          <div className="public-card p-6">
-            <h3 className="flex items-center gap-2 text-base font-semibold leading-none tracking-normal">
-              <LockKeyhole className="h-5 w-5 text-[var(--color-success)]" />
-              What happens next
-            </h3>
-            <div className="mt-4 space-y-3 text-sm text-muted-foreground">
+          <Card className="public-card">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-base">
+                <LockKeyhole className="h-5 w-5 text-[var(--color-success)]" />
+                What happens next
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3 text-sm text-muted-foreground">
               <div className="flex gap-2">
                 <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-[var(--color-success)]" />
                 <p>Subscription and payment records are created.</p>
@@ -116,24 +126,25 @@ export function MockPaymentPage() {
               </div>
               <div className="flex gap-2">
                 <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-[var(--color-success)]" />
-                <p>The customer dashboard opens so knowledge documents can be uploaded.</p>
+                <p>You will see an onboarding success page with instructions to log in and upload knowledge documents.</p>
               </div>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
 
-          <div className="public-card p-6">
-            <h3 className="flex items-center gap-2 text-base font-semibold leading-none tracking-normal">
-              <ReceiptText className="h-5 w-5 text-primary" />
-              Email notifications
-            </h3>
-            <div className="mt-4 space-y-2 text-sm text-muted-foreground">
+          <Card className="public-card">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-base">
+                <ReceiptText className="h-5 w-5 text-primary" />
+                Email notifications
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2 text-sm text-muted-foreground">
               <p>Registration received</p>
               <p>Payment successful</p>
               <p>Admin approval pending</p>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
         </aside>
-      </div>
       </section>
     </main>
   );
@@ -141,7 +152,7 @@ export function MockPaymentPage() {
 
 function SummaryItem({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-md border border-[var(--color-border)] bg-[var(--color-bg-card)] p-3">
+    <div className="rounded-md border border-primary/15 bg-card p-3">
       <p className="text-xs font-medium uppercase text-muted-foreground">{label}</p>
       <p className="mt-1 break-words text-sm font-semibold text-foreground">{value}</p>
     </div>
