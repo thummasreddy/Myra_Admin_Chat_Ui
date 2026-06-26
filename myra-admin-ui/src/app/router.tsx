@@ -20,6 +20,11 @@ import {
   TenantReviewPage
 } from "@/features/admin/pages/MyraAdminOperationsPages";
 import { isMyraAdmin } from "@/features/admin/admin.permissions";
+import { PublicLandingPage } from "@/public/pages/PublicLandingPage";
+import { RegisterBusinessPage } from "@/public/pages/RegisterBusinessPage";
+import { PricingPage } from "@/public/pages/PricingPage";
+import { MockPaymentPage } from "@/public/pages/MockPaymentPage";
+import { OnboardingSuccessPage } from "@/public/pages/OnboardingSuccessPage";
 
 function ThemeRoute({ theme, children, useStoredTheme }: { theme: "light" | "dark"; children: ReactNode; useStoredTheme?: boolean }) {
   useEffect(() => {
@@ -61,7 +66,13 @@ function RedirectTenantDetailAlias() {
 }
 
 export const router = createBrowserRouter([
-  { path: "/", element: <Navigate to="/dashboard" replace /> },
+  { path: "/", element: <PublicLandingPage /> },
+  { path: "/register", element: <RegisterBusinessPage /> },
+  { path: "/pricing", element: <PricingPage /> },
+  { path: "/mock-payment/:registrationId", element: <MockPaymentPage /> },
+  { path: "/onboarding-success/:registrationId", element: <OnboardingSuccessPage /> },
+  { path: "/login", element: <Navigate to="/myra-admin/login" replace /> },
+  { path: "/customer/dashboard", element: <Navigate to="/myra-admin/login" replace /> },
   { path: "/myra-admin", element: <Navigate to="/dashboard" replace /> },
   { path: "/myra-admin/dashboard", element: <Navigate to="/dashboard" replace /> },
   { path: "/myra-admin/approvals", element: <Navigate to="/approvals" replace /> },
